@@ -1,0 +1,196 @@
+import { AccountEntity } from './account.entity';
+import { AlbumEntity } from './album.entity';
+import { ArtistEntity } from './artist.entity';
+import {
+  BelongsTo,
+  Column,
+  DataType,
+  ForeignKey,
+  Model,
+  Sequelize,
+  Table,
+} from 'sequelize-typescript';
+import { ComposerEntity } from './composer.entity';
+import { FolderEntity } from './folder.entity';
+import { GenreEntity } from './genre.entity';
+import { PlaylistEntity } from './playlist.entity';
+
+/**
+ * The PinnedItemEntity represents an item that has been pinned by the user.
+ */
+@Table({
+  tableName: 'pinned_items',
+  timestamps: false,
+  underscored: true,
+})
+export class PinnedItemEntity extends Model<PinnedItemEntity> {
+  /**
+   * The account ID the pinned item belongs to
+   */
+  @Column({
+    type: DataType.INTEGER,
+    references: {
+      model: AccountEntity,
+      key: 'id',
+    },
+    allowNull: true,
+  })
+  @ForeignKey(() => AccountEntity)
+  declare accountId?: number;
+
+  /**
+   * The album ID if an album is pinned
+   */
+  @Column({
+    type: DataType.INTEGER,
+    references: {
+      model: AlbumEntity,
+      key: 'id',
+    },
+    allowNull: true,
+  })
+  @ForeignKey(() => AlbumEntity)
+  declare albumId?: number;
+
+  @BelongsTo(() => AlbumEntity)
+  declare album: AlbumEntity;
+
+  @Column({
+    type: DataType.BOOLEAN,
+    get() {
+      const value = this.getDataValue('allSongs');
+      return value === 1 || value === true;
+    },
+  })
+  declare allSongs: boolean;
+
+  /**
+   * The artist ID if an artist is pinned
+   */
+  @Column({
+    type: DataType.INTEGER,
+    references: {
+      model: ArtistEntity,
+      key: 'id',
+    },
+    allowNull: true,
+  })
+  @ForeignKey(() => ArtistEntity)
+  declare artistId?: number;
+
+  @BelongsTo(() => ArtistEntity)
+  declare artist: ArtistEntity;
+
+  /**
+   * The composer ID if a composer is pinned
+   */
+  @Column({
+    type: DataType.INTEGER,
+    references: {
+      model: ComposerEntity,
+      key: 'id',
+    },
+    allowNull: true,
+  })
+  @ForeignKey(() => ComposerEntity)
+  declare composerId?: number;
+
+  @BelongsTo(() => ComposerEntity)
+  declare composer: ComposerEntity;
+
+  /**
+   * This field is managed by Sequelize and tracks the date and time the row was created.  This field should not be specified if you are
+   * inserting and updating data.
+   */
+  @Column({
+    type: DataType.DATE,
+    defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+  })
+  declare createdAt: Date;
+
+  /**
+   * The folder ID if a folder is pinned
+   */
+  @Column({
+    type: DataType.INTEGER,
+    references: {
+      model: FolderEntity,
+      key: 'id',
+    },
+    allowNull: true,
+  })
+  @ForeignKey(() => FolderEntity)
+  declare folderId?: number;
+
+  @BelongsTo(() => FolderEntity)
+  declare folder: FolderEntity;
+
+  /**
+   * The genre ID if a genre is pinned
+   */
+  @Column({
+    type: DataType.INTEGER,
+    references: {
+      model: GenreEntity,
+      key: 'id',
+    },
+    allowNull: true,
+  })
+  @ForeignKey(() => GenreEntity)
+  declare genreId?: number;
+
+  @BelongsTo(() => GenreEntity)
+  declare genre: GenreEntity;
+
+  /**
+   * The ID of the table row is the first file ID that was found in the folder path
+   */
+  @Column({
+    type: DataType.INTEGER,
+    primaryKey: true,
+    allowNull: false,
+    autoIncrement: true,
+  })
+  declare id: number;
+
+  /**
+   * The playlist ID if a playlist is pinned
+   */
+  @Column({
+    type: DataType.INTEGER,
+    references: {
+      model: PlaylistEntity,
+      key: 'id',
+    },
+    allowNull: true,
+  })
+  @ForeignKey(() => PlaylistEntity)
+  declare playlistId?: number;
+
+  @BelongsTo(() => PlaylistEntity)
+  declare playlist: PlaylistEntity;
+
+  @Column({
+    type: DataType.BOOLEAN,
+    get() {
+      const value = this.getDataValue('randomHundred');
+      return value === 1 || value === true;
+    },
+  })
+  declare randomHundred: boolean;
+
+  @Column({
+    type: DataType.BOOLEAN,
+    get() {
+      const value = this.getDataValue('recentlyAdded');
+      return value === 1 || value === true;
+    },
+  })
+  declare recentlyAdded: boolean;
+
+  /**
+   * This field is managed by Sequelize and tracks the most recent date and time the row was last updated.  This field should not be specified if you are inserting and updating data
+   */
+  @Column(DataType.DATE)
+  declare updatedAt?: Date;
+}

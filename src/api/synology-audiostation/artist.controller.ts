@@ -1,0 +1,139 @@
+import { AccountEntity } from 'src/database/entities';
+import {
+  ApiBody,
+  ApiExtraModels,
+  ApiHeader,
+  ApiOkResponse,
+  ApiTags,
+  getSchemaPath,
+} from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Logger,
+  Post,
+} from '@nestjs/common';
+import {
+  SynologyArtistResponseDto,
+  SynologyArtistsBodyDto,
+  SynologyArtistsByDefaultGenreBodyDto,
+  SynologyArtistsByGenreBodyDto,
+} from './dtos';
+import { SynologyArtistService } from './artist.service';
+import { User } from '../user.decorator';
+import { plainToInstance } from 'class-transformer';
+
+@Controller()
+@ApiTags('Synology AudioStation APIs')
+export class SynologyArtistController {
+  private readonly logger: Logger = new Logger(SynologyArtistController.name);
+
+  constructor(private readonly artistService: SynologyArtistService) {}
+
+  @Post('/webapi/AudioStation/artist.cgi')
+  @HttpCode(HttpStatus.OK)
+  @ApiHeader({
+    name: 'cookie',
+    description:
+      'The session ID and device ID tokens for the authenticated user',
+    required: true,
+  })
+  @ApiOkResponse({
+    description: 'Returns a list of artists',
+    type: SynologyArtistResponseDto,
+  })
+  @ApiExtraModels(
+    SynologyArtistsBodyDto,
+    SynologyArtistsByGenreBodyDto,
+    SynologyArtistsByDefaultGenreBodyDto,
+  )
+  @ApiBody({
+    schema: {
+      oneOf: [
+        {
+          $ref: getSchemaPath(SynologyArtistsBodyDto),
+        },
+        {
+          $ref: getSchemaPath(SynologyArtistsByGenreBodyDto),
+        },
+        {
+          $ref: getSchemaPath(SynologyArtistsByDefaultGenreBodyDto),
+        },
+      ],
+    },
+  })
+  async routeArtistCgi(
+    @User() user: AccountEntity,
+    @Body()
+    variousBodies:
+      | SynologyArtistsBodyDto
+      | SynologyArtistsByGenreBodyDto
+      | SynologyArtistsByDefaultGenreBodyDto,
+  ) {
+    // Route #1:  artists in a genre
+    if ('genre' in variousBodies) {
+      return this.listArtistsInGenre(
+        user,
+        plainToInstance(SynologyArtistsByGenreBodyDto, variousBodies),
+      );
+    }
+    // Route #2:  artists in a "default" genre
+    if ('genre_filter' in variousBodies) {
+      return this.listArtistsInDefaultGenre(
+        user,
+        plainToInstance(SynologyArtistsByDefaultGenreBodyDto, variousBodies),
+      );
+    }
+    // Route #3:  all artists
+    return this.listArtists(
+      user,
+      plainToInstance(SynologyArtistsBodyDto, variousBodies),
+    );
+  }
+
+  private async listArtistsInGenre(
+    user: AccountEntity,
+    body: SynologyArtistsByGenreBodyDto,
+  ) {
+    const data = await this.artistService.listArtistsByGenre(
+      user.id,
+      body.genre,
+      body.offset,
+      body.limit,
+    );
+    return {
+      data,
+      success: true,
+    };
+  }
+
+  private async listArtistsInDefaultGenre(
+    user: AccountEntity,
+    body: SynologyArtistsByDefaultGenreBodyDto,
+  ) {
+    const data = await this.artistService.listArtistsByGenre(
+      user.id,
+      body.genre_filter,
+      body.offset,
+      body.limit,
+    );
+    return {
+      data,
+      success: true,
+    };
+  }
+
+  private async listArtists(user: AccountEntity, body: SynologyArtistsBodyDto) {
+    const data = await this.artistService.listArtists(
+      user.id,
+      body.offset,
+      body.limit,
+    );
+    return {
+      data,
+      success: true,
+    };
+  }
+}
