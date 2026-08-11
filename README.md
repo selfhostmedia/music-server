@@ -8,7 +8,11 @@ This software is not "vibe-coded" but has been built in conjunction with GitHub 
 
 ## Synology compatibility
 
-The API has been designed to be compatible with the Synology Audio Station API so it can be used as a drop-in replacement for Synology's music apps for Android and iOS.
+The API has been designed to be compatible with the Synology Audio Station API so it can be used as a drop-in replacement for Synology's DS Audio apps for Android and iOS:
+
+- iOS: https://apps.apple.com/us/app/ds-audio/id321495303
+- Android: https://play.google.com/store/apps/details?id=com.synology.DSaudio&hl=en-US
+- Android: https://www.synology.com/en-us/support/download
 
 The Synology API endpoints are fully compatible except for the concept of "shared" and "personal" libraries.  On a Synology NAS these refer to a shared volume and the personal music folder within each user's home folder.  This server does not have the concept of shared and personal libraries but each user can add the same root folders to access the same music collection.
 
