@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main ]
 
 jobs:
   test:
@@ -48,7 +48,7 @@ jobs:
       - name: Run tests
         run: npm run test
 
-      - name: Dump backend logs (last 200 lines) on failure
+      - name: Backend debugging logs
         if: failure()
         shell: bash
         continue-on-error: true
