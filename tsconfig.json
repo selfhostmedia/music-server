@@ -23,7 +23,7 @@
     "strictBindCallApply": false,
     "strictNullChecks": true,
     "target": "ES2022",
-    "types": ["node", "express", "multer"],
+    "types": ["node", "express"],
     // "incremental": true,
   }
 }
