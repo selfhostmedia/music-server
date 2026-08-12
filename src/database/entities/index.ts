@@ -12,13 +12,13 @@ import { CollatedGenreAlbumEntity } from './collated-genre-album.entity';
 import { CollatedGenreTrackEntity } from './collated-genre-track.entity';
 import { CollatedTrackEntity } from './collated-track.entity';
 import { ComposerEntity } from './composer.entity';
+import { FavoriteItemEntity } from './favorite-item.entity';
 import { FileEntity } from './file.entity';
 import { FolderEntity } from './folder.entity';
 import { GenreEntity } from './genre.entity';
 import { LinkedArtistEntity } from './linked-artist.entity';
 import { LinkedComposerEntity } from './linked-composer.entity';
 import { LinkedGenreEntity } from './linked-genre.entity';
-import { PinnedItemEntity } from './pinned-item.entity';
 import { PlaylistEntity } from './playlist.entity';
 import { PlaylistItemEntity } from './playlist-item.entity';
 import { PlaylistSmartRuleEntity } from './playlist-smart-rule.entity';
@@ -42,13 +42,13 @@ export {
   CollatedGenreTrackEntity,
   CollatedTrackEntity,
   ComposerEntity,
+  FavoriteItemEntity,
   FileEntity,
   FolderEntity,
   GenreEntity,
   LinkedArtistEntity,
   LinkedComposerEntity,
   LinkedGenreEntity,
-  PinnedItemEntity,
   PlaylistEntity,
   PlaylistItemEntity,
   PlaylistSmartRuleEntity,
@@ -72,7 +72,7 @@ export const entitiesList = [
   PlaylistEntity,
   PlaylistItemEntity,
   PlaylistSmartRuleEntity,
-  PinnedItemEntity,
+  FavoriteItemEntity,
   LinkedArtistEntity,
   LinkedComposerEntity,
   LinkedGenreEntity,
