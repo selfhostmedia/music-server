@@ -13,7 +13,7 @@ import {
   ComposerEntity,
   FolderEntity,
   GenreEntity,
-  PinnedItemEntity,
+  FavoriteItemEntity,
   PlaylistItemEntity,
   SessionEntity,
 } from 'src/database/entities';
@@ -42,7 +42,7 @@ import { readFileSync } from 'node:fs';
 import { sep } from 'node:path';
 import crypto from 'node:crypto';
 
-function pinnedItemToRow(item: PinnedItemEntity): SynologyEntryPinItemDto {
+function pinnedItemToRow(item: FavoriteItemEntity): SynologyEntryPinItemDto {
   return {
     id: item.id.toString(),
     criteria: {
@@ -115,8 +115,8 @@ export class SynologyEntryService {
     @Inject(ConfigService) private readonly configService: ConfigService,
     @InjectModel(GenreEntity)
     private readonly genreEntity: typeof GenreEntity,
-    @InjectModel(PinnedItemEntity)
-    private readonly pinnedItemEntity: typeof PinnedItemEntity,
+    @InjectModel(FavoriteItemEntity)
+    private readonly favoriteItemEntity: typeof FavoriteItemEntity,
     @InjectModel(PlaylistEntity)
     private readonly playlistEntity: typeof PlaylistEntity,
     @InjectModel(PlaylistItemEntity)
@@ -212,7 +212,7 @@ export class SynologyEntryService {
     offset: number,
     limit: number,
   ): Promise<SynologyEntryPinsDataDto> {
-    const items = await this.pinnedItemEntity.findAll({
+    const items = await this.favoriteItemEntity.findAll({
       where: {
         accountId,
       },
@@ -257,7 +257,7 @@ export class SynologyEntryService {
       offset: offset || 0,
       limit: limit || 100000,
     });
-    const total = await this.pinnedItemEntity.count({
+    const total = await this.favoriteItemEntity.count({
       where: {
         accountId,
       },
@@ -393,7 +393,7 @@ export class SynologyEntryService {
           playlistId = playlist.id;
         }
         // eslint-disable-next-line no-await-in-loop
-        await this.pinnedItemEntity.create({
+        await this.favoriteItemEntity.create({
           accountId,
           albumId,
           allSongs: item.name === 'All songs',
@@ -404,7 +404,7 @@ export class SynologyEntryService {
           playlistId,
           randomHundred: item.type === SynologyPinType.RANDOM_100,
           recentlyAdded: item.type === SynologyPinType.RECENTLY_ADDED,
-        } as PinnedItemEntity);
+        } as FavoriteItemEntity);
       }
     }
     return this.listPinnedItems(accountId, 0, 100000);
@@ -414,7 +414,7 @@ export class SynologyEntryService {
     accountId: number,
     itemIds: number[],
   ): Promise<SynologyEntryPinsDataDto> {
-    await this.pinnedItemEntity.destroy({
+    await this.favoriteItemEntity.destroy({
       where: {
         accountId,
         id: {

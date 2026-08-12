@@ -16,14 +16,14 @@ import { GenreEntity } from './genre.entity';
 import { PlaylistEntity } from './playlist.entity';
 
 /**
- * The PinnedItemEntity represents an item that has been pinned by the user.
+ * The FavoriteItemEntity represents an item that has been favorited or pinned by the user.
  */
 @Table({
-  tableName: 'pinned_items',
+  tableName: 'favorite_items',
   timestamps: false,
   underscored: true,
 })
-export class PinnedItemEntity extends Model<PinnedItemEntity> {
+export class FavoriteItemEntity extends Model<FavoriteItemEntity> {
   /**
    * The account ID the pinned item belongs to
    */
