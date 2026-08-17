@@ -14,10 +14,7 @@ export async function up(queryInterface: QueryInterface): Promise<void> {
       autoIncrement: true,
     },
     password_hash: DataType.STRING(60),
-    role: {
-      type: DataType.ENUM('admin', 'user'),
-      defaultValue: 'user',
-    },
+    roles: DataType.STRING(100),
     session_key: {
       type: DataType.UUID,
       defaultValue: DataType.UUIDV4,
