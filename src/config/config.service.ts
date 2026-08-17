@@ -1,16 +1,13 @@
-import * as dotenv from 'dotenv';
 import { ConfigService as BaseConfigService } from '@nestjs/config';
 import { Environment } from './environment';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class ConfigService extends BaseConfigService<Environment, true> {
-  constructor() {
-    super();
-    if (process.env.NODE_ENV === 'development') {
-      dotenv.config();
-    }
-  }
+  /**
+   * Flag for disabling the indexing service from scanning folders
+   */
+  public disableIndexing: boolean = false;
 
   get<T extends keyof Environment>(key: T): Environment[T] {
     return super.get(key);
@@ -21,6 +18,6 @@ export class ConfigService extends BaseConfigService<Environment, true> {
   }
 
   isProduction(): boolean {
-    return this.get('NODE_ENV') === 'development';
+    return this.get('NODE_ENV') === 'production';
   }
 }

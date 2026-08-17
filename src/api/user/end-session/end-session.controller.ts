@@ -33,7 +33,7 @@ export class UserEndSessionController {
    * and provide a valid JWT token to end the session.
    */
   @Delete('end-session')
-  @AllowedRoles([UserRole.USER])
+  @AllowedRoles([UserRole.USER, UserRole.ADMIN])
   @ApiBearerAuth(JWT_TOKEN)
   @ApiHeader({
     name: 'Authorization',

@@ -8,7 +8,7 @@ export async function up(queryInterface: QueryInterface) {
   const passwordHash = await bcrypt.hash(password, 10);
   const sessionKey = Guid.create().toString();
   await queryInterface.sequelize.query(
-    `INSERT INTO accounts(username, password_hash, role, session_key) VALUES ('${username}', '${passwordHash}', 'admin', '${sessionKey}');`,
+    `INSERT INTO accounts(username, password_hash, roles, session_key) VALUES ('${username}', '${passwordHash}', 'admin,user', '${sessionKey}');`,
   );
 }
 

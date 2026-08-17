@@ -1,6 +1,5 @@
 import { AccountEntity } from 'src/database/entities';
 import { AuthenticationService } from 'src/authentication/authentication.service';
-import { ConfigService } from 'src/config/config.service';
 import { ErrorCodes } from 'src/constants/error-codes';
 import {
   Inject,
@@ -12,10 +11,12 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
+import { SessionRestriction } from 'src/types/enums';
 import { UserRole } from 'src/constants/enums';
 import type { CanActivate, ExecutionContext } from '@nestjs/common';
 
 export const AllowedRoles = (roles: UserRole[]) => SetMetadata('roles', roles);
+export const AllowGuest = () => SetMetadata('allowGuest', true);
 
 @Injectable()
 export class RoleGuard implements CanActivate {
@@ -23,16 +24,15 @@ export class RoleGuard implements CanActivate {
 
   constructor(
     private readonly authenticationService: AuthenticationService,
-    private readonly configService: ConfigService,
     @Inject(Reflector) private readonly reflector: Reflector,
     private readonly jwtService: JwtService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    if (!this.configService.get('REQUIRE_AUTH')) {
-      // authentication is not required for this environment
-      return true;
-    }
+    const allowGuest = this.reflector.getAllAndOverride<boolean>('allowGuest', [
+      context.getHandler(),
+      context.getClass(),
+    ]);
     const request = context.switchToHttp().getRequest();
     // verify the session if a JWT token is present in authorization header
     const token = this.extractTokenFromHeader(request);
@@ -66,17 +66,42 @@ export class RoleGuard implements CanActivate {
               'session-error-2',
             );
           }
-          if (
-            !this.authenticationService.verifySessionToken(
+          const validSessionToken =
+            await this.authenticationService.verifySessionToken(
               user,
               session,
               payload.tokenHash,
-            )
-          ) {
+            );
+          if (!validSessionToken) {
             throw new UnauthorizedException(
               ErrorCodes.AUTHORIZATION_ERROR,
               'session-error-3',
             );
+          }
+          // prevent a session from accessing APIs beyond the context it was created for
+          // eg the synology ds audio apps cannot APIs for other apps or the web UI
+          if (session.restrictSession) {
+            // Synology APIs
+            if (
+              session.restrictSession ===
+                SessionRestriction.SYNOLOGY_AUDIOSTATION &&
+              !request.url.startsWith('/webapi/')
+            ) {
+              throw new UnauthorizedException(
+                ErrorCodes.AUTHORIZATION_ERROR,
+                'session-error-5',
+              );
+            }
+            // Web UI APIs
+            if (
+              session.restrictSession === SessionRestriction.WEB_UI &&
+              !request.url.startsWith('/api/')
+            ) {
+              throw new UnauthorizedException(
+                ErrorCodes.AUTHORIZATION_ERROR,
+                'session-error-5',
+              );
+            }
           }
           request.user = user;
           request.session = session;
@@ -92,6 +117,9 @@ export class RoleGuard implements CanActivate {
         );
       }
     }
+    if (allowGuest) {
+      return true;
+    }
     // check for role eligibility
     const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(
       'roles',
@@ -101,18 +129,27 @@ export class RoleGuard implements CanActivate {
       // no roles are required for public route
       return true;
     }
+    // enforce the role requirement for protected route
+    if (request.url.startsWith('/api/admin/')) {
+      if (!requiredRoles.includes(UserRole.ADMIN)) {
+        throw new UnauthorizedException(
+          ErrorCodes.AUTHORIZATION_ERROR,
+          'Administration routes must require the ADMIN role',
+        );
+      }
+    }
     const user = request.user as AccountEntity;
     if (!user) {
       // role is required but user is not signed in
       return false;
     }
-    if (requiredRoles.some((role) => user.role.includes(role))) {
+    if (requiredRoles.some((role) => user.roles.includes(role))) {
       // user satisfies role requirement
       return true;
     }
     throw new UnauthorizedException(
       ErrorCodes.AUTHORIZATION_ERROR,
-      'session-error-5',
+      'session-error-6',
     );
   }
 

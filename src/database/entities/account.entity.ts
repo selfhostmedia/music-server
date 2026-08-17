@@ -1,13 +1,11 @@
 import {
   Column,
   DataType,
-  HasMany,
   Model,
   Sequelize,
   Table,
 } from 'sequelize-typescript';
 import { Guid } from 'typescript-guid';
-import { SessionEntity } from './session.entity';
 import { UserRole } from 'src/constants/enums';
 
 /**
@@ -51,18 +49,25 @@ export class AccountEntity extends Model<AccountEntity> {
   declare passwordHash: string;
 
   @Column({
-    type: DataType.ARRAY(DataType.STRING(20)),
+    type: DataType.STRING(100),
     allowNull: false,
     get() {
-      const rawValue = this.getDataValue('role');
+      const rawValue = this.getDataValue('roles');
       if (rawValue?.length) {
-        const roles = rawValue.map((p: string) => p as UserRole);
+        const roles = rawValue.split(',').map((p: string) => p as UserRole);
         return roles;
       }
       return [];
     },
+    set(value) {
+      if (Array.isArray(value)) {
+        this.setDataValue('roles', value.join(','));
+      } else {
+        this.setDataValue('roles', value);
+      }
+    },
   })
-  declare role: UserRole[];
+  declare roles: UserRole[];
 
   /**
    * The session token is a random UUID used as part of a secret token that verifies session information.  A change in this value invalidates all sessions belongong to this user immediately.
@@ -70,14 +75,11 @@ export class AccountEntity extends Model<AccountEntity> {
   @Column({
     type: DataType.UUID,
     allowNull: false,
+    set(value: Guid) {
+      this.setDataValue('sessionMasterKey', value.toString());
+    },
   })
   declare sessionKey: Guid;
-
-  /**
-   * The sessions that the user has generated each time they have signed in.
-   */
-  @HasMany(() => SessionEntity, { onDelete: 'cascade' })
-  sessions?: SessionEntity[];
 
   /**
    * This field is managed by Sequelize and tracks the most recent date and time the row was last updated.  This field should not be specified if you are inserting and updating data

@@ -11,9 +11,10 @@ import {
   CollatedGenreTrackEntity,
   CollatedTrackEntity,
   ComposerEntity,
+  FavoriteItemEntity,
   FolderEntity,
   GenreEntity,
-  FavoriteItemEntity,
+  PlaylistEntity,
   PlaylistItemEntity,
   SessionEntity,
 } from 'src/database/entities';
@@ -27,7 +28,7 @@ import {
 import { ConfigService } from 'src/config/config.service';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
-import { PlaylistEntity } from 'src/database/entities/playlist.entity';
+import { SessionRestriction } from 'src/types/enums';
 import {
   SynologyEntryCertificateDataDto,
   SynologyEntryNewPinItemDto,
@@ -172,10 +173,13 @@ export class SynologyEntryService {
       username,
       password,
       userAgent,
+      SessionRestriction.SYNOLOGY_AUDIOSTATION,
       3650,
     );
-    const userAgentHash =
-      await this.authenticationService.generateDeviceHash(userAgent);
+    const userAgentHash = await this.authenticationService.generateDeviceHash(
+      username,
+      userAgent,
+    );
     return {
       did: userAgentHash,
       sid: jwtToken,

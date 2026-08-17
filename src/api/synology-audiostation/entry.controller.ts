@@ -1,5 +1,5 @@
 import { AccountEntity, SessionEntity } from 'src/database/entities';
-import { AllowGuest } from './synology.guard';
+import { AllowGuest } from '../role.guard';
 import {
   ApiBody,
   ApiExtraModels,

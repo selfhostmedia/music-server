@@ -4,7 +4,6 @@ import {
   Inject,
   Injectable,
   Logger,
-  SetMetadata,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -17,8 +16,6 @@ type HeaderPayload = {
   deviceToken: string;
   userAgent: string;
 };
-
-export const AllowGuest = () => SetMetadata('allowGuest', true);
 
 @Injectable()
 export class SynologyGuard implements CanActivate {
@@ -48,7 +45,8 @@ export class SynologyGuard implements CanActivate {
         if (payload) {
           // verify the device token
           const isDeviceTokenValid =
-            this.authenticationService.verifyDeviceToken(
+            await this.authenticationService.verifyDeviceToken(
+              payload.accountId,
               tokens.userAgent,
               tokens.deviceToken,
             );
@@ -81,13 +79,13 @@ export class SynologyGuard implements CanActivate {
               'session-error-2',
             );
           }
-          if (
-            !this.authenticationService.verifySessionToken(
+          const validSessionToken =
+            await this.authenticationService.verifySessionToken(
               user,
               session,
               payload.tokenHash,
-            )
-          ) {
+            );
+          if (!validSessionToken) {
             throw new UnauthorizedException(
               ErrorCodes.AUTHORIZATION_ERROR,
               'session-error-3',

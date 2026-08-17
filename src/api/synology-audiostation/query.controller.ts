@@ -1,4 +1,4 @@
-import { AllowGuest } from './synology.guard';
+import { AllowGuest } from '../role.guard';
 import { ApiTags } from '@nestjs/swagger';
 import { Controller, HttpCode, HttpStatus, Logger, Post } from '@nestjs/common';
 import { SynologyQueryService } from './query.service';

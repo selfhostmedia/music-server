@@ -1,12 +1,12 @@
 import {
   ArtistEntity,
+  CollatedAlbumEntity,
   CollatedArtistAlbumEntity,
   CollatedComposerAlbumEntity,
   CollatedGenreAlbumEntity,
   CollatedTrackEntity,
   GenreEntity,
 } from 'src/database/entities';
-import { CollatedAlbumEntity } from 'src/database/entities/collated-album.entity';
 import { InjectModel } from '@nestjs/sequelize';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Op } from 'sequelize';

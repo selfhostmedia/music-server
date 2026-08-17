@@ -1,4 +1,4 @@
-import { AllowGuest } from './synology.guard';
+import { AllowGuest } from '../role.guard';
 import {
   ApiBody,
   ApiExtraModels,

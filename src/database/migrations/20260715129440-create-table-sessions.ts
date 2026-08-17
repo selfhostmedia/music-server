@@ -24,6 +24,10 @@ export async function up(queryInterface: QueryInterface): Promise<void> {
       allowNull: false,
       autoIncrement: true,
     },
+    restrict_session: {
+      type: DataType.STRING(50),
+      allowNull: true,
+    },
     session_token: {
       type: DataType.STRING(128),
       allowNull: false,

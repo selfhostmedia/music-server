@@ -1,3 +1,8 @@
+export enum SessionRestriction {
+  SYNOLOGY_AUDIOSTATION = 'synology-audiostation',
+  WEB_UI = 'web-ui',
+}
+
 export enum FileType {
   FLAC = 'flac',
   M4A = 'm4a',

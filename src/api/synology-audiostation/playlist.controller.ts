@@ -1,4 +1,4 @@
-import { AccountEntity } from 'src/database/entities/account.entity';
+import { AccountEntity } from 'src/database/entities';
 import {
   ApiBody,
   ApiExtraModels,

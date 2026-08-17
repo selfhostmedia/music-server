@@ -1,4 +1,5 @@
 import {
+  AccountEntity,
   AlbumArtistEntity,
   AlbumEntity,
   ArtistEntity,
@@ -6,6 +7,7 @@ import {
   FileEntity,
   FolderEntity,
   GenreEntity,
+  IndexerConfigurationEntity,
   LinkedArtistEntity,
   LinkedComposerEntity,
   LinkedGenreEntity,
@@ -19,10 +21,12 @@ import { IndexGenreService } from './index-genre.service';
 import { IndexerService } from './indexer.service';
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
+import { SystemConfigurationEntity } from 'src/database/entities/system-configurations.entity';
 
 @Module({
   imports: [
     SequelizeModule.forFeature([
+      AccountEntity,
       AlbumEntity,
       AlbumArtistEntity,
       ArtistEntity,
@@ -30,10 +34,12 @@ import { SequelizeModule } from '@nestjs/sequelize';
       FileEntity,
       FolderEntity,
       GenreEntity,
+      IndexerConfigurationEntity,
       LinkedArtistEntity,
       LinkedComposerEntity,
       LinkedGenreEntity,
       RootPathEntity,
+      SystemConfigurationEntity,
     ]),
   ],
   providers: [

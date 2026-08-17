@@ -1,5 +1,6 @@
 import { AccountEntity } from './account.entity';
 import {
+  BelongsTo,
   Column,
   DataType,
   ForeignKey,
@@ -31,6 +32,9 @@ export class RootPathEntity extends Model<RootPathEntity> {
   })
   @ForeignKey(() => AccountEntity)
   declare accountId: number;
+
+  @BelongsTo(() => AccountEntity)
+  declare account?: AccountEntity;
 
   /**
    * This field is managed by Sequelize and tracks the date and time the row was created.  This field should not be specified if you are

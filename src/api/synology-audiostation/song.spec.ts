@@ -278,7 +278,7 @@ describe('/webapi/AudioStation/song.cgi', () => {
     expect(data?.data.songs[1]?.additional.song_tag.artist).toBe('Artist 1');
     expect(data?.data.songs[1]?.additional.song_tag.album).toBe('Album 2');
   });
-  
+
   it.todo('should paginate multi-genre songs');
 
   it('should list default genre album songs', async () => {

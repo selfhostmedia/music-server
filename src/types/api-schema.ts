@@ -4,7 +4,7 @@
  */
 
 export type paths = {
-    "/api/guest/create-account": {
+    "/api/admin/create-account": {
         parameters: {
             query?: never;
             header?: never;
@@ -14,16 +14,225 @@ export type paths = {
         get?: never;
         put?: never;
         /**
-         * @description Creates a user account used for authentication and accessing APIs requiring authentication
-         *     and returns a user session and JWT token that can be immediately used. The users must submit
-         *     a valid and unique email address that has not been previously registered and password
-         *     credentials to create an account.
+         * @description Creates a user account granting them access to the music server. This endpoint is only
+         *     accessible to users with the ADMIN role.
          */
-        post: operations["GuestCreateAccountController_post"];
+        post: operations["AdminCreateAccountController_post"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/admin/create-root-path": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["AdminCreateRootPathController_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/delete-account": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["AdminDeleteAccountController_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/delete-root-path": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** @description Deletes a root path from the platform. */
+        delete: operations["AdminDeleteRootPathController_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/indexer-configuration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AdminIndexerConfigurationController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/list-accounts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AdminListAccountsController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/list-indexer-logs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AdminListIndexerLogsController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/list-root-paths": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Lists all root paths that have been added to the platform. */
+        get: operations["AdminListRootPathsController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/regenerate-master-session-key": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["AdminRegenerateMasterSessionKeyController_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/regenerate-user-sessionkey": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["AdminRegenerateUserSessionKeyController_patch"];
+        trace?: never;
+    };
+    "/api/admin/reset-user-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["AdminResetUserPasswordController_patch"];
+        trace?: never;
+    };
+    "/api/admin/set-indexer-status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["AdminSetIndexerStatusController_patch"];
+        trace?: never;
+    };
+    "/api/admin/update-root-path": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description Updates a root path */
+        patch: operations["AdminUpdateRootPathController_patch"];
+        trace?: never;
+    };
+    "/api/admin/update-user-roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["AdminUpdateUserRolesController_patch"];
         trace?: never;
     };
     "/api/guest/create-session": {
@@ -42,6 +251,22 @@ export type paths = {
          *     their account must be in good standing to create a session.
          */
         post: operations["GuestCreateSessionController_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/guest/healthcheck": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GuestHealthcheckController_healthcheck"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -329,17 +554,117 @@ export type paths = {
 export type webhooks = Record<string, never>;
 export type components = {
     schemas: {
-        BadRequestResponse: {
+        AdminAccountDto: {
+            id: number;
+            roles: components["schemas"]["UserRole"][];
+            username: string;
+        };
+        /**
+         * @description The error message(s) that occurred during the validation of the request data or additional requirements
+         *     applied during the execution of the request
+         * @enum {string}
+         */
+        AdminCreateAccountBadRequestErrorMessage: AdminCreateAccountBadRequestErrorMessage;
+        AdminCreateAccountBadRequestResponseDto: {
             /** @description General description of the error class */
             error: string;
             /**
-             * Format: constant
-             * @description A bad request occurred due to validation or other issues with the submitted data.
+             * @description The error message(s) that occurred during the validation of the request data or additional requirements
+             *     applied during the execution of the request
              * @default bad-request-error
              */
-            message: components["schemas"]["BadRequestResponseErrorCodes"];
+            message: components["schemas"]["AdminCreateAccountBadRequestErrorMessage"][];
+            /**
+             * @description The success being "false" indicates that the request failed to complete.
+             * @default false
+             */
+            success: boolean;
+        };
+        AdminCreateAccountBodyDto: {
+            /** @description The plain-text password the user will enter to sign in.  It will be hashed and securely-stored in the database. */
+            password: string;
+            roles: components["schemas"]["UserRole"][];
+            /** @description The username for signing in */
+            username: string;
+        };
+        AdminCreateAccountResponseDto: {
             /**
              * Format: constant
+             * @description The success being "true" indicates that the request completed.
+             * @default true
+             */
+            success: boolean;
+        };
+        /**
+         * @description The error message(s) that occurred during the validation of the request data or additional requirements
+         *     applied during the execution of the request
+         * @enum {string}
+         */
+        AdminCreateRootPathBadRequestErrorMessage: AdminCreateRootPathBadRequestErrorMessage;
+        AdminCreateRootPathBadRequestResponseDto: {
+            /** @description General description of the error class */
+            error: string;
+            /**
+             * @description The error message(s) that occurred during the validation of the request data or additional requirements
+             *     applied during the execution of the request
+             * @default root-path-does-not-exist-error
+             */
+            message: components["schemas"]["AdminCreateRootPathBadRequestErrorMessage"][];
+            /**
+             * @description The success being "false" indicates that the request failed to complete.
+             * @default false
+             */
+            success: boolean;
+        };
+        AdminCreateRootPathBodyDto: {
+            /** @description The fully-qualified path to set for the root path */
+            rootPath: string;
+        };
+        /**
+         * @description The error message(s) that occurred during the validation of the request data or additional requirements
+         *     applied during the execution of the request
+         * @enum {string}
+         */
+        AdminCreateRootPathNotFoundErrorMessage: AdminCreateRootPathNotFoundErrorMessage;
+        AdminCreateRootPathNotFoundResponseDto: {
+            /** @description General description of the error class */
+            error: string;
+            /**
+             * @description The error message(s) that occurred during the validation of the request data or additional requirements
+             *     applied during the execution of the request
+             * @default account-not-found-error
+             */
+            message: components["schemas"]["AdminCreateRootPathNotFoundErrorMessage"][];
+            /**
+             * @description The success being "false" indicates that the request failed to complete.
+             * @default false
+             */
+            success: boolean;
+        };
+        AdminCreateRootPathResponseDto: {
+            /**
+             * Format: constant
+             * @description The success being "true" indicates that the request completed.
+             * @default true
+             */
+            success: boolean;
+        };
+        /**
+         * @description The error message(s) that occurred during the validation of the request data or additional requirements
+         *     applied during the execution of the request
+         * @enum {string}
+         */
+        AdminDeleteAccountBadRequestErrorMessage: AdminDeleteAccountBadRequestErrorMessage;
+        AdminDeleteAccountBadRequestResponseDto: {
+            /** @description General description of the error class */
+            error: string;
+            /**
+             * @description The error message(s) that occurred during the validation of the request data or additional requirements
+             *     applied during the execution of the request
+             * @default invalid-account-id-error
+             */
+            message: components["schemas"]["AdminDeleteAccountBadRequestErrorMessage"][];
+            /**
              * @description The success being "false" indicates that the request failed to complete.
              * @default false
              */
@@ -350,48 +675,23 @@ export type components = {
          *     applied during the execution of the request
          * @enum {string}
          */
-        BadRequestResponseErrorCodes: BadRequestResponseErrorCodes;
-        /**
-         * @description The content type, folder or file
-         * @enum {string}
-         */
-        ContentType: ContentType;
-        /**
-         * @description An internal error occurred that isn't handled by the API and doesn't have a more specific error
-         *     message defined.
-         * @enum {string}
-         */
-        FailedResponseErrorCodes: FailedResponseErrorCodes;
-        /** @enum {string} */
-        FileType: FileType;
-        GuestCreateAccountBadResponseDto: {
+        AdminDeleteAccountNotFoundErrorMessage: AdminDeleteAccountNotFoundErrorMessage;
+        AdminDeleteAccountNotFoundResponseDto: {
             /** @description General description of the error class */
             error: string;
             /**
-             * Format: constant
              * @description The error message(s) that occurred during the validation of the request data or additional requirements
              *     applied during the execution of the request
-             * @default bad-request-error
+             * @default invalid-account-id-error
              */
-            message: components["schemas"]["BadRequestResponseErrorCodes"][];
+            message: components["schemas"]["AdminDeleteAccountNotFoundErrorMessage"][];
             /**
-             * Format: constant
              * @description The success being "false" indicates that the request failed to complete.
              * @default false
              */
             success: boolean;
         };
-        GuestCreateAccountBodyDto: {
-            /** @description The plain-text password the user will enter to sign in */
-            password: string;
-            /** @description The username for signing in */
-            username: string;
-        };
-        GuestCreateAccountResponseDto: {
-            /** @description The ID of the newly-registered account */
-            accountId: number;
-            /** @description The JWT session token that can be attached to requests to authenticate against the API */
-            jwtToken: string;
+        AdminDeleteAccountResponseDto: {
             /**
              * Format: constant
              * @description The success being "true" indicates that the request completed.
@@ -399,33 +699,408 @@ export type components = {
              */
             success: boolean;
         };
-        GuestCreateSessionBadResponseDto: {
+        /**
+         * @description The error message(s) that occurred during the validation of the request data or additional requirements
+         *     applied during the execution of the request
+         * @enum {string}
+         */
+        AdminDeleteRootPathNotFoundErrorMessage: AdminDeleteRootPathNotFoundErrorMessage;
+        AdminDeleteRootPathNotFoundResponseDto: {
             /** @description General description of the error class */
             error: string;
             /**
+             * @description The error message(s) that occurred during the validation of the request data or additional requirements
+             *     applied during the execution of the request
+             * @default root-path-not-found-error
+             */
+            message: components["schemas"]["AdminDeleteRootPathNotFoundErrorMessage"][];
+            /**
+             * @description The success being "false" indicates that the request failed to complete.
+             * @default false
+             */
+            success: boolean;
+        };
+        AdminDeleteRootPathResponseDto: {
+            /**
              * Format: constant
+             * @description The success being "true" indicates that the request completed.
+             * @default true
+             */
+            success: boolean;
+        };
+        AdminIndexerConfigurationDto: {
+            /** Format: date-time */
+            createdAt: string;
+            createdByAccountId: number;
+            createdByUsername: string;
+            isEnabled: boolean;
+        };
+        AdminIndexerConfigurationResponseDto: {
+            configuration: components["schemas"]["AdminIndexerConfigurationDto"];
+            /**
+             * Format: constant
+             * @description The success being "true" indicates that the request completed.
+             * @default true
+             */
+            success: boolean;
+        };
+        AdminListAccountsResponseDto: {
+            accounts: components["schemas"]["AdminAccountDto"][];
+            /**
+             * Format: constant
+             * @description The success being "true" indicates that the request completed.
+             * @default true
+             */
+            success: boolean;
+        };
+        /**
+         * @description The error message(s) that occurred during the validation of the request data or additional requirements
+         *     applied during the execution of the request
+         * @enum {string}
+         */
+        AdminListIndexerLogsBadRequestErrorMessage: AdminListIndexerLogsBadRequestErrorMessage;
+        AdminListIndexerLogsBadRequestResponseDto: {
+            /** @description General description of the error class */
+            error: string;
+            /**
+             * @description The error message(s) that occurred during the validation of the request data or additional requirements
+             *     applied during the execution of the request
+             * @default invalid-account-id-error
+             */
+            message: components["schemas"]["AdminListIndexerLogsBadRequestErrorMessage"][];
+            /**
+             * @description The success being "false" indicates that the request failed to complete.
+             * @default false
+             */
+            success: boolean;
+        };
+        /**
+         * @description The error message(s) that occurred during the validation of the request data or additional requirements
+         *     applied during the execution of the request
+         * @enum {string}
+         */
+        AdminListIndexerLogsNotFoundErrorMessage: AdminListIndexerLogsNotFoundErrorMessage;
+        AdminListIndexerLogsNotFoundResponseDto: {
+            /** @description General description of the error class */
+            error: string;
+            /**
+             * @description The error message(s) that occurred during the validation of the request data or additional requirements
+             *     applied during the execution of the request
+             * @default invalid-account-id-error
+             */
+            message: components["schemas"]["AdminListIndexerLogsNotFoundErrorMessage"][];
+            /**
+             * @description The success being "false" indicates that the request failed to complete.
+             * @default false
+             */
+            success: boolean;
+        };
+        AdminListIndexerLogsResponseDto: {
+            logs: components["schemas"]["AdminLogEntryDto"][];
+            /**
+             * Format: constant
+             * @description The success being "true" indicates that the request completed.
+             * @default true
+             */
+            success: boolean;
+        };
+        AdminListRootPathsResponseDto: {
+            /** @description The list of root paths with associated account owner information */
+            rootPaths: components["schemas"]["AdminRootPathDto"][];
+        };
+        AdminLogEntryDto: {
+            accountId: number;
+            message: string;
+            rootPath: string;
+            rootPathId: number;
+            username: string;
+        };
+        AdminRegenerateMasterSessionKeyResponseDto: {
+            /**
+             * Format: constant
+             * @description The success being "true" indicates that the request completed.
+             * @default true
+             */
+            success: boolean;
+        };
+        /**
+         * @description The error message(s) that occurred during the validation of the request data or additional requirements
+         *     applied during the execution of the request
+         * @enum {string}
+         */
+        AdminRegenerateUserSessionKeyNotFoundErrorMessage: AdminRegenerateUserSessionKeyNotFoundErrorMessage;
+        AdminRegenerateUserSessionKeyNotFoundResponseDto: {
+            /** @description General description of the error class */
+            error: string;
+            /**
+             * @description The error message(s) that occurred during the validation of the request data or additional requirements
+             *     applied during the execution of the request
+             * @default account-not-found-error
+             */
+            message: components["schemas"]["AdminRegenerateUserSessionKeyNotFoundErrorMessage"][];
+            /**
+             * @description The success being "false" indicates that the request failed to complete.
+             * @default false
+             */
+            success: boolean;
+        };
+        AdminRegenerateUserSessionKeyResponseDto: {
+            /**
+             * Format: constant
+             * @description The success being "true" indicates that the request completed.
+             * @default true
+             */
+            success: boolean;
+        };
+        /**
+         * @description The error message(s) that occurred during the validation of the request data or additional requirements
+         *     applied during the execution of the request
+         * @enum {string}
+         */
+        AdminResetUserPasswordBadRequestErrorMessage: AdminResetUserPasswordBadRequestErrorMessage;
+        AdminResetUserPasswordBadRequestResponseDto: {
+            /** @description General description of the error class */
+            error: string;
+            /**
+             * @description The error message(s) that occurred during the validation of the request data or additional requirements
+             *     applied during the execution of the request
+             * @default invalid-password-error
+             */
+            message: components["schemas"]["AdminResetUserPasswordBadRequestErrorMessage"][];
+            /**
+             * @description The success being "false" indicates that the request failed to complete.
+             * @default false
+             */
+            success: boolean;
+        };
+        AdminResetUserPasswordBodyDto: {
+            newPassword: string;
+        };
+        /**
+         * @description The error message(s) that occurred during the validation of the request data or additional requirements
+         *     applied during the execution of the request
+         * @enum {string}
+         */
+        AdminResetUserPasswordNotFoundErrorMessage: AdminResetUserPasswordNotFoundErrorMessage;
+        AdminResetUserPasswordNotFoundResponseDto: {
+            /** @description General description of the error class */
+            error: string;
+            /**
+             * @description The error message(s) that occurred during the validation of the request data or additional requirements
+             *     applied during the execution of the request
+             * @default account-not-found-error
+             */
+            message: components["schemas"]["AdminResetUserPasswordNotFoundErrorMessage"][];
+            /**
+             * @description The success being "false" indicates that the request failed to complete.
+             * @default false
+             */
+            success: boolean;
+        };
+        AdminResetUserPasswordResponseDto: {
+            /**
+             * Format: constant
+             * @description The success being "true" indicates that the request completed.
+             * @default true
+             */
+            success: boolean;
+        };
+        AdminRootPathDto: {
+            /** @description The ID of the account that owns this root path */
+            accountId: number;
+            /**
+             * Format: date-time
+             * @description The date and time the row was created
+             */
+            createdAt: string;
+            /**
+             * @description The number of files or songs that have been found in this root path, this excludes
+             *     anything that is not a music track.
+             */
+            fileCount: number;
+            /** @description The ID of the root path row in the database */
+            id: number;
+            /** @description The fully-qualified path of the root path, this is the base path where music is stored for a user */
+            rootPath: string;
+            /** @description The total size of all the files in this root path contained in the `fileCount` field */
+            totalSize: number;
+            /**
+             * Format: date-time
+             * @description The date and time the row was last updated, this field is optional and may not be present if the row has never been updated
+             */
+            updatedAt?: string;
+            /** @description The username of the account that owns this root path */
+            username: string;
+        };
+        AdminSetIndexerStatusBodyDto: {
+            /** @description Whether the scanner should be enabled or disabled */
+            enabled: boolean;
+        };
+        AdminSetIndexerStatusResponseDto: {
+            /**
+             * Format: constant
+             * @description The success being "true" indicates that the request completed.
+             * @default true
+             */
+            success: boolean;
+        };
+        /**
+         * @description The error message(s) that occurred during the validation of the request data or additional requirements
+         *     applied during the execution of the request
+         * @enum {string}
+         */
+        AdminUpdateRootPathBadRequestErrorMessage: AdminUpdateRootPathBadRequestErrorMessage;
+        AdminUpdateRootPathBadRequestResponseDto: {
+            /** @description General description of the error class */
+            error: string;
+            /**
+             * @description The error message(s) that occurred during the validation of the request data or additional requirements
+             *     applied during the execution of the request
+             * @default root-path-does-not-exist-error
+             */
+            message: components["schemas"]["AdminUpdateRootPathBadRequestErrorMessage"][];
+            /**
+             * @description The success being "false" indicates that the request failed to complete.
+             * @default false
+             */
+            success: boolean;
+        };
+        AdminUpdateRootPathBodyDto: {
+            /** @description The new path to set for the root path */
+            newPath: string;
+        };
+        /**
+         * @description The error message(s) that occurred during the validation of the request data or additional requirements
+         *     applied during the execution of the request
+         * @enum {string}
+         */
+        AdminUpdateRootPathNotFoundErrorMessage: AdminUpdateRootPathNotFoundErrorMessage;
+        AdminUpdateRootPathNotFoundResponseDto: {
+            /** @description General description of the error class */
+            error: string;
+            /**
+             * @description The error message(s) that occurred during the validation of the request data or additional requirements
+             *     applied during the execution of the request
+             * @default root-path-not-found-error
+             */
+            message: components["schemas"]["AdminUpdateRootPathNotFoundErrorMessage"][];
+            /**
+             * @description The success being "false" indicates that the request failed to complete.
+             * @default false
+             */
+            success: boolean;
+        };
+        AdminUpdateRootPathResponseDto: {
+            /**
+             * Format: constant
+             * @description The success being "true" indicates that the request completed.
+             * @default true
+             */
+            success: boolean;
+        };
+        /**
+         * @description The error message(s) that occurred during the validation of the request data or additional requirements
+         *     applied during the execution of the request
+         * @enum {string}
+         */
+        AdminUpdateUserRolesBadRequestErrorMessage: AdminUpdateUserRolesBadRequestErrorMessage;
+        AdminUpdateUserRolesBadRequestResponseDto: {
+            /** @description General description of the error class */
+            error: string;
+            /**
+             * @description The error message(s) that occurred during the validation of the request data or additional requirements
+             *     applied during the execution of the request
+             * @default invalid-user-role-error
+             */
+            message: components["schemas"]["AdminUpdateUserRolesBadRequestErrorMessage"][];
+            /**
+             * @description The success being "false" indicates that the request failed to complete.
+             * @default false
+             */
+            success: boolean;
+        };
+        AdminUpdateUserRolesBodyDto: {
+            roles: components["schemas"]["UserRole"][];
+        };
+        /**
+         * @description The error message(s) that occurred during the validation of the request data or additional requirements
+         *     applied during the execution of the request
+         * @enum {string}
+         */
+        AdminUpdateUserRolesNotFoundErrorMessage: AdminUpdateUserRolesNotFoundErrorMessage;
+        AdminUpdateUserRolesNotFoundResponseDto: {
+            /** @description General description of the error class */
+            error: string;
+            /**
+             * @description The error message(s) that occurred during the validation of the request data or additional requirements
+             *     applied during the execution of the request
+             * @default account-not-found-error
+             */
+            message: components["schemas"]["AdminUpdateUserRolesNotFoundErrorMessage"][];
+            /**
+             * @description The success being "false" indicates that the request failed to complete.
+             * @default false
+             */
+            success: boolean;
+        };
+        AdminUpdateUserRolesResponseDto: {
+            /**
+             * Format: constant
+             * @description The success being "true" indicates that the request completed.
+             * @default true
+             */
+            success: boolean;
+        };
+        BadRequestResponse: {
+            /** @description General description of the error class */
+            error: string;
+            /**
+             * @description A bad request occurred due to validation or other issues with the submitted data.
+             * @default bad-request-error
+             * @enum {string}
+             */
+            message: BadRequestResponseMessage;
+            /**
+             * @description The success being "false" indicates that the request failed to complete.
+             * @default false
+             */
+            success: boolean;
+        };
+        /**
+         * @description The content type, folder or file
+         * @enum {string}
+         */
+        ContentType: ContentType;
+        /** @enum {string} */
+        FileType: FileType;
+        /**
+         * @description The error message(s) that occurred during the validation of the request data or additional requirements
+         *     applied during the execution of the request
+         * @enum {string}
+         */
+        GuestCreateSessionBadRequestErrorMessage: GuestCreateSessionBadRequestErrorMessage;
+        GuestCreateSessionBadRequestResponseDto: {
+            /** @description General description of the error class */
+            error: string;
+            /**
              * @description The error message(s) that occurred during the validation of the request data or additional requirements
              *     applied during the execution of the request
              * @default bad-request-error
              */
-            message: components["schemas"]["BadRequestResponseErrorCodes"][];
+            message: components["schemas"]["GuestCreateSessionBadRequestErrorMessage"][];
             /**
-             * Format: constant
              * @description The success being "false" indicates that the request failed to complete.
              * @default false
              */
             success: boolean;
         };
         GuestCreateSessionBodyDto: {
-            /**
-             * Format: email
-             * @description The email address for the account
-             */
-            email: string;
             /** @description The number of days until the session expires */
-            expiresDays: number;
+            expiresDays?: number;
             /** @description The password for the account */
             password: string;
+            /** @description The username for the account */
+            username: string;
         };
         GuestCreateSessionResponseDto: {
             /** @description The JWT session token that can be attached to requests to authenticate against the API */
@@ -441,14 +1116,13 @@ export type components = {
             /** @description General description of the error class */
             error: string;
             /**
-             * Format: constant
              * @description An internal error occurred that isn't handled by the API and doesn't have a more specific error
              *     message defined.
              * @default internal-server-error
+             * @enum {string}
              */
-            message: components["schemas"]["FailedResponseErrorCodes"];
+            message: InternalServerErrorResponseMessage;
             /**
-             * Format: constant
              * @description The success being "false" indicates that the request failed to complete.
              * @default false
              */
@@ -522,9 +1196,8 @@ export type components = {
              */
             data: components["schemas"]["SynologyAlbumDataDto"];
             /**
-             * @description Boolean flag for the request ending successfully.  It is not clear if this is always true on Synology NAS
-             *     but this software will throw a HTTP exception if the request fails so this value is always true when the
-             *     response is returned.  It is included here to match the Synology API.
+             * @description Boolean flag for the request ending successfully.  There are scenarios where Synology could
+             *     return false instead but this server will return an HTTP error response.
              */
             success: boolean;
         };
@@ -912,9 +1585,8 @@ export type components = {
         SynologyArtistResponseDto: {
             data: components["schemas"]["SynologyArtistDataDto"];
             /**
-             * @description Boolean flag for the request ending successfully.  It is not clear if this is always true on Synology NAS
-             *     but this software will throw a HTTP exception if the request fails so this value is always true when the
-             *     response is returned.  It is included here to match the Synology API.
+             * @description Boolean flag for the request ending successfully.  There are scenarios where Synology could
+             *     return false instead but this server will return an HTTP error response.
              */
             success: boolean;
         };
@@ -1137,9 +1809,8 @@ export type components = {
         SynologyComposerResponseDto: {
             data: components["schemas"]["SynologyComposerDataDto"];
             /**
-             * @description Boolean flag for the request ending successfully.  It is not clear if this is always true on Synology NAS
-             *     but this software will throw a HTTP exception if the request fails so this value is always true when the
-             *     response is returned.  It is included here to match the Synology API.
+             * @description Boolean flag for the request ending successfully.  There are scenarios where Synology could
+             *     return false instead but this server will return an HTTP error response.
              */
             success: boolean;
         };
@@ -1153,9 +1824,8 @@ export type components = {
         SynologyDefaultGenreResponseDto: {
             data: components["schemas"]["SynologyDefaultGenreDataDto"];
             /**
-             * @description Boolean flag for the request ending successfully.  It is not clear if this is always true on Synology NAS
-             *     but this software will throw a HTTP exception if the request fails so this value is always true when the
-             *     response is returned.  It is included here to match the Synology API.
+             * @description Boolean flag for the request ending successfully.  There are scenarios where Synology could
+             *     return false instead but this server will return an HTTP error response.
              */
             success: boolean;
         };
@@ -1201,9 +1871,8 @@ export type components = {
         SynologyEntryCertificateResponseDto: {
             data: components["schemas"]["SynologyEntryCertificateDataDto"];
             /**
-             * @description Boolean flag for the request ending successfully.  It is not clear if this is always true on Synology NAS
-             *     but this software will throw a HTTP exception if the request fails so this value is always true when the
-             *     response is returned.  It is included here to match the Synology API.
+             * @description Boolean flag for the request ending successfully.  There are scenarios where Synology could
+             *     return false instead but this server will return an HTTP error response.
              */
             success: boolean;
         };
@@ -1311,9 +1980,8 @@ export type components = {
         SynologyEntryListPinsResponseDto: {
             data: components["schemas"]["SynologyEntryPinsDataDto"];
             /**
-             * @description Boolean flag for the request ending successfully.  It is not clear if this is always true on Synology NAS
-             *     but this software will throw a HTTP exception if the request fails so this value is always true when the
-             *     response is returned.  It is included here to match the Synology API.
+             * @description Boolean flag for the request ending successfully.  There are scenarios where Synology could
+             *     return false instead but this server will return an HTTP error response.
              */
             success: boolean;
         };
@@ -1350,9 +2018,8 @@ export type components = {
         };
         SynologyEntryLogoutResponseDto: {
             /**
-             * @description Boolean flag for the request ending successfully.  It is not clear if this is always true on Synology NAS
-             *     but this software will throw a HTTP exception if the request fails so this value is always true when the
-             *     response is returned.  It is included here to match the Synology API.
+             * @description Boolean flag for the request ending successfully.  There are scenarios where Synology could
+             *     return false instead but this server will return an HTTP error response.
              */
             success: boolean;
         };
@@ -1558,9 +2225,8 @@ export type components = {
         SynologyEntrySignInResponseDto: {
             data: components["schemas"]["SynologyEntrySignInDataDto"];
             /**
-             * @description Boolean flag for the request ending successfully.  It is not clear if this is always true on Synology NAS
-             *     but this software will throw a HTTP exception if the request fails so this value is always true when the
-             *     response is returned.  It is included here to match the Synology API.
+             * @description Boolean flag for the request ending successfully.  There are scenarios where Synology could
+             *     return false instead but this server will return an HTTP error response.
              */
             success: boolean;
         };
@@ -1665,9 +2331,8 @@ export type components = {
         SynologyFolderResponseDto: {
             data: components["schemas"]["SynologyFolderDataDto"];
             /**
-             * @description Boolean flag for the request ending successfully.  It is not clear if this is always true on Synology NAS
-             *     but this software will throw a HTTP exception if the request fails so this value is always true when the
-             *     response is returned.  It is included here to match the Synology API.
+             * @description Boolean flag for the request ending successfully.  There are scenarios where Synology could
+             *     return false instead but this server will return an HTTP error response.
              */
             success: boolean;
         };
@@ -1741,9 +2406,8 @@ export type components = {
         SynologyGenreResponseDto: {
             data: components["schemas"]["SynologyGenreDataDto"];
             /**
-             * @description Boolean flag for the request ending successfully.  It is not clear if this is always true on Synology NAS
-             *     but this software will throw a HTTP exception if the request fails so this value is always true when the
-             *     response is returned.  It is included here to match the Synology API.
+             * @description Boolean flag for the request ending successfully.  There are scenarios where Synology could
+             *     return false instead but this server will return an HTTP error response.
              */
             success: boolean;
         };
@@ -1819,9 +2483,8 @@ export type components = {
         SynologyInfoResponseDto: {
             data: components["schemas"]["SynologyInfoDataDto"];
             /**
-             * @description Boolean flag for the request ending successfully.  It is not clear if this is always true on Synology NAS
-             *     but this software will throw a HTTP exception if the request fails so this value is always true when the
-             *     response is returned.  It is included here to match the Synology API.
+             * @description Boolean flag for the request ending successfully.  There are scenarios where Synology could
+             *     return false instead but this server will return an HTTP error response.
              */
             success: boolean;
         };
@@ -2068,9 +2731,8 @@ export type components = {
         SynologyPlaylistIdResponseDto: {
             data: components["schemas"]["SynologyPlaylistIdDataDto"];
             /**
-             * @description Boolean flag for the request ending successfully.  It is not clear if this is always true on Synology NAS
-             *     but this software will throw a HTTP exception if the request fails so this value is always true when the
-             *     response is returned.  It is included here to match the Synology API.
+             * @description Boolean flag for the request ending successfully.  There are scenarios where Synology could
+             *     return false instead but this server will return an HTTP error response.
              */
             success: boolean;
         };
@@ -2223,9 +2885,8 @@ export type components = {
         SynologyPlaylistResponseDto: {
             data: components["schemas"]["SynologyPlaylistDataDto"];
             /**
-             * @description Boolean flag for the request ending successfully.  It is not clear if this is always true on Synology NAS
-             *     but this software will throw a HTTP exception if the request fails so this value is always true when the
-             *     response is returned.  It is included here to match the Synology API.
+             * @description Boolean flag for the request ending successfully.  There are scenarios where Synology could
+             *     return false instead but this server will return an HTTP error response.
              */
             success: boolean;
         };
@@ -2383,9 +3044,8 @@ export type components = {
         SynologyPlaylistWithItemsResponseDto: {
             data: components["schemas"]["SynologyPlaylistWithItemsDataDto"];
             /**
-             * @description Boolean flag for the request ending successfully.  It is not clear if this is always true on Synology NAS
-             *     but this software will throw a HTTP exception if the request fails so this value is always true when the
-             *     response is returned.  It is included here to match the Synology API.
+             * @description Boolean flag for the request ending successfully.  There are scenarios where Synology could
+             *     return false instead but this server will return an HTTP error response.
              */
             success: boolean;
         };
@@ -2456,9 +3116,8 @@ export type components = {
                 title: string;
             };
             /**
-             * @description Boolean flag for the request ending successfully.  It is not clear if this is always true on Synology NAS
-             *     but this software will throw a HTTP exception if the request fails so this value is always true when the
-             *     response is returned.  It is included here to match the Synology API.
+             * @description Boolean flag for the request ending successfully.  There are scenarios where Synology could
+             *     return false instead but this server will return an HTTP error response.
              */
             success: boolean;
         };
@@ -2499,9 +3158,8 @@ export type components = {
                 stream_id: string;
             };
             /**
-             * @description Boolean flag for the request ending successfully.  It is not clear if this is always true on Synology NAS
-             *     but this software will throw a HTTP exception if the request fails so this value is always true when the
-             *     response is returned.  It is included here to match the Synology API.
+             * @description Boolean flag for the request ending successfully.  There are scenarios where Synology could
+             *     return false instead but this server will return an HTTP error response.
              */
             success: boolean;
         };
@@ -2691,9 +3349,8 @@ export type components = {
         SynologyRadioItemResponseDto: {
             data: components["schemas"]["SynologyRadioItemDataDto"];
             /**
-             * @description Boolean flag for the request ending successfully.  It is not clear if this is always true on Synology NAS
-             *     but this software will throw a HTTP exception if the request fails so this value is always true when the
-             *     response is returned.  It is included here to match the Synology API.
+             * @description Boolean flag for the request ending successfully.  There are scenarios where Synology could
+             *     return false instead but this server will return an HTTP error response.
              */
             success: boolean;
         };
@@ -2810,9 +3467,8 @@ export type components = {
         SynologySearchResponseDto: {
             data: components["schemas"]["SynologySearchDataDto"];
             /**
-             * @description Boolean flag for the request ending successfully.  It is not clear if this is always true on Synology NAS
-             *     but this software will throw a HTTP exception if the request fails so this value is always true when the
-             *     response is returned.  It is included here to match the Synology API.
+             * @description Boolean flag for the request ending successfully.  There are scenarios where Synology could
+             *     return false instead but this server will return an HTTP error response.
              */
             success: boolean;
         };
@@ -2864,9 +3520,8 @@ export type components = {
         SynologySongResponseDto: {
             data: components["schemas"]["SynologySongDataDto"];
             /**
-             * @description Boolean flag for the request ending successfully.  It is not clear if this is always true on Synology NAS
-             *     but this software will throw a HTTP exception if the request fails so this value is always true when the
-             *     response is returned.  It is included here to match the Synology API.
+             * @description Boolean flag for the request ending successfully.  There are scenarios where Synology could
+             *     return false instead but this server will return an HTTP error response.
              */
             success: boolean;
         };
@@ -3407,12 +4062,13 @@ export type components = {
         };
         SynologySuccessResponseDto: {
             /**
-             * @description Boolean flag for the request ending successfully.  It is not clear if this is always true on Synology NAS
-             *     but this software will throw a HTTP exception if the request fails so this value is always true when the
-             *     response is returned.  It is included here to match the Synology API.
+             * @description Boolean flag for the request ending successfully.  There are scenarios where Synology could
+             *     return false instead but this server will return an HTTP error response.
              */
             success: boolean;
         };
+        /** @enum {string} */
+        UserRole: UserRole;
     };
     responses: never;
     parameters: never;
@@ -3422,18 +4078,19 @@ export type components = {
 };
 export type $defs = Record<string, never>;
 export interface operations {
-    GuestCreateAccountController_post: {
+    AdminCreateAccountController_post: {
         parameters: {
             query?: never;
             header: {
-                "user-agent": string;
+                /** @description Bearer token for authentication */
+                Authorization: string;
             };
             path?: never;
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["GuestCreateAccountBodyDto"];
+                "application/json": components["schemas"]["AdminCreateAccountBodyDto"];
             };
         };
         responses: {
@@ -3442,7 +4099,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["GuestCreateAccountResponseDto"];
+                    "application/json": components["schemas"]["AdminCreateAccountResponseDto"];
                 };
             };
             400: {
@@ -3450,15 +4107,470 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["GuestCreateAccountBadResponseDto"];
+                    "application/json": components["schemas"]["AdminCreateAccountBadRequestResponseDto"];
                 };
             };
-            500: {
+        };
+    };
+    AdminCreateRootPathController_post: {
+        parameters: {
+            query: {
+                /** @description The ID of the account to create the root path for. */
+                accountId: number;
+            };
+            header: {
+                /** @description Bearer token for authentication */
+                Authorization: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminCreateRootPathBodyDto"];
+            };
+        };
+        responses: {
+            /** @description Root path created successfully */
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                    "application/json": components["schemas"]["AdminCreateRootPathResponseDto"];
+                };
+            };
+            /** @description Invalid request data */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminCreateRootPathBadRequestResponseDto"];
+                };
+            };
+            /** @description Account not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminCreateRootPathNotFoundResponseDto"];
+                };
+            };
+        };
+    };
+    AdminDeleteAccountController_delete: {
+        parameters: {
+            query: {
+                /** @description The ID of the account to be deleted. */
+                accountId: number;
+            };
+            header: {
+                /** @description Bearer token for authentication */
+                Authorization: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Account deleted successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminDeleteAccountResponseDto"];
+                };
+            };
+            /** @description Invalid account ID or account does not exist */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminDeleteAccountBadRequestResponseDto"];
+                };
+            };
+            /** @description Account not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminDeleteAccountNotFoundResponseDto"];
+                };
+            };
+        };
+    };
+    AdminDeleteRootPathController_delete: {
+        parameters: {
+            query: {
+                /** @description The ID of the root path to delete */
+                id: number;
+            };
+            header: {
+                /** @description Bearer token for authentication */
+                Authorization: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Root path deleted successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminDeleteRootPathResponseDto"];
+                };
+            };
+            /** @description Root path not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminDeleteRootPathNotFoundResponseDto"];
+                };
+            };
+        };
+    };
+    AdminIndexerConfigurationController_get: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Bearer token for authentication */
+                Authorization: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminIndexerConfigurationResponseDto"];
+                };
+            };
+        };
+    };
+    AdminListAccountsController_get: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Bearer token for authentication */
+                Authorization: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Accounts listed successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminListAccountsResponseDto"];
+                };
+            };
+        };
+    };
+    AdminListIndexerLogsController_get: {
+        parameters: {
+            query?: {
+                accountId?: number;
+                rootPathId?: number;
+                search?: string;
+            };
+            header: {
+                /** @description Bearer token for authentication */
+                Authorization: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminListIndexerLogsResponseDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminListIndexerLogsBadRequestResponseDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminListIndexerLogsNotFoundResponseDto"];
+                };
+            };
+        };
+    };
+    AdminListRootPathsController_get: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Bearer token for authentication */
+                Authorization: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminListRootPathsResponseDto"];
+                };
+            };
+        };
+    };
+    AdminRegenerateMasterSessionKeyController_post: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Bearer token for authentication */
+                Authorization: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Master session key regenerated successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminRegenerateMasterSessionKeyResponseDto"];
+                };
+            };
+        };
+    };
+    AdminRegenerateUserSessionKeyController_patch: {
+        parameters: {
+            query: {
+                /** @description The ID of the account to regenerate the session key for. */
+                accountId: number;
+            };
+            header: {
+                /** @description Bearer token for authentication */
+                Authorization: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Session key regenerated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminRegenerateUserSessionKeyResponseDto"];
+                };
+            };
+            /** @description Account not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminRegenerateUserSessionKeyNotFoundResponseDto"];
+                };
+            };
+        };
+    };
+    AdminResetUserPasswordController_patch: {
+        parameters: {
+            query: {
+                /** @description The ID of the account whose password is to be reset. */
+                accountId: number;
+            };
+            header: {
+                /** @description Bearer token for authentication */
+                Authorization: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminResetUserPasswordBodyDto"];
+            };
+        };
+        responses: {
+            /** @description Password reset successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminResetUserPasswordResponseDto"];
+                };
+            };
+            /** @description Invalid request data or additional requirements not met */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminResetUserPasswordBadRequestResponseDto"];
+                };
+            };
+            /** @description Account not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminResetUserPasswordNotFoundResponseDto"];
+                };
+            };
+        };
+    };
+    AdminSetIndexerStatusController_patch: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Bearer token for authentication */
+                Authorization: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminSetIndexerStatusBodyDto"];
+            };
+        };
+        responses: {
+            /** @description Scanner status updated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminSetIndexerStatusResponseDto"];
+                };
+            };
+        };
+    };
+    AdminUpdateRootPathController_patch: {
+        parameters: {
+            query: {
+                /** @description The ID of the root path to update */
+                id: number;
+            };
+            header: {
+                /** @description Bearer token for authentication */
+                Authorization: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminUpdateRootPathBodyDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUpdateRootPathResponseDto"];
+                };
+            };
+            /** @description Invalid root path, either malformed or nonexistent */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUpdateRootPathBadRequestResponseDto"];
+                };
+            };
+            /** @description Root path not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUpdateRootPathNotFoundResponseDto"];
+                };
+            };
+        };
+    };
+    AdminUpdateUserRolesController_patch: {
+        parameters: {
+            query: {
+                /** @description The ID of the account whose roles are changing. */
+                accountId: number;
+            };
+            header: {
+                /** @description Bearer token for authentication */
+                Authorization: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminUpdateUserRolesBodyDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUpdateUserRolesResponseDto"];
+                };
+            };
+            /** @description Invalid user role or account only admin error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUpdateUserRolesBadRequestResponseDto"];
+                };
+            };
+            /** @description Account not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUpdateUserRolesNotFoundResponseDto"];
                 };
             };
         };
@@ -3466,9 +4578,7 @@ export interface operations {
     GuestCreateSessionController_post: {
         parameters: {
             query?: never;
-            header: {
-                "user-agent": string;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
@@ -3491,7 +4601,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["GuestCreateSessionBadResponseDto"];
+                    "application/json": components["schemas"]["GuestCreateSessionBadRequestResponseDto"];
                 };
             };
             500: {
@@ -3501,6 +4611,23 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["InternalServerErrorResponse"];
                 };
+            };
+        };
+    };
+    GuestHealthcheckController_healthcheck: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -4014,100 +5141,156 @@ export interface operations {
         };
     };
 }
-export enum BadRequestResponseErrorCodes {
+export enum AdminCreateAccountBadRequestErrorMessage {
+    invalid_user_role_error = "invalid-user-role-error",
     invalid_username_error = "invalid-username-error",
     invalid_username_length_error = "invalid-username-length-error",
     invalid_username_not_unique_error = "invalid-username-not-unique-error",
     invalid_password_error = "invalid-password-error",
     invalid_password_length_error = "invalid-password-length-error"
 }
-export enum ContentType {
-    file = "file",
-    folder = "folder",
-    remote = "remote"
+export enum AdminCreateRootPathBadRequestErrorMessage {
+    root_path_does_not_exist_error = "root-path-does-not-exist-error",
+    duplicate_root_path_error = "duplicate-root-path-error"
 }
-export enum FailedResponseErrorCodes {
+export enum AdminCreateRootPathNotFoundErrorMessage {
+    account_not_found_error = "account-not-found-error"
+}
+export enum AdminDeleteAccountBadRequestErrorMessage {
     invalid_account_id_error = "invalid-account-id-error",
-    invalid_collection_id_error = "invalid-collection-id-error",
-    invalid_collection_image_file_error = "invalid-collection-image-file-error",
-    invalid_collection_image_file_size_error = "invalid-collection-image-file-size-error",
-    invalid_collection_image_file_too_small_error = "invalid-collection-image-file-too-small-error",
-    invalid_collection_image_file_too_large_error = "invalid-collection-image-file-too-large-error",
-    invalid_collection_image_url_error = "invalid-collection-image-url-error",
-    invalid_collection_name_error = "invalid-collection-name-error",
-    invalid_collection_name_length_error = "invalid-collection-name-length-error",
-    invalid_collection_tags_error = "invalid-collection-tags-error",
-    invalid_collection_tags_length_error = "invalid-collection-tags-length-error",
-    invalid_confirmation_email_error = "invalid-confirmation-email-error",
-    invalid_confirmation_email_length_error = "invalid-confirmation-email-length-error",
-    invalid_confirmation_email_match_error = "invalid-confirmation-email-match-error",
-    invalid_confirmation_password_error = "invalid-confirmation-password-error",
-    invalid_confirmation_password_length_error = "invalid-confirmation-password-length-error",
-    invalid_confirmation_password_match_error = "invalid-confirmation-password-match-error",
-    invalid_created_at_error = "invalid-created-at-error",
-    invalid_email_error = "invalid-email-error",
-    invalid_email_length_error = "invalid-email-length-error",
-    invalid_email_not_unique_error = "invalid-email-not-unique-error",
+    invalid_account_error = "invalid-account-error",
+    account_only_admin_error = "account-only-admin-error"
+}
+export enum AdminDeleteAccountNotFoundErrorMessage {
+    invalid_account_id_error = "invalid-account-id-error",
+    account_not_found_error = "account-not-found-error"
+}
+export enum AdminDeleteRootPathNotFoundErrorMessage {
+    root_path_not_found_error = "root-path-not-found-error"
+}
+export enum AdminListIndexerLogsBadRequestErrorMessage {
+    invalid_account_id_error = "invalid-account-id-error",
+    invalid_root_path_id_error = "invalid-root-path-id-error",
+    invalid_search_length_error = "invalid-search-length-error"
+}
+export enum AdminListIndexerLogsNotFoundErrorMessage {
+    invalid_account_id_error = "invalid-account-id-error",
+    invalid_root_path_id_error = "invalid-root-path-id-error"
+}
+export enum AdminRegenerateUserSessionKeyNotFoundErrorMessage {
+    account_not_found_error = "account-not-found-error"
+}
+export enum AdminResetUserPasswordBadRequestErrorMessage {
+    invalid_password_error = "invalid-password-error",
+    invalid_password_length_error = "invalid-password-length-error"
+}
+export enum AdminResetUserPasswordNotFoundErrorMessage {
+    account_not_found_error = "account-not-found-error"
+}
+export enum AdminUpdateRootPathBadRequestErrorMessage {
+    root_path_does_not_exist_error = "root-path-does-not-exist-error",
+    duplicate_root_path_error = "duplicate-root-path-error"
+}
+export enum AdminUpdateRootPathNotFoundErrorMessage {
+    root_path_not_found_error = "root-path-not-found-error"
+}
+export enum AdminUpdateUserRolesBadRequestErrorMessage {
+    invalid_user_role_error = "invalid-user-role-error",
+    account_only_admin_error = "account-only-admin-error"
+}
+export enum AdminUpdateUserRolesNotFoundErrorMessage {
+    account_not_found_error = "account-not-found-error"
+}
+export enum BadRequestResponseMessage {
+    invalid_account_error = "invalid-account-error",
     invalid_ended_at_error = "invalid-ended-at-error",
     invalid_expires_at_error = "invalid-expires-at-error",
     invalid_expires_at_range_error = "invalid-expires-at-range-error",
-    invalid_image_blob_error = "invalid-image-blob-error",
-    invalid_image_filename_error = "invalid-image-filename-error",
-    invalid_image_id_error = "invalid-image-id-error",
-    invalid_limit_error = "invalid-limit-error",
-    invalid_limit_range_error = "invalid-limit-range-error",
-    invalid_music_id_error = "invalid-music-id-error",
-    invalid_music_import_file_error = "invalid-music-import-file-error",
-    invalid_music_import_file_type_error = "invalid-music-import-file-type-error",
-    invalid_music_import_file_too_small_error = "invalid-music-import-file-too-small-error",
-    invalid_music_import_file_too_large_error = "invalid-music-import-file-too-large-error",
-    invalid_music_import_file_pages_error = "invalid-music-import-file-pages-error",
-    invalid_music_import_file_pages_limit_error = "invalid-music-import-file-pages-limit-error",
-    invalid_music_import_page_number_error = "invalid-music-import-page-number-error",
-    invalid_music_name_error = "invalid-music-name-error",
-    invalid_music_name_length_error = "invalid-music-name-length-error",
-    invalid_music_tags_error = "invalid-music-tags-error",
-    invalid_music_tags_length_error = "invalid-music-tags-length-error",
-    invalid_offset_error = "invalid-offset-error",
-    invalid_offset_range_error = "invalid-offset-range-error",
     invalid_password_error = "invalid-password-error",
     invalid_password_length_error = "invalid-password-length-error",
-    invalid_scan_step_error = "invalid-scan-step-error",
-    invalid_scan_step_length_error = "invalid-scan-step-length-error",
-    invalid_scan_log_message_error = "invalid-scan-log-message-error",
-    invalid_scan_log_message_length_error = "invalid-scan-log-message-length-error",
-    invalid_session_id_error = "invalid-session-id-error",
-    invalid_total_results_error = "invalid-total-results-error",
-    invalid_updated_at_error = "invalid-updated-at-error",
+    invalid_root_path_error = "invalid-root-path-error",
+    invalid_search_length_error = "invalid-search-length-error",
     invalid_username_error = "invalid-username-error",
     invalid_username_length_error = "invalid-username-length-error",
     invalid_username_not_unique_error = "invalid-username-not-unique-error",
+    invalid_user_role_error = "invalid-user-role-error",
+    invalid_limit_error = "invalid-limit-error",
+    invalid_limit_range_error = "invalid-limit-range-error",
+    invalid_offset_error = "invalid-offset-error",
+    invalid_offset_range_error = "invalid-offset-range-error",
     invalid_jwt_token_error = "invalid-jwt-token-error",
-    invalid_password_hash_error = "invalid-password-hash-error",
-    invalid_password_hash_length_error = "invalid-password-hash-length-error",
     invalid_role_error = "invalid-role-error",
     invalid_session_error = "invalid-session-error",
     invalid_session_key_error = "invalid-session-key-error",
     account_not_found_error = "account-not-found-error",
+    account_only_admin_error = "account-only-admin-error",
     session_not_found_error = "session-not-found-error",
-    collection_not_found_error = "collection-not-found-error",
-    image_not_found_error = "image-not-found-error",
-    scan_not_found_error = "scan-not-found-error",
-    scan_data_not_found_error = "scan-data-not-found-error",
-    scan_log_not_found_error = "scan-log-not-found-error",
-    page_not_found_error = "page-not-found-error",
-    music_not_found_error = "music-not-found-error",
+    root_path_not_found_error = "root-path-not-found-error",
+    invalid_account_id_error = "invalid-account-id-error",
+    invalid_root_path_id_error = "invalid-root-path-id-error",
+    invalid_session_id_error = "invalid-session-id-error",
     authorization_error = "authorization-error",
     bad_request_error = "bad-request-error",
     internal_server_error = "internal-server-error",
+    indexer_configuration_not_found_error = "indexer-configuration-not-found-error",
+    system_configuration_not_found_error = "system-configuration-not-found-error",
     not_found_error = "not-found-error",
-    upload_failed_error = "upload-failed-error"
+    root_path_does_not_exist_error = "root-path-does-not-exist-error",
+    duplicate_root_path_error = "duplicate-root-path-error"
+}
+export enum ContentType {
+    file = "file",
+    folder = "folder",
+    remote = "remote"
 }
 export enum FileType {
     flac = "flac",
     m4a = "m4a",
     mp3 = "mp3",
     ogg = "ogg"
+}
+export enum GuestCreateSessionBadRequestErrorMessage {
+    invalid_username_error = "invalid-username-error",
+    invalid_username_length_error = "invalid-username-length-error",
+    invalid_password_error = "invalid-password-error",
+    invalid_password_length_error = "invalid-password-length-error"
+}
+export enum InternalServerErrorResponseMessage {
+    invalid_account_error = "invalid-account-error",
+    invalid_ended_at_error = "invalid-ended-at-error",
+    invalid_expires_at_error = "invalid-expires-at-error",
+    invalid_expires_at_range_error = "invalid-expires-at-range-error",
+    invalid_password_error = "invalid-password-error",
+    invalid_password_length_error = "invalid-password-length-error",
+    invalid_root_path_error = "invalid-root-path-error",
+    invalid_search_length_error = "invalid-search-length-error",
+    invalid_username_error = "invalid-username-error",
+    invalid_username_length_error = "invalid-username-length-error",
+    invalid_username_not_unique_error = "invalid-username-not-unique-error",
+    invalid_user_role_error = "invalid-user-role-error",
+    invalid_limit_error = "invalid-limit-error",
+    invalid_limit_range_error = "invalid-limit-range-error",
+    invalid_offset_error = "invalid-offset-error",
+    invalid_offset_range_error = "invalid-offset-range-error",
+    invalid_jwt_token_error = "invalid-jwt-token-error",
+    invalid_role_error = "invalid-role-error",
+    invalid_session_error = "invalid-session-error",
+    invalid_session_key_error = "invalid-session-key-error",
+    account_not_found_error = "account-not-found-error",
+    account_only_admin_error = "account-only-admin-error",
+    session_not_found_error = "session-not-found-error",
+    root_path_not_found_error = "root-path-not-found-error",
+    invalid_account_id_error = "invalid-account-id-error",
+    invalid_root_path_id_error = "invalid-root-path-id-error",
+    invalid_session_id_error = "invalid-session-id-error",
+    authorization_error = "authorization-error",
+    bad_request_error = "bad-request-error",
+    internal_server_error = "internal-server-error",
+    indexer_configuration_not_found_error = "indexer-configuration-not-found-error",
+    system_configuration_not_found_error = "system-configuration-not-found-error",
+    not_found_error = "not-found-error",
+    root_path_does_not_exist_error = "root-path-does-not-exist-error",
+    duplicate_root_path_error = "duplicate-root-path-error"
 }
 export enum PlaylistType {
     normal = "normal",
@@ -4188,4 +5371,8 @@ export enum SynologyPinType {
 export enum SynologyPlaylistDeleteBodyDtoType {
     normal = "normal",
     smart = "smart"
+}
+export enum UserRole {
+    user = "user",
+    admin = "admin"
 }
