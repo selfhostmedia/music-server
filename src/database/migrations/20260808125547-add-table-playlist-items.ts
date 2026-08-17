@@ -14,7 +14,6 @@ export async function up(queryInterface: QueryInterface) {
         model: 'files',
         key: 'id',
       },
-      onUpdate: 'CASCADE',
       onDelete: 'CASCADE',
     },
     id: {
@@ -30,7 +29,6 @@ export async function up(queryInterface: QueryInterface) {
         model: 'playlists',
         key: 'id',
       },
-      onUpdate: 'CASCADE',
       onDelete: 'CASCADE',
     },
     position: DataTypes.INTEGER,

@@ -9,7 +9,6 @@ export async function up(queryInterface: QueryInterface) {
         model: 'shoutcast_containers',
         key: 'id',
       },
-      onUpdate: 'CASCADE',
       onDelete: 'CASCADE',
     },
     created_at: {

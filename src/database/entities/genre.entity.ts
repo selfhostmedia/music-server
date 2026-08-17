@@ -30,6 +30,7 @@ export class GenreEntity extends Model<GenreEntity> {
       key: 'id',
     },
     allowNull: true,
+    onDelete: 'CASCADE',
   })
   @ForeignKey(() => AccountEntity)
   declare accountId: number;

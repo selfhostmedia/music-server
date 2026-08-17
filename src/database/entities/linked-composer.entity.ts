@@ -28,6 +28,7 @@ export class LinkedComposerEntity extends Model<LinkedComposerEntity> {
       model: ComposerEntity,
       key: 'id',
     },
+    onDelete: 'CASCADE',
   })
   @ForeignKey(() => ComposerEntity)
   declare composerId: number;
@@ -65,6 +66,7 @@ export class LinkedComposerEntity extends Model<LinkedComposerEntity> {
       model: FileEntity,
       key: 'id',
     },
+    onDelete: 'CASCADE',
   })
   @ForeignKey(() => FileEntity)
   declare fileId: number;

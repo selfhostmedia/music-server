@@ -6,6 +6,7 @@ import {
   Model,
   Table,
 } from 'sequelize-typescript';
+import { RootPathEntity } from './root-path.entity';
 
 /**
  * The FolderEntity is a view that contains all unique folder paths for a given account and root path.  It is
@@ -59,6 +60,8 @@ export class FolderEntity extends Model<FolderEntity> {
       model: 'root_paths',
       key: 'id',
     },
+    onDelete: 'CASCADE',
   })
+  @ForeignKey(() => RootPathEntity)
   declare rootPathId: number;
 }

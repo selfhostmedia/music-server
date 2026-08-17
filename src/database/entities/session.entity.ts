@@ -8,6 +8,7 @@ import {
   Sequelize,
   Table,
 } from 'sequelize-typescript';
+import { SessionRestriction } from 'src/types/enums';
 import { Guid } from 'typescript-guid';
 
 /**
@@ -37,6 +38,7 @@ export class SessionEntity extends Model<SessionEntity> {
       model: AccountEntity,
       key: 'id',
     },
+    onDelete: 'CASCADE',
   })
   @ForeignKey(() => AccountEntity)
   declare accountId: number;
@@ -72,6 +74,15 @@ export class SessionEntity extends Model<SessionEntity> {
     autoIncrement: true,
   })
   declare id: number;
+
+  /**
+   * Whether the session is restricted to the APIs for a specific app, for instance if the signin
+   * occurred in a Synology app then that session will not be allowed to access the web UI or APIs
+   * for other apps.  This is a security measure to prevent a session from being used in an unintended
+   * context.
+   */
+  @Column(DataType.STRING(50))
+  declare restrictSession?: SessionRestriction;
 
   /**
    * The session token is a random UUID used as part of a secret token that verifies session information.  A change in this value invalidates a session immediately

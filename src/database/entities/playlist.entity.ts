@@ -34,6 +34,7 @@ export class PlaylistEntity extends Model<PlaylistEntity> {
       key: 'id',
     },
     allowNull: true,
+    onDelete: 'CASCADE',
   })
   @ForeignKey(() => AccountEntity)
   declare accountId: number;

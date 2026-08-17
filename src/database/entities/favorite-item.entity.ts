@@ -34,6 +34,7 @@ export class FavoriteItemEntity extends Model<FavoriteItemEntity> {
       key: 'id',
     },
     allowNull: true,
+    onDelete: 'CASCADE',
   })
   @ForeignKey(() => AccountEntity)
   declare accountId?: number;
@@ -48,6 +49,7 @@ export class FavoriteItemEntity extends Model<FavoriteItemEntity> {
       key: 'id',
     },
     allowNull: true,
+    onDelete: 'CASCADE',
   })
   @ForeignKey(() => AlbumEntity)
   declare albumId?: number;
@@ -74,6 +76,7 @@ export class FavoriteItemEntity extends Model<FavoriteItemEntity> {
       key: 'id',
     },
     allowNull: true,
+    onDelete: 'CASCADE',
   })
   @ForeignKey(() => ArtistEntity)
   declare artistId?: number;
@@ -91,6 +94,7 @@ export class FavoriteItemEntity extends Model<FavoriteItemEntity> {
       key: 'id',
     },
     allowNull: true,
+    onDelete: 'CASCADE',
   })
   @ForeignKey(() => ComposerEntity)
   declare composerId?: number;
@@ -118,6 +122,7 @@ export class FavoriteItemEntity extends Model<FavoriteItemEntity> {
       key: 'id',
     },
     allowNull: true,
+    onDelete: 'CASCADE',
   })
   @ForeignKey(() => FolderEntity)
   declare folderId?: number;
@@ -135,6 +140,7 @@ export class FavoriteItemEntity extends Model<FavoriteItemEntity> {
       key: 'id',
     },
     allowNull: true,
+    onDelete: 'CASCADE',
   })
   @ForeignKey(() => GenreEntity)
   declare genreId?: number;
@@ -163,6 +169,7 @@ export class FavoriteItemEntity extends Model<FavoriteItemEntity> {
       key: 'id',
     },
     allowNull: true,
+    onDelete: 'CASCADE',
   })
   @ForeignKey(() => PlaylistEntity)
   declare playlistId?: number;

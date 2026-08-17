@@ -10,6 +10,7 @@ export async function up(queryInterface: QueryInterface): Promise<void> {
         model: 'albums',
         key: 'id',
       },
+      onDelete: 'CASCADE',
     },
     artist_id: {
       type: DataType.INTEGER,
@@ -18,6 +19,7 @@ export async function up(queryInterface: QueryInterface): Promise<void> {
         model: 'artists',
         key: 'id',
       },
+      onDelete: 'CASCADE',
     },
     created_at: {
       type: DataType.DATE,

@@ -75,6 +75,7 @@ export class PlaylistSmartRuleEntity extends Model<PlaylistSmartRuleEntity> {
       key: 'id',
     },
     allowNull: true,
+    onDelete: 'CASCADE',
   })
   @ForeignKey(() => PlaylistEntity)
   declare playlistId: number;

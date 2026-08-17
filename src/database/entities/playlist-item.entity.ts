@@ -42,6 +42,7 @@ export class PlaylistItemEntity extends Model<PlaylistItemEntity> {
       key: 'id',
     },
     allowNull: true,
+    onDelete: 'CASCADE',
   })
   @ForeignKey(() => FileEntity)
   declare fileId?: number;
@@ -70,6 +71,7 @@ export class PlaylistItemEntity extends Model<PlaylistItemEntity> {
       key: 'id',
     },
     allowNull: false,
+    onDelete: 'CASCADE',
   })
   @ForeignKey(() => PlaylistEntity)
   declare playlistId: number;

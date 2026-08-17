@@ -14,6 +14,7 @@ export async function up(queryInterface: QueryInterface): Promise<void> {
         model: 'composers',
         key: 'id',
       },
+      onDelete: 'CASCADE',
     },
     id: {
       type: DataType.INTEGER,
@@ -28,7 +29,6 @@ export async function up(queryInterface: QueryInterface): Promise<void> {
         model: 'files',
         key: 'id',
       },
-      onUpdate: 'CASCADE',
       onDelete: 'CASCADE',
     },
     updated_at: {

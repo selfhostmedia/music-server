@@ -32,6 +32,7 @@ export class AlbumEntity extends Model<AlbumEntity> {
       key: 'id',
     },
     allowNull: true,
+    onDelete: 'CASCADE',
   })
   @ForeignKey(() => AccountEntity)
   declare accountId?: number;
@@ -92,6 +93,7 @@ export class AlbumEntity extends Model<AlbumEntity> {
       model: RootPathEntity,
       key: 'id',
     },
+    onDelete: 'CASCADE',
   })
   @ForeignKey(() => RootPathEntity)
   declare rootPathId: number;

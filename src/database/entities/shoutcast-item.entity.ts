@@ -29,6 +29,7 @@ export class ShoutcastItemEntity extends Model<ShoutcastItemEntity> {
       key: 'id',
     },
     allowNull: true,
+    onDelete: 'CASCADE',
   })
   @ForeignKey(() => ShoutcastContainerEntity)
   declare containerId?: number;

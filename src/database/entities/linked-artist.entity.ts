@@ -28,6 +28,7 @@ export class LinkedArtistEntity extends Model<LinkedArtistEntity> {
       model: ArtistEntity,
       key: 'id',
     },
+    onDelete: 'CASCADE',
   })
   @ForeignKey(() => ArtistEntity)
   declare artistId: number;
@@ -68,6 +69,7 @@ export class LinkedArtistEntity extends Model<LinkedArtistEntity> {
       model: FileEntity,
       key: 'id',
     },
+    onDelete: 'CASCADE',
   })
   @ForeignKey(() => FileEntity)
   declare fileId: number;

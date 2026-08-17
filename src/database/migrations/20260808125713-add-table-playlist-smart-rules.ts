@@ -23,7 +23,6 @@ export async function up(queryInterface: QueryInterface) {
         model: 'playlists',
         key: 'id',
       },
-      onUpdate: 'CASCADE',
       onDelete: 'CASCADE',
     },
     updated_at: {

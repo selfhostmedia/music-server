@@ -37,6 +37,7 @@ export class FileEntity extends Model<FileEntity> {
       key: 'id',
     },
     allowNull: true,
+    onDelete: 'CASCADE',
   })
   @ForeignKey(() => AccountEntity)
   declare accountId?: number;
@@ -50,6 +51,7 @@ export class FileEntity extends Model<FileEntity> {
       model: AlbumEntity,
       key: 'id',
     },
+    onDelete: 'CASCADE',
   })
   @ForeignKey(() => AlbumEntity)
   declare albumId: number;
@@ -144,6 +146,7 @@ export class FileEntity extends Model<FileEntity> {
       model: RootPathEntity,
       key: 'id',
     },
+    onDelete: 'CASCADE',
   })
   @ForeignKey(() => RootPathEntity)
   declare rootPathId: number;

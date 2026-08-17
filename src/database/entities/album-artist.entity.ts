@@ -28,6 +28,7 @@ export class AlbumArtistEntity extends Model<AlbumArtistEntity> {
       model: AlbumEntity,
       key: 'id',
     },
+    onDelete: 'CASCADE',
   })
   @ForeignKey(() => AlbumEntity)
   declare albumId: number;
@@ -44,6 +45,7 @@ export class AlbumArtistEntity extends Model<AlbumArtistEntity> {
       model: ArtistEntity,
       key: 'id',
     },
+    onDelete: 'CASCADE',
   })
   @ForeignKey(() => ArtistEntity)
   declare artistId: number;
