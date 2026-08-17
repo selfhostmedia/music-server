@@ -1,4 +1,4 @@
-import { AllowGuest } from 'src/api/synology-audiostation/synology.guard';
+import { AllowGuest } from 'src/api/role.guard';
 import { ApiTags } from '@nestjs/swagger';
 import { Controller, Get } from '@nestjs/common';
 import { GUEST_APIS } from 'src/constants/swagger';

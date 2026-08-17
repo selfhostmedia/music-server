@@ -1,63 +1,54 @@
 // eslint-disable-next-line max-classes-per-file
-import { ApiProperty, IntersectionType } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { BadRequestResponse, SuccessResponse } from 'src/api/response.dto';
 import { ErrorCodes } from 'src/constants/error-codes';
-import { IsInt, IsString, Length, Min, ValidateIf } from 'class-validator';
+import { IsString, Length, ValidateIf } from 'class-validator';
+import { UserRole } from 'src/constants/enums/user-role.enum';
 
-export class GuestCreateAccountBodyDto {
+export class AdminCreateAccountBodyDto {
   /**
    * The username for signing in
    */
   @IsString()
   @Length(1, 255, { message: ErrorCodes.INVALID_USERNAME_LENGTH_ERROR })
-  username!: string;
+  declare username: string;
 
   /**
-   * The plain-text password the user will enter to sign in
+   * The plain-text password the user will enter to sign in.  It will be hashed and securely-stored in the database.
    */
   @IsString({ message: ErrorCodes.INVALID_PASSWORD_ERROR })
-  @Length(8, 255, { message: ErrorCodes.INVALID_PASSWORD_LENGTH_ERROR })
+  @Length(1, 255, { message: ErrorCodes.INVALID_PASSWORD_LENGTH_ERROR })
   @ValidateIf((value) => value.password?.length, {
     message: ErrorCodes.INVALID_PASSWORD_ERROR,
   })
-  password!: string;
+  declare password: string;
+
+  @ApiProperty({
+    enum: UserRole,
+    enumName: 'UserRole',
+    isArray: true,
+  })
+  declare roles: UserRole[];
 }
 
-export class GuestCreateAccountDataDto {
-  /**
-   * The ID of the newly-registered account
-   */
-  @IsInt()
-  @Min(1, { message: ErrorCodes.INVALID_ACCOUNT_ID_ERROR })
-  accountId!: number;
+export class AdminCreateAccountResponseDto extends SuccessResponse {}
 
-  /**
-   * The JWT session token that can be attached to requests to authenticate against the API
-   */
-  @IsString()
-  jwtToken!: string;
-}
-
-export class GuestCreateAccountResponseDto extends IntersectionType(
-  SuccessResponse,
-  GuestCreateAccountDataDto,
-) {}
-
-export class GuestCreateAccountBadResponseDto extends BadRequestResponse {
+export class AdminCreateAccountBadRequestResponseDto extends BadRequestResponse {
   /**
    * The error message(s) that occurred during the validation of the request data or additional requirements
    * applied during the execution of the request
    */
   @ApiProperty({
-    type: 'string',
     isArray: true,
     enum: [
+      ErrorCodes.INVALID_USER_ROLE_ERROR,
       ErrorCodes.INVALID_USERNAME_ERROR,
       ErrorCodes.INVALID_USERNAME_LENGTH_ERROR,
       ErrorCodes.INVALID_USERNAME_NOT_UNIQUE_ERROR,
       ErrorCodes.INVALID_PASSWORD_ERROR,
       ErrorCodes.INVALID_PASSWORD_LENGTH_ERROR,
     ],
+    enumName: 'AdminCreateAccountBadRequestErrorMessage',
   })
   declare message: ErrorCodes[];
 }

@@ -8,5 +8,6 @@ import { SequelizeModule } from '@nestjs/sequelize';
   imports: [SequelizeModule.forFeature([AccountEntity, SessionEntity])],
   controllers: [GuestCreateSessionController],
   providers: [GuestCreateSessionService],
+  exports: [GuestCreateSessionService],
 })
 export class GuestCreateSessionModule {}

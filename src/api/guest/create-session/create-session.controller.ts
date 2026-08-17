@@ -1,13 +1,14 @@
+import { AllowGuest } from 'src/api/role.guard';
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { Body, Controller, Headers, Post } from '@nestjs/common';
+import { Body, Controller, Post, Req } from '@nestjs/common';
 import { GUEST_APIS } from 'src/constants/swagger';
 import {
-  GuestCreateSessionBadResponseDto,
+  GuestCreateSessionBadRequestResponseDto,
   GuestCreateSessionBodyDto,
   GuestCreateSessionResponseDto,
 } from './create-session.dto';
@@ -30,17 +31,22 @@ export class GuestCreateSessionController {
    * their account must be in good standing to create a session.
    */
   @Post('create-session')
+  @AllowGuest()
   @ApiCreatedResponse({
     type: GuestCreateSessionResponseDto,
+  })
+  @ApiBadRequestResponse({
+    type: GuestCreateSessionBadRequestResponseDto,
   })
   @ApiInternalServerErrorResponse({
     type: InternalServerErrorResponse,
   })
-  @ApiBadRequestResponse({ type: GuestCreateSessionBadResponseDto })
+  @ApiBadRequestResponse({ type: GuestCreateSessionBadRequestResponseDto })
   async post(
-    @Headers('user-agent') userAgent: string,
+    @Req() req: Request,
     @Body() body: GuestCreateSessionBodyDto,
   ): Promise<GuestCreateSessionResponseDto> {
+    const userAgent = req.headers['user-agent'] || '';
     const jwtToken = await this.createSessionService.post(userAgent, body);
     return {
       success: true,
