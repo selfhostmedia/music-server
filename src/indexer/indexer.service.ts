@@ -220,7 +220,7 @@ export class IndexerService {
       `[accountId: ${accountId} rootPathId: ${rootPathId}] ${message}`,
     );
     this.logs.push(logEntry);
-    if (this.logs.length > this.logSizeLimit) {
+    while (this.logs.length > this.logSizeLimit) {
       this.logs.shift();
     }
   }
