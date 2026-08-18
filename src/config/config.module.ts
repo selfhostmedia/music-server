@@ -7,7 +7,9 @@ import { DynamicModule, Global, Module } from '@nestjs/common';
 export class ConfigModule {
   static forRoot(): DynamicModule {
     return {
-      imports: [BaseConfigModule.forRoot({ isGlobal: true })],
+      imports: [
+        BaseConfigModule.forRoot({ isGlobal: true, ignoreEnvFile: true }),
+      ],
       module: ConfigModule,
       providers: [ConfigService],
       exports: [ConfigService],
