@@ -3,7 +3,6 @@ import { UserRoleEnum } from '../../../types/api-schema';
 import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
 import {
   api,
-  clearSessionToken,
   createJwtToken,
   createTestAccount,
   deleteTestData,
