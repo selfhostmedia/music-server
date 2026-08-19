@@ -86,6 +86,7 @@
     "lint": "npx eslint . --fix",
     "lint:json": "for x in `find . -type f -name \"*.json\" -not -path \"./node_modules/*\" -not -path \"./.git/*\" -not -path \"./dist/*\"`; do npx sort-json-keys \"./$x\"; done",
     "openapi:generate": "npx openapi-typescript http://localhost:7100/swagger.json -o ./src/types/api-schema.ts --enum --alphabetize --export-type",
+    "prettier": "prettier --write .",
     "rebuild": "rm -f *.db && npm run build && npm run sequelize:migrate && npm run sequelize:seed:all",
     "sequelize:migrate": "npx sequelize-cli db:migrate",
     "sequelize:seed": "npx sequelize-cli db:seed",
