@@ -9,7 +9,6 @@ export async function up(queryInterface: QueryInterface) {
         model: 'accounts',
         key: 'id',
       },
-      onUpdate: 'CASCADE',
       onDelete: 'CASCADE',
     },
     created_at: {
@@ -38,7 +37,6 @@ export async function up(queryInterface: QueryInterface) {
         model: 'root_paths',
         key: 'id',
       },
-      onUpdate: 'CASCADE',
       onDelete: 'CASCADE',
     },
     updated_at: {
@@ -52,9 +50,6 @@ export async function up(queryInterface: QueryInterface) {
 }
 
 export async function down(queryInterface: QueryInterface) {
-  await queryInterface.removeIndex(
-    'folders',
-    'idx_folders_account_id_folder_path',
-  );
+  await queryInterface.removeIndex('folders', 'idx_folders_account_id_folder_path');
   await queryInterface.dropTable('folders');
 }

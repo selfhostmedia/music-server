@@ -1,17 +1,9 @@
-import {
-  CollatedTrackEntity,
-  FolderEntity,
-  RootPathEntity,
-} from 'src/database/entities';
-import { ContentType } from 'src/types/enums';
+import { CollatedTrackEntity, FolderEntity, RootPathEntity } from 'src/database/entities';
+import { ContentTypeEnum } from 'src/types/enums';
 import { InjectModel } from '@nestjs/sequelize';
 import { Injectable } from '@nestjs/common';
 import { Op } from 'sequelize';
-import {
-  SynologyFolderDataDto,
-  SynologyFolderDto,
-  SynologySongDto,
-} from './dtos';
+import { SynologyFolderDataDto, SynologyFolderDto, SynologySongDto } from './dtos';
 import { sep } from 'node:path';
 
 function folderToRow(folder: FolderEntity): SynologyFolderDto {
@@ -20,7 +12,7 @@ function folderToRow(folder: FolderEntity): SynologyFolderDto {
     is_personal: false,
     path: folder.folderPath,
     title: folder.folderPath.split(sep).pop() || folder.folderPath,
-    type: ContentType.FOLDER,
+    type: ContentTypeEnum.FOLDER,
   };
 }
 
@@ -54,7 +46,7 @@ function fileToRow(track: CollatedTrackEntity): SynologySongDto {
     id: `music_${track.fileId}`,
     path: track.filePath,
     title: track.filePath.split(sep).pop() || track.filePath,
-    type: ContentType.FILE,
+    type: ContentTypeEnum.FILE,
   };
 }
 
@@ -69,11 +61,7 @@ export class SynologyFolderService {
     private readonly rootPathEntity: typeof RootPathEntity,
   ) {}
 
-  async listRootFolders(
-    accountId: number,
-    offset: number,
-    limit: number,
-  ): Promise<SynologyFolderDataDto> {
+  async listRootFolders(accountId: number, offset: number, limit: number): Promise<SynologyFolderDataDto> {
     const folders = await this.folderEntity.findAll({
       where: {
         accountId,
@@ -108,17 +96,11 @@ export class SynologyFolderService {
       throw new Error(`Folder with ID ${folderId} not found`);
     }
     // find the root path entity that matches the basePath
-    const rootPath = await this.rootPathEntity.findByPk(
-      startingFolder.rootPathId,
-    );
+    const rootPath = await this.rootPathEntity.findByPk(startingFolder.rootPathId);
     if (!rootPath) {
-      throw new Error(
-        `No root path found for base path: ${startingFolder.folderPath}`,
-      );
+      throw new Error(`No root path found for base path: ${startingFolder.folderPath}`);
     }
-    const stemParts = startingFolder.folderPath
-      .split(sep)
-      .filter((part) => part.length > 0);
+    const stemParts = startingFolder.folderPath.split(sep).filter((part) => part.length > 0);
     const pathContents: (SynologyFolderDto | SynologySongDto)[] = [];
     // folder contents
     const folders = await this.folderEntity.findAll({
@@ -151,10 +133,7 @@ export class SynologyFolderService {
     }
     const folderTotal = pathContents.length;
     // file contents
-    const relativeFilePath = startingFolder.folderPath.replace(
-      rootPath.rootPath,
-      '',
-    );
+    const relativeFilePath = startingFolder.folderPath.replace(rootPath.rootPath, '');
     const files = await this.collatedTrackEntity.findAll({
       where: {
         accountId,
@@ -177,7 +156,7 @@ export class SynologyFolderService {
     return {
       folder_total: folderTotal,
       id: `dir_${startingFolder.id}`,
-      items: pathContents,
+      items: pathContents.slice(offset, offset + limit),
       offset,
       total: pathContents.length,
     };

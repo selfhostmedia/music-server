@@ -1,6 +1,7 @@
 import { AuthenticationService } from 'src/authentication/authentication.service';
 import { GuestCreateSessionBodyDto } from './create-session.dto';
 import { Injectable, Logger } from '@nestjs/common';
+import { SessionRestrictionEnum } from 'src/types/enums';
 import { UserEndSessionController } from 'src/api/user/end-session/end-session.controller';
 
 @Injectable()
@@ -14,14 +15,12 @@ export class GuestCreateSessionService {
    * @param body
    * @returns
    */
-  async post(
-    userAgent: string,
-    body: GuestCreateSessionBodyDto,
-  ): Promise<string> {
+  async post(userAgent: string, body: GuestCreateSessionBodyDto): Promise<string> {
     const jwtToken = await this.authenticationService.createSession(
-      userAgent,
-      body.email,
+      body.username,
       body.password,
+      userAgent,
+      SessionRestrictionEnum.WEB_UI,
       body.expiresDays,
     );
     return jwtToken;

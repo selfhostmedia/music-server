@@ -7,15 +7,9 @@ import { ConfigService } from './config/config.service';
 import { CookiesModule } from './middleware/cookies';
 import { DatabaseModule } from './database/database.module';
 import { IndexerModule } from './indexer/indexer.module';
-import { IndexerService } from './indexer/indexer.service';
-import {
-  Inject,
-  Logger,
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-} from '@nestjs/common';
+import { Inject, Logger, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
+import { ScheduleModule } from '@nestjs/schedule';
 import { Sequelize } from 'sequelize-typescript';
 import { join } from 'node:path';
 import Umzug from 'umzug';
@@ -28,6 +22,7 @@ import Umzug from 'umzug';
     }),
     CookiesModule,
     DatabaseModule,
+    ScheduleModule.forRoot(),
     JwtModule.registerAsync({
       global: true,
       useFactory: async () => ({
@@ -40,7 +35,10 @@ import Umzug from 'umzug';
       global: true,
     },
     ApiModule,
-    IndexerModule,
+    {
+      module: IndexerModule,
+      global: true,
+    },
   ],
 })
 export class AppModule implements NestModule {
@@ -49,7 +47,6 @@ export class AppModule implements NestModule {
   constructor(
     @Inject(ConfigService) private readonly configService: ConfigService,
     @Inject(Sequelize) private readonly sequelize: Sequelize,
-    @Inject(IndexerService) private readonly indexerService: IndexerService,
   ) {}
 
   // eslint-disable-next-line class-methods-use-this
@@ -62,11 +59,9 @@ export class AppModule implements NestModule {
     await this.sequelize.query('PRAGMA journal_mode=WAL;');
     // if using a :memory: sqlite database for tests then make sure the database
     // migrations and seeders are run
-    if (this.configService.get('NODE_ENV') === 'test') {
+    if (this.configService.isTesting()) {
       await this.runMigrationsAndSeeders();
     }
-    // perform an initial scan of the root paths to index any existing files
-    this.indexerService.scanRootPaths();
   }
 
   private async runMigrationsAndSeeders() {
@@ -84,9 +79,7 @@ export class AppModule implements NestModule {
     if (pendingMigrations.length > 0) {
       this.logger.log('Running database migrations...');
       await migrations.up();
-      const [rootPaths] = await this.sequelize.query(
-        'SELECT COUNT(*) AS count FROM root_paths;',
-      );
+      const [rootPaths] = await this.sequelize.query('SELECT COUNT(*) AS count FROM root_paths;');
       if ((rootPaths[0] as { count: number }).count === 0) {
         this.logger.log('Running database seeders...');
         const seeders = new Umzug({

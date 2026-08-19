@@ -1,29 +1,21 @@
 import {
   ArtistEntity,
+  CollatedAlbumEntity,
   CollatedArtistAlbumEntity,
   CollatedComposerAlbumEntity,
   CollatedGenreAlbumEntity,
   CollatedTrackEntity,
   GenreEntity,
 } from 'src/database/entities';
-import { CollatedAlbumEntity } from 'src/database/entities/collated-album.entity';
 import { InjectModel } from '@nestjs/sequelize';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Op } from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
 import { SynologyAlbumDataDto, SynologyAlbumDto } from './dtos';
-import {
-  normalizeString,
-  replaceDoubleQuotes,
-  sanitizeString,
-} from 'src/utils/strings';
+import { normalizeString, replaceDoubleQuotes, sanitizeString } from 'src/utils/strings';
 
 function albumToRow(
-  album:
-    | CollatedAlbumEntity
-    | CollatedComposerAlbumEntity
-    | CollatedArtistAlbumEntity
-    | CollatedGenreAlbumEntity,
+  album: CollatedAlbumEntity | CollatedComposerAlbumEntity | CollatedArtistAlbumEntity | CollatedGenreAlbumEntity,
 ): SynologyAlbumDto {
   return {
     additional: {
@@ -156,15 +148,7 @@ export class SynologyAlbumService {
       group: ['title'],
     });
     const total = await this.collatedGenreAlbumEntity.count({
-      attributes: [
-        [
-          Sequelize.fn(
-            'COUNT',
-            Sequelize.fn('DISTINCT', Sequelize.col('title')),
-          ),
-          'count',
-        ],
-      ],
+      attributes: [[Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('title'))), 'count']],
       where: {
         accountId,
         artist: sanitizeString(artistName),
@@ -187,16 +171,11 @@ export class SynologyAlbumService {
     limit: number,
   ): Promise<SynologyAlbumDataDto> {
     const albumData = await this.collatedTrackEntity.findAll({
-      attributes: [
-        [Sequelize.fn('DISTINCT', Sequelize.col('album_id')), 'albumId'],
-      ],
+      attributes: [[Sequelize.fn('DISTINCT', Sequelize.col('album_id')), 'albumId']],
       where: {
         [Op.and]: [
           { accountId },
-          Sequelize.where(
-            Sequelize.fn('LOWER', Sequelize.col('track_composers')),
-            composerName.toLocaleLowerCase(),
-          ),
+          Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('track_composers')), composerName.toLocaleLowerCase()),
         ],
       },
     });
@@ -212,15 +191,7 @@ export class SynologyAlbumService {
       offset,
     });
     const total = await this.collatedTrackEntity.count({
-      attributes: [
-        [
-          Sequelize.fn(
-            'COUNT',
-            Sequelize.fn('DISTINCT', Sequelize.col('album_id')),
-          ),
-          'count',
-        ],
-      ],
+      attributes: [[Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('album_id'))), 'count']],
       where: {
         accountId,
         albumId: {
@@ -266,15 +237,7 @@ export class SynologyAlbumService {
       group: ['title'],
     });
     const total = await this.collatedGenreAlbumEntity.count({
-      attributes: [
-        [
-          Sequelize.fn(
-            'COUNT',
-            Sequelize.fn('DISTINCT', Sequelize.col('title')),
-          ),
-          'count',
-        ],
-      ],
+      attributes: [[Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('title'))), 'count']],
       where: {
         accountId,
         genreId: {

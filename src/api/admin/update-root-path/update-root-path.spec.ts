@@ -1,0 +1,105 @@
+import { ErrorCodes } from '../../../constants/error-codes';
+import { UserRoleEnum } from '../../../types/api-schema';
+import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
+import {
+  api,
+  createRootPath,
+  createTestAccount,
+  deleteTestData,
+  listRootPaths,
+  signInDefaultAccount,
+  updateRootPath,
+} from '../../../test-helper';
+import { join } from 'node:path';
+import { mkdirSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+
+describe('/api/admin/update-root-path', () => {
+  beforeAll(async () => {
+    await signInDefaultAccount(true);
+    await signInDefaultAccount(false);
+  });
+
+  describe('authorized access', () => {
+    it('should reject guest access', async () => {
+      const { error } = await api.PATCH(`/api/admin/update-root-path`, {
+        body: {
+          newPath: tmpdir(),
+        },
+        params: {
+          query: {
+            id: 1,
+          },
+          header: {
+            Authorization: '',
+          },
+        },
+      });
+      const typedError = error as unknown as Record<string, string | string[]>;
+      expect(typedError?.error).toBe(ErrorCodes.FORBIDDEN_ERROR);
+    });
+
+    it('should reject non-admin access', async () => {
+      const { error } = await updateRootPath(1, tmpdir(), false);
+      const typedError = error as unknown as Record<string, string | string[]>;
+      expect(typedError?.message?.[0]).toBe(ErrorCodes.AUTHORIZATION_ERROR);
+    });
+  });
+
+  describe('errors', () => {
+    it('should reject invalid root path id', async () => {
+      const { error } = await updateRootPath(0, tmpdir());
+      const typedError = error as unknown as Record<string, string | string[]>;
+      expect(typedError?.message?.[0]).toBe(ErrorCodes.INVALID_ROOT_PATH_ID_ERROR);
+    });
+
+    it('should reject missing root path', async () => {
+      const { error } = await updateRootPath(1, '');
+      const typedError = error as unknown as Record<string, string | string[]>;
+      expect(typedError?.message?.[0]).toBe(ErrorCodes.INVALID_ROOT_PATH_ERROR);
+    });
+
+    it('should reject invalid root path', async () => {
+      const invalidPath = join(tmpdir(), `test-update-invalid-${Date.now()}`);
+      const nonexistentPath = join(tmpdir(), invalidPath);
+      const { error } = await updateRootPath(1, nonexistentPath);
+      const typedError = error as unknown as Record<string, string | string[]>;
+      expect(typedError?.message?.[0]).toBe(ErrorCodes.ROOT_PATH_DOES_NOT_EXIST_ERROR);
+    });
+  });
+
+  describe('success', () => {
+    const deleteAccounts: number[] = [];
+
+    afterAll(async () => {
+      await deleteTestData(deleteAccounts);
+    });
+
+    it('should update root path', async () => {
+      const username = `user-with-updated-root-path-${Date.now()}`;
+      const account = await createTestAccount(username, 'password', [UserRoleEnum.user]);
+      // create a root path
+      const originalRootPath = join(tmpdir(), `test-update-root-path-${Date.now()}`);
+      mkdirSync(originalRootPath, { recursive: true });
+      const { error: error2 } = await createRootPath(account.id, originalRootPath);
+      expect(error2).toBeUndefined();
+      const rootPathList = await listRootPaths();
+      const rootPath = rootPathList.data?.rootPaths.find((path) => path.rootPath === originalRootPath);
+      if (!rootPath) {
+        throw new Error('Root path not found after creation');
+      }
+      // update it
+      const newRootPath = join(tmpdir(), `test-updated-root-path-${Date.now()}`);
+      mkdirSync(newRootPath, { recursive: true });
+      const { error: error3 } = await updateRootPath(rootPath.id, newRootPath);
+      expect(error3).toBeUndefined();
+      // verify it
+      const rootPathList2 = await listRootPaths();
+      const rootPath2 = rootPathList2.data?.rootPaths.find((path) => path.rootPath === newRootPath);
+      expect(rootPath2).toBeDefined();
+      expect(rootPath2?.id).toBe(rootPath?.id);
+      expect(rootPath2?.rootPath).toBe(newRootPath);
+      deleteAccounts.push(account.id);
+    });
+  });
+});

@@ -1,5 +1,4 @@
-import { AlbumEntity, RootPathEntity } from 'src/database/entities';
-import { FileEntity } from 'src/database/entities/file.entity';
+import { AlbumEntity, FileEntity, RootPathEntity } from 'src/database/entities';
 import { InjectModel } from '@nestjs/sequelize';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { StreamDto } from './dtos';

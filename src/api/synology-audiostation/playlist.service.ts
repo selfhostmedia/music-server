@@ -5,12 +5,12 @@ import {
   PlaylistSmartRuleEntity,
 } from 'src/database/entities';
 import {
-  ContentType,
-  FileType,
-  PlaylistType,
-  SmartPlaylistField,
-  SmartPlaylistIntervalTag,
-  SmartPlaylistOperation,
+  ContentTypeEnum,
+  FileTypeEnum,
+  PlaylistTypeEnum,
+  SmartPlaylistFieldEnum,
+  SmartPlaylistIntervalTagEnum,
+  SmartPlaylistOperationEnum,
 } from 'src/types/enums';
 import { InjectModel } from '@nestjs/sequelize';
 import { Injectable } from '@nestjs/common';
@@ -33,13 +33,13 @@ import { replaceDoubleQuotes } from 'src/utils/strings';
 function ruleToRow(rule: PlaylistSmartRuleEntity): SynologyPlaylistRuleDto {
   let interval: number;
   switch (rule.interval) {
-    case SmartPlaylistIntervalTag.DAYS:
+    case SmartPlaylistIntervalTagEnum.DAYS:
       interval = 1;
       break;
-    case SmartPlaylistIntervalTag.WEEKS:
+    case SmartPlaylistIntervalTagEnum.WEEKS:
       interval = 2;
       break;
-    case SmartPlaylistIntervalTag.MONTHS:
+    case SmartPlaylistIntervalTagEnum.MONTHS:
       interval = 3;
       break;
     default:
@@ -47,34 +47,34 @@ function ruleToRow(rule: PlaylistSmartRuleEntity): SynologyPlaylistRuleDto {
   }
   let op: number;
   switch (rule.operation) {
-    case SmartPlaylistOperation.IS:
+    case SmartPlaylistOperationEnum.IS:
       op = 1;
       break;
-    case SmartPlaylistOperation.IS_NOT:
+    case SmartPlaylistOperationEnum.IS_NOT:
       op = 2;
       break;
-    case SmartPlaylistOperation.CONTAINS:
+    case SmartPlaylistOperationEnum.CONTAINS:
       op = 3;
       break;
-    case SmartPlaylistOperation.DOES_NOT_CONTAIN:
+    case SmartPlaylistOperationEnum.DOES_NOT_CONTAIN:
       op = 4;
       break;
-    case SmartPlaylistOperation.LESS_THAN:
+    case SmartPlaylistOperationEnum.LESS_THAN:
       op = 5;
       break;
-    case SmartPlaylistOperation.GREATER_THAN_OR_EQUAL_TO:
+    case SmartPlaylistOperationEnum.GREATER_THAN_OR_EQUAL_TO:
       op = 6;
       break;
-    case SmartPlaylistOperation.IN_THE_LAST:
+    case SmartPlaylistOperationEnum.IN_THE_LAST:
       op = 7;
       break;
-    case SmartPlaylistOperation.NOT_IN_THE_LAST:
+    case SmartPlaylistOperationEnum.NOT_IN_THE_LAST:
       op = 8;
       break;
-    case SmartPlaylistOperation.AFTER:
+    case SmartPlaylistOperationEnum.AFTER:
       op = 9;
       break;
-    case SmartPlaylistOperation.BEFORE:
+    case SmartPlaylistOperationEnum.BEFORE:
       op = 10;
       break;
     default:
@@ -82,34 +82,34 @@ function ruleToRow(rule: PlaylistSmartRuleEntity): SynologyPlaylistRuleDto {
   }
   let tag: number;
   switch (rule.field) {
-    case SmartPlaylistField.ARTIST:
+    case SmartPlaylistFieldEnum.ARTIST:
       tag = 1;
       break;
-    case SmartPlaylistField.ALBUM:
+    case SmartPlaylistFieldEnum.ALBUM:
       tag = 2;
       break;
-    case SmartPlaylistField.ALBUM_ARTIST:
+    case SmartPlaylistFieldEnum.ALBUM_ARTIST:
       tag = 3;
       break;
-    case SmartPlaylistField.COMPOSER:
+    case SmartPlaylistFieldEnum.COMPOSER:
       tag = 4;
       break;
-    case SmartPlaylistField.GENRE:
+    case SmartPlaylistFieldEnum.GENRE:
       tag = 5;
       break;
-    case SmartPlaylistField.FILE_PATH:
+    case SmartPlaylistFieldEnum.FILE_PATH:
       tag = 6;
       break;
-    case SmartPlaylistField.YEAR:
+    case SmartPlaylistFieldEnum.YEAR:
       tag = 7;
       break;
-    case SmartPlaylistField.BIT_RATE:
+    case SmartPlaylistFieldEnum.BIT_RATE:
       tag = 8;
       break;
-    case SmartPlaylistField.DATE_ADDED:
+    case SmartPlaylistFieldEnum.DATE_ADDED:
       tag = 9;
       break;
-    case SmartPlaylistField.RATING:
+    case SmartPlaylistFieldEnum.RATING:
       tag = 10;
       break;
     default:
@@ -149,12 +149,9 @@ export class SynologyPlaylistService {
     return playlist;
   }
 
-  async addItem(
-    accountId: number,
-    body: SynologyPlaylistAddOrRemoveItemBodyDto,
-  ) {
+  async addItem(accountId: number, body: SynologyPlaylistAddOrRemoveItemBodyDto) {
     const playlist = await this.getPlaylist(accountId, body.id);
-    if (playlist.type === PlaylistType.SMART) {
+    if (playlist.type === PlaylistTypeEnum.SMART) {
       throw new Error('Cannot add items to a smart playlist');
     }
     const insertData: PlaylistItemEntity[] = [];
@@ -182,9 +179,7 @@ export class SynologyPlaylistService {
     const transaction = await this.playlistItemEntity.sequelize?.transaction();
     await this.playlistItemEntity.update(
       {
-        position: this.playlistItemEntity.sequelize?.literal(
-          `position + ${insertData.length}`,
-        ),
+        position: this.playlistItemEntity.sequelize?.literal(`position + ${insertData.length}`),
       },
       {
         where: {
@@ -209,31 +204,25 @@ export class SynologyPlaylistService {
     }
   }
 
-  async createPlaylist(
-    accountId: number,
-    body: SynologyPlaylistCreateNormalBodyDto,
-  ) {
+  async createPlaylist(accountId: number, body: SynologyPlaylistCreateNormalBodyDto) {
     const playlist = await this.playlistEntity.create({
       accountId,
       name: replaceDoubleQuotes(body.name),
-      type: PlaylistType.NORMAL,
+      type: PlaylistTypeEnum.NORMAL,
     } as PlaylistEntity);
     return {
       id: `playlist_personal_normal/${playlist.name}`,
     };
   }
 
-  async createSmartPlaylist(
-    accountId: number,
-    body: SynologyPlaylistCreateSmartBodyDto,
-  ) {
+  async createSmartPlaylist(accountId: number, body: SynologyPlaylistCreateSmartBodyDto) {
     const transaction = await this.playlistEntity.sequelize?.transaction();
     const playlist = await this.playlistEntity.create(
       {
         accountId,
         name: replaceDoubleQuotes(body.name),
         rulesConjugal: body.conj_rule,
-        type: PlaylistType.SMART,
+        type: PlaylistTypeEnum.SMART,
       } as PlaylistEntity,
       {
         transaction,
@@ -279,19 +268,50 @@ export class SynologyPlaylistService {
     });
   }
 
-  async getItems(
-    accountId: number,
-    body: SynologyPlaylistTrackListBodyDto,
-  ): Promise<SynologyPlaylistWithItemsDataDto> {
+  async getPlaylists(accountId: number): Promise<SynologyPlaylistDataDto> {
+    const playlists = await this.playlistEntity.findAll({
+      where: {
+        accountId,
+      },
+      order: [['name', 'ASC']],
+    });
+    const rules = await this.playlistSmartRuleEntity.findAll({
+      where: {
+        playlistId: {
+          [Op.in]: playlists.map((p) => p.id),
+        },
+      },
+      order: [['id', 'ASC']],
+    });
+    return {
+      playlists: playlists.map((playlist) => {
+        const playlistRules = rules.filter((rule) => rule.playlistId === playlist.id);
+        return {
+          id: `playlist_personal_${playlist.type}/${playlist.name}`,
+          library: 'personal',
+          name: playlist.name,
+          sharing_status: 'none',
+          type: playlist.type,
+          additional: {
+            rules: playlistRules.map(ruleToRow),
+            rules_conjunction: playlist.rulesConjugal,
+            sharing_info: {
+              date_available: 0,
+              date_expired: 0,
+              id: '',
+              url: '',
+              status: 'none',
+            },
+          },
+        };
+      }),
+    };
+  }
+
+  async getItems(accountId: number, body: SynologyPlaylistTrackListBodyDto): Promise<SynologyPlaylistWithItemsDataDto> {
     const playlist = await this.getPlaylist(accountId, body.id);
     const itemIds = await this.playlistItemEntity.findAll({
-      attributes: [
-        'id',
-        'fileId',
-        'position',
-        'radioStationTitle',
-        'radioStationUrl',
-      ],
+      attributes: ['id', 'fileId', 'position', 'radioStationTitle', 'radioStationUrl'],
       where: {
         playlistId: playlist.id,
       },
@@ -300,9 +320,7 @@ export class SynologyPlaylistService {
     const tracks = await this.collatedTrackEntity.findAll({
       where: {
         fileId: {
-          [Op.in]: itemIds
-            .map((item) => item.fileId)
-            .filter(Boolean) as number[],
+          [Op.in]: itemIds.map((item) => item.fileId).filter(Boolean) as number[],
         },
       },
     });
@@ -310,7 +328,7 @@ export class SynologyPlaylistService {
       trackBitRate: 0,
       trackChannels: 0,
       fileId: '',
-      fileType: FileType.FLAC,
+      fileType: FileTypeEnum.FLAC,
       filePath: '',
       trackDuration: 0,
       fileSize: 0,
@@ -345,24 +363,23 @@ export class SynologyPlaylistService {
             songs_offset: body.offset,
             songs_total: tracks.length,
             songs: itemIds.map((item) => {
-              const track =
-                tracks.find((t) => t.fileId === item.fileId) ||
-                radioStationTrack;
+              const track = tracks.find((t) => t.fileId === item.fileId) || radioStationTrack;
               const id = track.fileId
                 ? `music_${track.fileId}`
-                : `remote_{"album":""\\,"artist":""\\,"cover":""\\,"duration":0\\,"title":"${item.radioStationTitle}"}\n ${item.radioStationUrl}}`;
+                : // eslint-disable-next-line max-len
+                  `remote_{"album":""\\,"artist":""\\,"cover":""\\,"duration":0\\,"title":"${item.radioStationTitle}"}\n ${item.radioStationUrl}}`;
               return {
                 id,
                 position: item.position,
                 path: track?.filePath || item.radioStationUrl || '',
                 title: track?.trackTitle || item.radioStationTitle || '',
-                type: track.fileId ? ContentType.FILE : ContentType.REMOTE,
+                type: track.fileId ? ContentTypeEnum.FILE : ContentTypeEnum.REMOTE,
                 additional: {
                   song_audio: {
                     bitrate: track?.trackBitRate || 0,
                     channel: track?.trackChannels || 0,
-                    codec: track?.fileType || FileType.FLAC,
-                    container: track?.fileType || FileType.FLAC,
+                    codec: track?.fileType || FileTypeEnum.FLAC,
+                    container: track?.fileType || FileTypeEnum.FLAC,
                     duration: track?.trackDuration || 0,
                     filesize: track?.fileSize || 0,
                     frequency: track?.trackFrequency || 0,
@@ -391,12 +408,9 @@ export class SynologyPlaylistService {
     };
   }
 
-  async getPlaylistInfo(
-    accountId: number,
-    body: SynologyPlaylistRetrieveBodyDto,
-  ): Promise<SynologyPlaylistDataDto> {
+  async getPlaylistInfo(accountId: number, body: SynologyPlaylistRetrieveBodyDto): Promise<SynologyPlaylistDataDto> {
     const playlist = await this.getPlaylist(accountId, body.id);
-    if (playlist.type === PlaylistType.NORMAL) {
+    if (playlist.type === PlaylistTypeEnum.NORMAL) {
       return {
         playlists: [
           {
@@ -448,45 +462,28 @@ export class SynologyPlaylistService {
     };
   }
 
-  async moveItem(
-    accountId: number,
-    body: SynologyPlaylistAddOrRemoveItemBodyDto,
-  ) {
+  async moveItem(accountId: number, body: SynologyPlaylistAddOrRemoveItemBodyDto) {
     const playlist = await this.getPlaylist(accountId, body.id);
-    if (playlist.type === PlaylistType.SMART) {
+    if (playlist.type === PlaylistTypeEnum.SMART) {
       throw new Error('Cannot move items in a smart playlist');
     }
     const items = await this.playlistItemEntity.findAll({
-      attributes: [
-        'id',
-        'fileId',
-        'radioStationUrl',
-        'radioStationTitle',
-        'position',
-      ],
+      attributes: ['id', 'fileId', 'radioStationUrl', 'radioStationTitle', 'position'],
       where: {
         playlistId: playlist.id,
       },
       order: [['position', 'ASC']],
     });
     const movingItems = items.filter((item) => {
-      const idValue =
-        item.fileId ||
-        `radio_${item.radioStationTitle} ${item.radioStationUrl}`;
+      const idValue = item.fileId || `radio_${item.radioStationTitle} ${item.radioStationUrl}`;
       return body.songs.includes(idValue);
     });
     const remainingItems = items.filter((item) => {
-      const idValue =
-        item.fileId ||
-        `radio_${item.radioStationTitle} ${item.radioStationUrl}`;
+      const idValue = item.fileId || `radio_${item.radioStationTitle} ${item.radioStationUrl}`;
       return !body.songs.includes(idValue);
     });
     const insertAt = Math.min(Math.max(body.offset, 0), remainingItems.length);
-    const newOrder = [
-      ...remainingItems.slice(0, insertAt),
-      ...movingItems,
-      ...remainingItems.slice(insertAt),
-    ];
+    const newOrder = [...remainingItems.slice(0, insertAt), ...movingItems, ...remainingItems.slice(insertAt)];
     const transaction = await this.playlistItemEntity.sequelize?.transaction();
     for (let i = 0; i < newOrder.length; i += 1) {
       const item = newOrder[i];
@@ -516,10 +513,7 @@ export class SynologyPlaylistService {
     }
   }
 
-  async removeItem(
-    accountId: number,
-    body: SynologyPlaylistAddOrRemoveItemBodyDto,
-  ) {
+  async removeItem(accountId: number, body: SynologyPlaylistAddOrRemoveItemBodyDto) {
     const playlist = await this.getPlaylist(accountId, body.id);
     const items = await this.playlistItemEntity.findAll({
       attributes: ['id'],
@@ -528,9 +522,7 @@ export class SynologyPlaylistService {
       },
     });
     if (!items || items.length < body.offset) {
-      throw new Error(
-        `Playlist item with offset ${body.offset} not found in playlist ${body.id}`,
-      );
+      throw new Error(`Playlist item with offset ${body.offset} not found in playlist ${body.id}`);
     }
     const deleteItems: number[] = [];
     for (let i = body.offset; i < body.offset + body.limit; i += 1) {
@@ -540,9 +532,7 @@ export class SynologyPlaylistService {
       }
     }
     if (deleteItems.length === 0) {
-      throw new Error(
-        `Playlist item with offset ${body.offset} not found in playlist ${body.id}`,
-      );
+      throw new Error(`Playlist item with offset ${body.offset} not found in playlist ${body.id}`);
     }
     const transaction = await this.playlistItemEntity.sequelize?.transaction();
     await this.playlistItemEntity.destroy({
@@ -597,17 +587,14 @@ export class SynologyPlaylistService {
     };
   }
 
-  async updateSmartPlaylist(
-    accountId: number,
-    body: SynologyPlaylistUpdateSmartBodyDto,
-  ) {
+  async updateSmartPlaylist(accountId: number, body: SynologyPlaylistUpdateSmartBodyDto) {
     const playlist = await this.getPlaylist(accountId, body.id);
     const transaction = await this.playlistEntity.sequelize?.transaction();
     await this.playlistEntity.update(
       {
         name: replaceDoubleQuotes(body.name),
         rulesConjugal: body.conj_rule,
-        type: PlaylistType.SMART,
+        type: PlaylistTypeEnum.SMART,
       } as PlaylistEntity,
       {
         where: {

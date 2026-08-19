@@ -1,14 +1,5 @@
 import { AccountEntity } from './account.entity';
-import {
-  BelongsTo,
-  Column,
-  DataType,
-  ForeignKey,
-  HasMany,
-  Model,
-  Sequelize,
-  Table,
-} from 'sequelize-typescript';
+import { BelongsTo, Column, DataType, ForeignKey, HasMany, Model, Sequelize, Table } from 'sequelize-typescript';
 import { LinkedGenreEntity } from './linked-genre.entity';
 
 /**
@@ -21,7 +12,7 @@ import { LinkedGenreEntity } from './linked-genre.entity';
 })
 export class GenreEntity extends Model<GenreEntity> {
   /**
-   * The account ID the root path belongs to
+   * The account ID the root path belongs to.
    */
   @Column({
     type: DataType.INTEGER,
@@ -30,6 +21,7 @@ export class GenreEntity extends Model<GenreEntity> {
       key: 'id',
     },
     allowNull: true,
+    onDelete: 'CASCADE',
   })
   @ForeignKey(() => AccountEntity)
   declare accountId: number;
@@ -38,8 +30,8 @@ export class GenreEntity extends Model<GenreEntity> {
   declare account: AccountEntity;
 
   /**
-   * This field is managed by Sequelize and tracks the date and time the row was created.  This field should not be specified if you are
-   * inserting and updating data
+   * This field is managed by Sequelize and tracks the date and time the row was created.  This field should not be
+   * specified if you are inserting and updating data.
    */
   @Column({
     type: DataType.DATE,
@@ -51,7 +43,7 @@ export class GenreEntity extends Model<GenreEntity> {
   declare linkedGenres?: LinkedGenreEntity[];
 
   /**
-   * The ID of the table row is an integer that is assigned by the database when the row is created
+   * The ID of the table row is an integer that is assigned by the database when the row is created.
    */
   @Column({
     type: DataType.INTEGER,
@@ -84,7 +76,8 @@ export class GenreEntity extends Model<GenreEntity> {
   declare nameNormalized: string;
 
   /**
-   * This field is managed by Sequelize and tracks the most recent date and time the row was last updated.  This field should not be specified if you are inserting and updating data
+   * This field is managed by Sequelize and tracks the most recent date and time the row was last updated.  This field
+   * should not be specified if you are inserting and updating data.
    */
   @Column(DataType.DATE)
   declare updatedAt?: Date;

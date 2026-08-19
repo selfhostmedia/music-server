@@ -1,12 +1,16 @@
-import { AccountEntity } from 'src/database/entities/account.entity';
+import { AUTHENTICATED_REQUEST_DESCRIPTION, PAGINATED_DATA_DESCRIPTION } from './consts';
+import { AccountEntity } from 'src/database/entities';
 import {
   ApiBody,
   ApiExtraModels,
   ApiHeader,
   ApiOkResponse,
+  ApiOperation,
+  ApiTags,
   getSchemaPath,
 } from '@nestjs/swagger';
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { SYNOLOGY_AUDIOSTATION_APIS } from 'src/constants/swagger';
 import { SynologyMethodEnum } from './enums';
 import {
   SynologyPlaylistAddOrRemoveItemBodyDto,
@@ -14,6 +18,7 @@ import {
   SynologyPlaylistCreateSmartBodyDto,
   SynologyPlaylistDeleteBodyDto,
   SynologyPlaylistIdResponseDto,
+  SynologyPlaylistListBodyDto,
   SynologyPlaylistMoveItemsBodyDto,
   SynologyPlaylistRemoveMissingBodyDto,
   SynologyPlaylistRenameBodyDto,
@@ -29,16 +34,27 @@ import { User } from '../user.decorator';
 import { plainToInstance } from 'class-transformer';
 
 @Controller()
+@ApiTags(SYNOLOGY_AUDIOSTATION_APIS)
 export class SynologyPlaylistController {
   constructor(private readonly playlistService: SynologyPlaylistService) {}
 
   @Post('/webapi/AudioStation/playlist.cgi')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Manages playlists',
+    description: [
+      // eslint-disable-next-line max-len
+      `Manages playlists in the music library.  This endpoint is used to list, create, delete, rename, and update playlists, as well as add and remove tracks and radio stations from playlists.  It provides the ability to retrieve playlist information and track/radio lists for playlists.`,
+      // eslint-disable-next-line max-len
+      `Playlists can be a "normal" playlist containing a static list of tracks and radio stations you add, or a "smart" playlist which is a dynamic filter based on criteria such as genre, artist, album, and more.`,
+      `Listing playlists are not returned in a paginated format, but the tracks and radio stations within them are.`,
+      PAGINATED_DATA_DESCRIPTION,
+      AUTHENTICATED_REQUEST_DESCRIPTION,
+    ].join('\n\n'),
+  })
   @ApiHeader({
     name: 'cookie',
-    description:
-      'The session ID and device ID tokens for the authenticated user',
-    required: true,
+    description: 'The session ID and device ID cookies for the user `id={sessionId}; did={deviceId}`',
   })
   @ApiOkResponse({
     description: 'Endpoints for creating and managing playlists',
@@ -56,6 +72,7 @@ export class SynologyPlaylistController {
     SynologyPlaylistCreateNormalBodyDto,
     SynologyPlaylistCreateSmartBodyDto,
     SynologyPlaylistDeleteBodyDto,
+    SynologyPlaylistListBodyDto,
     SynologyPlaylistMoveItemsBodyDto,
     SynologyPlaylistRemoveMissingBodyDto,
     SynologyPlaylistRenameBodyDto,
@@ -100,6 +117,9 @@ export class SynologyPlaylistController {
         {
           $ref: getSchemaPath(SynologyPlaylistRetrieveBodyDto),
         },
+        {
+          $ref: getSchemaPath(SynologyPlaylistListBodyDto),
+        },
       ],
     },
   })
@@ -117,49 +137,30 @@ export class SynologyPlaylistController {
       | SynologyPlaylistRetrieveBodyDto
       | SynologyPlaylistTrackListBodyDto
       | SynologyPlaylistUpdateSmartBodyDto,
-  ): Promise<
-    | SynologySuccessResponseDto
-    | SynologyPlaylistResponseDto
-    | SynologyPlaylistResponseDto
-  > {
+  ): Promise<SynologySuccessResponseDto | SynologyPlaylistResponseDto | SynologyPlaylistResponseDto> {
     // Route #1:  create a playlist
     if (variousBodies.method === SynologyMethodEnum.CREATE) {
-      const body = plainToInstance(
-        SynologyPlaylistCreateNormalBodyDto,
-        variousBodies,
-      );
+      const body = plainToInstance(SynologyPlaylistCreateNormalBodyDto, variousBodies);
       return this.createPlaylist(user, body);
     }
     // Route #2:  create a "smart" playlist, which is a filter for songs
     if (variousBodies.method === SynologyMethodEnum.CREATE_SMART) {
-      const body = plainToInstance(
-        SynologyPlaylistCreateSmartBodyDto,
-        variousBodies,
-      );
+      const body = plainToInstance(SynologyPlaylistCreateSmartBodyDto, variousBodies);
       return this.createSmartPlaylist(user, body);
     }
     // Route #3:  delete a playlist
     if (variousBodies.method === SynologyMethodEnum.DELETE) {
-      const body = plainToInstance(
-        SynologyPlaylistDeleteBodyDto,
-        variousBodies,
-      );
+      const body = plainToInstance(SynologyPlaylistDeleteBodyDto, variousBodies);
       return this.deletePlaylist(user, body);
     }
     if (variousBodies.method === SynologyMethodEnum.UPDATE_SONGS) {
-      const body = plainToInstance(
-        SynologyPlaylistAddOrRemoveItemBodyDto,
-        variousBodies,
-      );
+      const body = plainToInstance(SynologyPlaylistAddOrRemoveItemBodyDto, variousBodies);
       // Route #4:  add song(s) and radio station(s)
       if (body.offset === -1) {
         return this.addItem(user, body);
       }
       // Route #5:  delete from a playlist
-      if (
-        (body.offset > -1 && body.songs.length === 0) ||
-        body.songs.join('').length === 0
-      ) {
+      if ((body.offset > -1 && body.songs.length === 0) || body.songs.join('').length === 0) {
         return this.removeItem(user, body);
       }
       // Route #6:  swap two tracks in the playlist order
@@ -173,33 +174,25 @@ export class SynologyPlaylistController {
     }
     // Route #8:  rename a playlist
     if (variousBodies.method === SynologyMethodEnum.RENAME) {
-      const body = plainToInstance(
-        SynologyPlaylistRenameBodyDto,
-        variousBodies,
-      );
+      const body = plainToInstance(SynologyPlaylistRenameBodyDto, variousBodies);
       return this.renamePlaylist(user, body);
     }
     // Route #9:  update a "smart" playlist
     if (variousBodies.method === SynologyMethodEnum.UPDATE_SMART) {
-      const body = plainToInstance(
-        SynologyPlaylistUpdateSmartBodyDto,
-        variousBodies,
-      );
+      const body = plainToInstance(SynologyPlaylistUpdateSmartBodyDto, variousBodies);
       return this.updateSmartPlaylist(user, body);
     }
-    // Route #11:  get the info for a playlist
+    // Route #10:  get the info for a playlist
     if (variousBodies.method === SynologyMethodEnum.GET_INFO) {
-      const body = plainToInstance(
-        SynologyPlaylistRetrieveBodyDto,
-        variousBodies,
-      );
+      const body = plainToInstance(SynologyPlaylistRetrieveBodyDto, variousBodies);
       return this.getPlaylistInfo(user, body);
     }
-    // Route #10:  get the track list for a playlist
-    const body = plainToInstance(
-      SynologyPlaylistTrackListBodyDto,
-      variousBodies,
-    );
+    // Router #11:  list the playlists in the music library
+    if (variousBodies.method === SynologyMethodEnum.LIST) {
+      return this.getPlaylists(user);
+    }
+    // Route #12:  get the track list for a playlist
+    const body = plainToInstance(SynologyPlaylistTrackListBodyDto, variousBodies);
     return this.getItems(user, body);
   }
 
@@ -225,10 +218,7 @@ export class SynologyPlaylistController {
     };
   }
 
-  async deletePlaylist(
-    user: AccountEntity,
-    body: SynologyPlaylistDeleteBodyDto,
-  ): Promise<SynologySuccessResponseDto> {
+  async deletePlaylist(user: AccountEntity, body: SynologyPlaylistDeleteBodyDto): Promise<SynologySuccessResponseDto> {
     await this.playlistService.deletePlaylist(user.id, body);
     return {
       success: true,
@@ -288,6 +278,14 @@ export class SynologyPlaylistController {
     body: SynologyPlaylistUpdateSmartBodyDto,
   ): Promise<SynologyPlaylistIdResponseDto> {
     const data = await this.playlistService.updateSmartPlaylist(user.id, body);
+    return {
+      data,
+      success: true,
+    };
+  }
+
+  async getPlaylists(user: AccountEntity): Promise<SynologyPlaylistResponseDto> {
+    const data = await this.playlistService.getPlaylists(user.id);
     return {
       data,
       success: true,

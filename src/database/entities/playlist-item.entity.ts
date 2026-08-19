@@ -1,12 +1,4 @@
-import {
-  BelongsTo,
-  Column,
-  DataType,
-  ForeignKey,
-  Model,
-  Sequelize,
-  Table,
-} from 'sequelize-typescript';
+import { BelongsTo, Column, DataType, ForeignKey, Model, Sequelize, Table } from 'sequelize-typescript';
 import { FileEntity } from './file.entity';
 import { PlaylistEntity } from './playlist.entity';
 
@@ -23,8 +15,8 @@ import { PlaylistEntity } from './playlist.entity';
 })
 export class PlaylistItemEntity extends Model<PlaylistItemEntity> {
   /**
-   * This field is managed by Sequelize and tracks the date and time the row was created.  This field should not be specified if you are
-   * inserting and updating data
+   * This field is managed by Sequelize and tracks the date and time the row was created.  This field should not be
+   * specified if you are inserting and updating data.
    */
   @Column({
     type: DataType.DATE,
@@ -42,6 +34,7 @@ export class PlaylistItemEntity extends Model<PlaylistItemEntity> {
       key: 'id',
     },
     allowNull: true,
+    onDelete: 'CASCADE',
   })
   @ForeignKey(() => FileEntity)
   declare fileId?: number;
@@ -50,7 +43,7 @@ export class PlaylistItemEntity extends Model<PlaylistItemEntity> {
   declare file?: FileEntity;
 
   /**
-   * The ID of the table row is an integer that is assigned by the database when the row is created
+   * The ID of the table row is an integer that is assigned by the database when the row is created.
    */
   @Column({
     type: DataType.INTEGER,
@@ -61,7 +54,7 @@ export class PlaylistItemEntity extends Model<PlaylistItemEntity> {
   declare id: number;
 
   /**
-   * The playlist ID the item belongs to
+   * The playlist ID the item belongs to.
    */
   @Column({
     type: DataType.INTEGER,
@@ -70,6 +63,7 @@ export class PlaylistItemEntity extends Model<PlaylistItemEntity> {
       key: 'id',
     },
     allowNull: false,
+    onDelete: 'CASCADE',
   })
   @ForeignKey(() => PlaylistEntity)
   declare playlistId: number;
@@ -93,7 +87,8 @@ export class PlaylistItemEntity extends Model<PlaylistItemEntity> {
   declare radioStationUrl?: string;
 
   /**
-   * This field is managed by Sequelize and tracks the most recent date and time the row was last updated.  This field should not be specified if you are inserting and updating data
+   * This field is managed by Sequelize and tracks the most recent date and time the row was last updated.  This field
+   * should not be specified if you are inserting and updating data.
    */
   @Column(DataType.DATE)
   declare updatedAt?: Date;

@@ -1,20 +1,16 @@
-import { AccountEntity } from 'src/database/entities/account.entity';
+import { AUTHENTICATED_REQUEST_DESCRIPTION } from './consts';
+import { AccountEntity } from 'src/database/entities';
 import {
   ApiBody,
   ApiExtraModels,
   ApiHeader,
   ApiOkResponse,
+  ApiOperation,
   ApiTags,
   getSchemaPath,
 } from '@nestjs/swagger';
-import {
-  Body,
-  Controller,
-  HttpCode,
-  HttpStatus,
-  Logger,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Logger, Post } from '@nestjs/common';
+import { SYNOLOGY_AUDIOSTATION_APIS } from 'src/constants/swagger';
 import {
   SynologyRadioAddOrUpdateItemBodyDto,
   SynologyRadioAddUserStationBodyDto,
@@ -28,7 +24,7 @@ import { User } from '../user.decorator';
 import { plainToInstance } from 'class-transformer';
 
 @Controller()
-@ApiTags('Synology AudioStation APIs')
+@ApiTags(SYNOLOGY_AUDIOSTATION_APIS)
 export class SynologyRadioController {
   private readonly logger: Logger = new Logger(SynologyRadioController.name);
 
@@ -42,15 +38,22 @@ export class SynologyRadioController {
    */
   @Post('/webapi/AudioStation/radio.cgi')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Manages SHOUTcast radio integration',
+    description: [
+      // eslint-disable-next-line max-len
+      `SHOUTcast radio integration is a feature of Synology AudioStation that allows users to listen to SHOUTcast radio stations directly from the AudioStation interface. This endpoint provides information about available SHOUTcast genres and stations`,
+      `The genres are a hard-coded list.  The stations are retrieved from the SHOUTcast API and briefly cached.`,
+      `The integration does not require a SHOUTcast account, but it does require an active internet connection.`,
+      AUTHENTICATED_REQUEST_DESCRIPTION,
+    ].join('\n\n'),
+  })
   @ApiHeader({
     name: 'cookie',
-    description:
-      'The session ID and device ID tokens for the authenticated user',
-    required: true,
+    description: 'The session ID and device ID cookies for the user `id={sessionId}; did={deviceId}`',
   })
   @ApiOkResponse({
-    description:
-      'Returns a list of genres found in the music library, or a hard-coded list of default genres',
+    description: 'Returns a list of genres found in the music library, or a hard-coded list of default genres',
     schema: {
       oneOf: [
         {
@@ -101,24 +104,15 @@ export class SynologyRadioController {
       // Route #1: Requesting the stations for a genre, which bundles the genre name
       // in the container field (e.g., `SHOUTcast_genre_Rock`).
       if (variousBodies.container.indexOf('_genre_') > -1) {
-        const body = plainToInstance(
-          SynologyRadioItemListBodyDto,
-          variousBodies,
-        );
+        const body = plainToInstance(SynologyRadioItemListBodyDto, variousBodies);
         return this.listStations(user, body);
       }
       // Route #2:  Requesting the contents of a container (e.g., SHOUTcast genres)
       const body = plainToInstance(SynologyRadioItemListBodyDto, variousBodies);
       return this.listItems(user, body);
     }
-    if (
-      variousBodies.method === 'updateradios' &&
-      'radios_json' in variousBodies
-    ) {
-      const body = plainToInstance(
-        SynologyRadioAddOrUpdateItemBodyDto,
-        variousBodies,
-      );
+    if (variousBodies.method === 'updateradios' && 'radios_json' in variousBodies) {
+      const body = plainToInstance(SynologyRadioAddOrUpdateItemBodyDto, variousBodies);
       // Route #3:  Adding a favorite or user-defined station
       if (variousBodies.offset === -1) {
         return this.addOrUpdateItem(user, body);
@@ -132,10 +126,7 @@ export class SynologyRadioController {
     }
     // Route #6:  Adding a user-defined station
     if (variousBodies.method === 'add' && 'container' in variousBodies) {
-      const body = plainToInstance(
-        SynologyRadioAddUserStationBodyDto,
-        variousBodies,
-      );
+      const body = plainToInstance(SynologyRadioAddUserStationBodyDto, variousBodies);
       return this.addOrUpdateItem(user, {
         ...body,
         radios_json: [
@@ -152,9 +143,7 @@ export class SynologyRadioController {
     return this.listContainers(user);
   }
 
-  async listContainers(
-    user: AccountEntity,
-  ): Promise<SynologyRadioItemResponseDto> {
+  async listContainers(user: AccountEntity): Promise<SynologyRadioItemResponseDto> {
     const data = await this.radioService.listContainers(user.id);
     return {
       data,
@@ -162,10 +151,7 @@ export class SynologyRadioController {
     };
   }
 
-  async listItems(
-    user: AccountEntity,
-    body: SynologyRadioItemListBodyDto,
-  ): Promise<SynologyRadioItemResponseDto> {
+  async listItems(user: AccountEntity, body: SynologyRadioItemListBodyDto): Promise<SynologyRadioItemResponseDto> {
     const data = await this.radioService.listItems(user.id, body);
     return {
       data,
@@ -173,10 +159,7 @@ export class SynologyRadioController {
     };
   }
 
-  async listStations(
-    user: AccountEntity,
-    body: SynologyRadioItemListBodyDto,
-  ): Promise<SynologyRadioItemResponseDto> {
+  async listStations(user: AccountEntity, body: SynologyRadioItemListBodyDto): Promise<SynologyRadioItemResponseDto> {
     const data = await this.radioService.listStations(user.id, body);
     return {
       data,

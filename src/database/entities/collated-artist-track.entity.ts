@@ -1,16 +1,9 @@
 import { AccountEntity } from './account.entity';
 import { AlbumEntity } from './album.entity';
 import { ArtistEntity } from './artist.entity';
-import {
-  BelongsTo,
-  Column,
-  DataType,
-  ForeignKey,
-  Model,
-  Table,
-} from 'sequelize-typescript';
+import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript';
 import { FileEntity } from './file.entity';
-import { FileType } from 'src/types/enums';
+import { FileTypeEnum } from 'src/types/enums';
 
 /**
  * The CollatedArtistTrackEntity selects data from a view that collates track information
@@ -26,7 +19,7 @@ import { FileType } from 'src/types/enums';
 })
 export class CollatedArtistTrackEntity extends Model<CollatedArtistTrackEntity> {
   /**
-   * The account ID the root path belongs to
+   * The account ID the root path belongs to.
    */
   @Column({
     type: DataType.INTEGER,
@@ -43,7 +36,7 @@ export class CollatedArtistTrackEntity extends Model<CollatedArtistTrackEntity> 
   declare account: AccountEntity;
 
   /**
-   * The album ID the file belongs to
+   * The album ID the file belongs to.
    */
   @Column({
     type: DataType.INTEGER,
@@ -93,11 +86,11 @@ export class CollatedArtistTrackEntity extends Model<CollatedArtistTrackEntity> 
   @Column(DataType.STRING(255))
   declare filePath: string;
 
-  @Column(DataType.ENUM(...Object.values(FileType)))
-  declare fileType: FileType;
+  @Column(DataType.ENUM(...Object.values(FileTypeEnum)))
+  declare fileType: FileTypeEnum;
 
   /**
-   * The linked file ID
+   * The linked file ID.
    */
   @Column({
     type: DataType.INTEGER,
@@ -132,9 +125,7 @@ export class CollatedArtistTrackEntity extends Model<CollatedArtistTrackEntity> 
     type: DataType.TEXT,
     get(): string[] {
       const rawValue = this.getDataValue('track_composers');
-      return (
-        rawValue?.split(',').map((composer: string) => composer.trim()) || []
-      );
+      return rawValue?.split(',').map((composer: string) => composer.trim()) || [];
     },
   })
   declare trackComposers: string[];

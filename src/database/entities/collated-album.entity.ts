@@ -23,7 +23,7 @@ import {
 })
 export class CollatedAlbumEntity extends Model<CollatedAlbumEntity> {
   /**
-   * The account ID the root path belongs to
+   * The account ID the root path belongs to.
    */
   @Column({
     type: DataType.INTEGER,
@@ -40,7 +40,7 @@ export class CollatedAlbumEntity extends Model<CollatedAlbumEntity> {
   declare account: AccountEntity;
 
   /**
-   * The album ID the file belongs to
+   * The album ID the file belongs to.
    */
   @Column({
     type: DataType.INTEGER,
@@ -62,9 +62,7 @@ export class CollatedAlbumEntity extends Model<CollatedAlbumEntity> {
     type: DataType.TEXT,
     get(): string[] {
       const rawValue = this.getDataValue('composers');
-      return (
-        rawValue?.split(',').map((composer: string) => composer.trim()) || []
-      );
+      return rawValue?.split(',').map((composer: string) => composer.trim()) || [];
     },
   })
   declare composers: string[];

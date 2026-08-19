@@ -1,9 +1,5 @@
 /* eslint-disable no-await-in-loop */
-import {
-  FileEntity,
-  GenreEntity,
-  LinkedGenreEntity,
-} from 'src/database/entities';
+import { FileEntity, GenreEntity, LinkedGenreEntity } from 'src/database/entities';
 import { IAudioMetadata } from 'src/types/music-metadata';
 import { InjectModel } from '@nestjs/sequelize';
 import { Injectable, Logger } from '@nestjs/common';
@@ -21,11 +17,7 @@ export class IndexGenreService {
     private readonly linkedGenreEntity: typeof LinkedGenreEntity,
   ) {}
 
-  async insertOrRetrieveGenre(
-    accountId: number,
-    name: string,
-    transaction?: Transaction,
-  ): Promise<number> {
+  async insertOrRetrieveGenre(accountId: number, name: string, transaction?: Transaction): Promise<number> {
     const nameNormalized = normalizeString(name);
     const existing = await this.genreEntity.findOne({
       where: {
@@ -62,11 +54,7 @@ export class IndexGenreService {
     for (let i = 0; i < genres.length; i += 1) {
       const name = genres[i]?.trim();
       if (name) {
-        const genreId = await this.insertOrRetrieveGenre(
-          accountId,
-          name,
-          transaction,
-        );
+        const genreId = await this.insertOrRetrieveGenre(accountId, name, transaction);
         const existingAssociation = await this.linkedGenreEntity.findOne({
           where: {
             genreId,

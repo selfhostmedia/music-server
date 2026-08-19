@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   test:
@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [ 24.x ]
+        node-version: [24.x]
 
     steps:
       - uses: actions/checkout@v4
@@ -31,6 +31,9 @@ jobs:
 
       - name: Run linter
         run: npm run lint
+
+      - name: Run prettier
+        run: npm run prettier -- --check
 
       - name: Start test stack (backend + db)
         run: npm run start:test > "$RUNNER_TEMP/api.log" 2>&1 &

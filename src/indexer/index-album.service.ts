@@ -1,9 +1,5 @@
 /* eslint-disable no-await-in-loop */
-import {
-  AlbumArtistEntity,
-  AlbumEntity,
-  RootPathEntity,
-} from 'src/database/entities';
+import { AlbumArtistEntity, AlbumEntity, RootPathEntity } from 'src/database/entities';
 import { IAudioMetadata } from 'src/types/music-metadata';
 import { IndexArtistService } from './index-artist.service';
 import { InjectModel } from '@nestjs/sequelize';
@@ -40,9 +36,7 @@ export class IndexAlbumService {
       return existing;
     }
     // insert the album
-    const coverImage = embeddedData.common.picture?.[0]?.data
-      ? Buffer.from(embeddedData.common.picture[0].data)
-      : null;
+    const coverImage = embeddedData.common.picture?.[0]?.data ? Buffer.from(embeddedData.common.picture[0].data) : null;
     const coverImageMimeType = embeddedData.common.picture?.[0]?.format || null;
     const album = await this.albumEntity.create(
       {
@@ -52,8 +46,7 @@ export class IndexAlbumService {
         folderPath,
         rootPathId: rootPath.id,
         title: sanitizeString(embeddedData?.common.album || '') || '',
-        titleNormalized:
-          normalizeString(embeddedData?.common.album || '') || '',
+        titleNormalized: normalizeString(embeddedData?.common.album || '') || '',
         year: embeddedData?.common.year || 0,
       } as AlbumEntity,
       {
@@ -63,18 +56,11 @@ export class IndexAlbumService {
     // insert the album artists
     const albumArtists = embeddedData.common.albumartist
       ? [embeddedData.common.albumartist]
-      : splitArray(
-          embeddedData.common.albumartists || [
-            embeddedData.common.artist || 'Unknown Artist',
-          ],
-        );
+      : splitArray(embeddedData.common.albumartists || [embeddedData.common.artist || 'Unknown Artist']);
     for (let i = 0, len = albumArtists.length; i < len; i += 1) {
       const artist = albumArtists[i];
       if (artist) {
-        const artistId = await this.indexArtistService.insertOrRetrieveArtist(
-          artist,
-          transaction,
-        );
+        const artistId = await this.indexArtistService.insertOrRetrieveArtist(artist, transaction);
         const existingAssociation = await this.albumArtistEntity.findOne({
           where: {
             albumId: album.id,

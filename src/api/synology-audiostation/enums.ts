@@ -62,7 +62,7 @@ export enum SynologyMethodEnum {
    * Method for returning a list of "default" genres
    */
   LIST_DEFAULT_GENRE = 'list_default_genre',
-  LOGOUT = 'logout',
+  LOGOUT = 'clearSessionToken',
   PIN = 'pin',
   QUERY = 'query',
   /**
@@ -90,7 +90,7 @@ export enum SynologyQueryEnum {
   ALL = 'all',
 }
 
-export enum SynologyPinType {
+export enum SynologyPinTypeEnum {
   ALBUM = 'album',
   ARTIST = 'artist',
   COMPOSER = 'composer',

@@ -14,6 +14,7 @@ export async function up(queryInterface: QueryInterface): Promise<void> {
         model: 'genres',
         key: 'id',
       },
+      onDelete: 'CASCADE',
     },
     id: {
       type: DataType.INTEGER,
@@ -28,7 +29,6 @@ export async function up(queryInterface: QueryInterface): Promise<void> {
         model: 'files',
         key: 'id',
       },
-      onUpdate: 'CASCADE',
       onDelete: 'CASCADE',
     },
     updated_at: {
@@ -47,17 +47,8 @@ export async function up(queryInterface: QueryInterface): Promise<void> {
 }
 
 export async function down(queryInterface: QueryInterface): Promise<void> {
-  await queryInterface.removeIndex(
-    'linked_genres',
-    'idx_linked_genres_genre_id',
-  );
-  await queryInterface.removeIndex(
-    'linked_genres',
-    'idx_linked_genres_file_id',
-  );
-  await queryInterface.removeIndex(
-    'linked_genres',
-    'idx_linked_genres_genre_id_file_id',
-  );
+  await queryInterface.removeIndex('linked_genres', 'idx_linked_genres_genre_id');
+  await queryInterface.removeIndex('linked_genres', 'idx_linked_genres_file_id');
+  await queryInterface.removeIndex('linked_genres', 'idx_linked_genres_genre_id_file_id');
   await queryInterface.dropTable('linked_genres');
 }

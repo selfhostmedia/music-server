@@ -2,10 +2,7 @@ import { CollatedTrackEntity } from 'src/database/entities';
 import { InjectModel } from '@nestjs/sequelize';
 import { Injectable } from '@nestjs/common';
 import { Sequelize } from 'sequelize-typescript';
-import {
-  SynologyComposerDataDto,
-  SynologyComposerDto,
-} from './dtos/composer.cgi.dto';
+import { SynologyComposerDataDto, SynologyComposerDto } from './dtos/composer.cgi.dto';
 import { replaceDoubleQuotes } from 'src/utils/strings';
 
 function personToRow(person: CollatedTrackEntity): SynologyComposerDto {
@@ -27,18 +24,9 @@ export class SynologyComposerService {
     private readonly collatedTrackEntity: typeof CollatedTrackEntity,
   ) {}
 
-  async listComposers(
-    accountId: number,
-    offset: number,
-    limit: number,
-  ): Promise<SynologyComposerDataDto> {
+  async listComposers(accountId: number, offset: number, limit: number): Promise<SynologyComposerDataDto> {
     const composers = await this.collatedTrackEntity.findAll({
-      attributes: [
-        [
-          Sequelize.fn('DISTINCT', Sequelize.col('track_composers')),
-          'trackComposers',
-        ],
-      ],
+      attributes: [[Sequelize.fn('DISTINCT', Sequelize.col('track_composers')), 'trackComposers']],
       where: {
         accountId,
       },
@@ -47,15 +35,7 @@ export class SynologyComposerService {
       offset,
     });
     const total = await this.collatedTrackEntity.count({
-      attributes: [
-        [
-          Sequelize.fn(
-            'COUNT',
-            Sequelize.fn('DISTINCT', Sequelize.col('track_composers')),
-          ),
-          'count',
-        ],
-      ],
+      attributes: [[Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('track_composers'))), 'count']],
       where: {
         accountId,
       },

@@ -1,20 +1,16 @@
+import { AUTHENTICATED_REQUEST_DESCRIPTION, PAGINATED_DATA_DESCRIPTION } from './consts';
 import { AccountEntity } from 'src/database/entities';
 import {
   ApiBody,
   ApiExtraModels,
   ApiHeader,
   ApiOkResponse,
+  ApiOperation,
   ApiTags,
   getSchemaPath,
 } from '@nestjs/swagger';
-import {
-  Body,
-  Controller,
-  HttpCode,
-  HttpStatus,
-  Logger,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Logger, Post } from '@nestjs/common';
+import { SYNOLOGY_AUDIOSTATION_APIS } from 'src/constants/swagger';
 import {
   SynologyAlbumResponseDto,
   SynologyAlbumsBodyDto,
@@ -30,7 +26,7 @@ import { User } from '../user.decorator';
 import { plainToInstance } from 'class-transformer';
 
 @Controller()
-@ApiTags('Synology AudioStation APIs')
+@ApiTags(SYNOLOGY_AUDIOSTATION_APIS)
 export class SynologyAlbumController {
   private readonly logger: Logger = new Logger(SynologyAlbumController.name);
 
@@ -38,11 +34,17 @@ export class SynologyAlbumController {
 
   @Post('/webapi/AudioStation/album.cgi')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Lists albums in the music library',
+    description: [
+      `Lists albums found in the music library.  The albums can be filtered by artist, composer or genre.`,
+      PAGINATED_DATA_DESCRIPTION,
+      AUTHENTICATED_REQUEST_DESCRIPTION,
+    ].join('\n\n'),
+  })
   @ApiHeader({
     name: 'cookie',
-    description:
-      'The session ID and device ID tokens for the authenticated user',
-    required: true,
+    description: 'The session ID and device ID cookies for the user `id={sessionId}; did={deviceId}`',
   })
   @ApiOkResponse({
     description: 'Returns a list of albums',
@@ -84,7 +86,7 @@ export class SynologyAlbumController {
       ],
     },
   })
-  async routeAlbumCgi(
+  async route(
     @User() user: AccountEntity,
     @Body()
     variousBodies:
@@ -106,10 +108,7 @@ export class SynologyAlbumController {
       }
       // Route #2:  albums in a genre
       if ('genre' in variousBodies) {
-        return this.listAlbumsInGenre(
-          user,
-          plainToInstance(SynologyAlbumsByGenreBodyDto, variousBodies),
-        );
+        return this.listAlbumsInGenre(user, plainToInstance(SynologyAlbumsByGenreBodyDto, variousBodies));
       }
     }
     // Route #3:  albums in a default genre
@@ -117,36 +116,21 @@ export class SynologyAlbumController {
       if ('artist' in variousBodies) {
         return this.listAlbumsByArtistInDefaultGenre(
           user,
-          plainToInstance(
-            SynologyAlbumsByArtistAndDefaultGenreBodyDto,
-            variousBodies,
-          ),
+          plainToInstance(SynologyAlbumsByArtistAndDefaultGenreBodyDto, variousBodies),
         );
       }
-      return this.listAlbumsInDefaultGenre(
-        user,
-        plainToInstance(SynologyAlbumsByDefaultGenreBodyDto, variousBodies),
-      );
+      return this.listAlbumsInDefaultGenre(user, plainToInstance(SynologyAlbumsByDefaultGenreBodyDto, variousBodies));
     }
     // Route #4:  albums by a composer
     if ('composer' in variousBodies) {
-      return this.listAlbumsByComposer(
-        user,
-        plainToInstance(SynologyAlbumsByComposerBodyDto, variousBodies),
-      );
+      return this.listAlbumsByComposer(user, plainToInstance(SynologyAlbumsByComposerBodyDto, variousBodies));
     }
     // Route #5:  albums by an artist
     if ('artist' in variousBodies) {
-      return this.listAlbumsByArtist(
-        user,
-        plainToInstance(SynologyAlbumsByArtistBodyDto, variousBodies),
-      );
+      return this.listAlbumsByArtist(user, plainToInstance(SynologyAlbumsByArtistBodyDto, variousBodies));
     }
     // Route #6: all albums
-    return this.listAlbums(
-      user,
-      plainToInstance(SynologyAlbumsBodyDto, variousBodies),
-    );
+    return this.listAlbums(user, plainToInstance(SynologyAlbumsBodyDto, variousBodies));
   }
 
   private async listAlbumsInGenreByArtist(
@@ -167,12 +151,7 @@ export class SynologyAlbumController {
     user: AccountEntity,
     body: SynologyAlbumsByGenreBodyDto,
   ): Promise<SynologyAlbumResponseDto> {
-    const data = await this.albumService.listGenreAlbums(
-      user.id,
-      body.genre,
-      body.offset,
-      body.limit,
-    );
+    const data = await this.albumService.listGenreAlbums(user.id, body.genre, body.offset, body.limit);
     return { data, success: true };
   }
 
@@ -194,12 +173,7 @@ export class SynologyAlbumController {
     user: AccountEntity,
     body: SynologyAlbumsByDefaultGenreBodyDto,
   ): Promise<SynologyAlbumResponseDto> {
-    const data = await this.albumService.listGenreAlbums(
-      user.id,
-      body.genre_filter,
-      body.offset,
-      body.limit,
-    );
+    const data = await this.albumService.listGenreAlbums(user.id, body.genre_filter, body.offset, body.limit);
     return { data, success: true };
   }
 
@@ -207,12 +181,7 @@ export class SynologyAlbumController {
     user: AccountEntity,
     body: SynologyAlbumsByComposerBodyDto,
   ): Promise<SynologyAlbumResponseDto> {
-    const data = await this.albumService.listComposerAlbums(
-      user.id,
-      body.composer,
-      body.offset,
-      body.limit,
-    );
+    const data = await this.albumService.listComposerAlbums(user.id, body.composer, body.offset, body.limit);
     return { data, success: true };
   }
 
@@ -220,24 +189,12 @@ export class SynologyAlbumController {
     user: AccountEntity,
     body: SynologyAlbumsByArtistBodyDto,
   ): Promise<SynologyAlbumResponseDto> {
-    const data = await this.albumService.listArtistAlbums(
-      user.id,
-      body.artist,
-      body.offset,
-      body.limit,
-    );
+    const data = await this.albumService.listArtistAlbums(user.id, body.artist, body.offset, body.limit);
     return { data, success: true };
   }
 
-  private async listAlbums(
-    user: AccountEntity,
-    body: SynologyAlbumsBodyDto,
-  ): Promise<SynologyAlbumResponseDto> {
-    const data = await this.albumService.listAlbums(
-      user.id,
-      body.offset,
-      body.limit,
-    );
+  private async listAlbums(user: AccountEntity, body: SynologyAlbumsBodyDto): Promise<SynologyAlbumResponseDto> {
+    const data = await this.albumService.listAlbums(user.id, body.offset, body.limit);
     return { data, success: true };
   }
 }

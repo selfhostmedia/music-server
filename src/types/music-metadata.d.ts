@@ -64,7 +64,8 @@ export interface ICommonTagsResult {
    */
   artists?: string[];
   /**
-   * Track album artist/s. Contains the first album artist if multiple tags exist, or maybe several album artists written in a single string.
+   * Track album artist/s. Contains the first album artist if multiple tags exist, or maybe several album artists
+   * written in a single string.
    */
   albumartist?: string;
   /**
@@ -536,7 +537,8 @@ export interface IChapter {
    */
   end?: number;
   /**
-   * Time value that indicates the timescale for chapter tracks, the number of time units that pass per second in its time coordinate system.
+   * Time value that indicates the timescale for chapter tracks, the number of time units that pass per second in its
+   * time coordinate system.
    */
   timeScale?: number;
   /**

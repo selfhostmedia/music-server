@@ -5,9 +5,7 @@ import { SynologyLibraryEnum } from './enums';
 @Injectable()
 export class SynologyInfoService {
   // eslint-disable-next-line class-methods-use-this
-  async getConfiguration(
-    sessionTokenHash: string,
-  ): Promise<SynologyInfoDataDto> {
+  async getConfiguration(sessionTokenHash: string): Promise<SynologyInfoDataDto> {
     return {
       ame_status: {
         ame_major_version: 0,

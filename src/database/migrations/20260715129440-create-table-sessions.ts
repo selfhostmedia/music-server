@@ -10,6 +10,7 @@ export async function up(queryInterface: QueryInterface): Promise<void> {
         model: 'accounts',
         key: 'id',
       },
+      onDelete: 'CASCADE',
     },
     created_at: {
       type: DataType.DATE,
@@ -22,6 +23,10 @@ export async function up(queryInterface: QueryInterface): Promise<void> {
       primaryKey: true,
       allowNull: false,
       autoIncrement: true,
+    },
+    restrict_session: {
+      type: DataType.STRING(50),
+      allowNull: true,
     },
     session_token: {
       type: DataType.STRING(128),

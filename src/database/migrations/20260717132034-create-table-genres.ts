@@ -10,7 +10,6 @@ export async function up(queryInterface: QueryInterface): Promise<void> {
         model: 'accounts',
         key: 'id',
       },
-      onUpdate: 'CASCADE',
       onDelete: 'CASCADE',
     },
     created_at: {

@@ -1,6 +1,5 @@
 import { beforeAll, describe, expect, it } from '@jest/globals';
-import { createSignInCookie } from '../../test-helper';
-import { listArtists } from '../../test-helper.synology';
+import { createSignInCookie, listArtists } from '../../test-helper.synology';
 
 describe('/webapi/AudioStation/artist.cgi', () => {
   beforeAll(async () => {
@@ -8,7 +7,7 @@ describe('/webapi/AudioStation/artist.cgi', () => {
   });
 
   it('should list artists by genre', async () => {
-    const data = await listArtists({ genre: 'AlternRock' });
+    const data = await listArtists({ genre: 'Rock' });
     expect(data?.data.artists.length).toBe(2);
     expect(data?.data.artists[0]?.name).toBe('Artist 1');
     expect(data?.data.artists[1]?.name).toBe('Artist 3');
@@ -16,12 +15,12 @@ describe('/webapi/AudioStation/artist.cgi', () => {
 
   it('should paginate artists by genre', async () => {
     // page 1
-    const data = await listArtists({ genre: 'AlternRock' }, 0, 1);
+    const data = await listArtists({ genre: 'Rock' }, 0, 1);
     expect(data?.data.total).toBe(2);
     expect(data?.data.artists.length).toBe(1);
     expect(data?.data.artists[0]?.name).toBe('Artist 1');
     // page 2
-    const data2 = await listArtists({ genre: 'AlternRock' }, 1, 1);
+    const data2 = await listArtists({ genre: 'Rock' }, 1, 1);
     expect(data2?.data.total).toBe(2);
     expect(data2?.data.artists.length).toBe(1);
     expect(data2?.data.artists[0]?.name).toBe('Artist 3');
@@ -60,7 +59,18 @@ describe('/webapi/AudioStation/artist.cgi', () => {
     expect(data?.data.artists[1]?.name).toBe('Artist 2');
   });
 
-  it.todo('should paginate artists in default genre');
+  it('should paginate artists in default genre', async () => {
+    // page 1
+    const data = await listArtists({ genre: 'Ballad' }, 0, 1);
+    expect(data?.data.total).toBe(2);
+    expect(data?.data.artists.length).toBe(1);
+    expect(data?.data.artists[0]?.name).toBe('Artist 1');
+    // page 2
+    const data2 = await listArtists({ genre: 'Ballad' }, 1, 1);
+    expect(data2?.data.total).toBe(2);
+    expect(data2?.data.artists.length).toBe(1);
+    expect(data2?.data.artists[0]?.name).toBe('Artist 2');
+  });
 
   it('should list artists in multi-genre', async () => {
     const data = await listArtists({ genre: 'EDM/Dance' });
@@ -69,5 +79,16 @@ describe('/webapi/AudioStation/artist.cgi', () => {
     expect(data?.data.artists[1]?.name).toBe('Artist 3');
   });
 
-  it.todo('should paginate artists in multi-genre');
+  it('should paginate artists in multi-genre', async () => {
+    // page 1
+    const data = await listArtists({ genre: 'EDM/Dance' }, 0, 1);
+    expect(data?.data.total).toBe(2);
+    expect(data?.data.artists.length).toBe(1);
+    expect(data?.data.artists[0]?.name).toBe('Artist 1');
+    // page 2
+    const data2 = await listArtists({ genre: 'EDM/Dance' }, 1, 1);
+    expect(data2?.data.total).toBe(2);
+    expect(data2?.data.artists.length).toBe(1);
+    expect(data2?.data.artists[0]?.name).toBe('Artist 3');
+  });
 });

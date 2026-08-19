@@ -1,24 +1,17 @@
+import { AUTHENTICATED_REQUEST_DESCRIPTION } from './consts';
 import { AccountEntity, SessionEntity } from 'src/database/entities';
-import { AllowGuest } from './synology.guard';
+import { AllowGuest } from '../role.guard';
 import {
   ApiBody,
   ApiExtraModels,
   ApiHeader,
   ApiOkResponse,
+  ApiOperation,
   ApiTags,
   getSchemaPath,
 } from '@nestjs/swagger';
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Headers,
-  HttpCode,
-  HttpStatus,
-  Logger,
-  Post,
-  Res,
-} from '@nestjs/common';
+import { BadRequestException, Body, Controller, HttpCode, HttpStatus, Logger, Post, Req, Res } from '@nestjs/common';
+import { SYNOLOGY_AUDIOSTATION_APIS } from 'src/constants/swagger';
 import { Session } from '../session.decorator';
 import { SynologyApiEnum, SynologyMethodEnum } from './enums';
 import {
@@ -44,7 +37,7 @@ import { plainToInstance } from 'class-transformer';
 import type { Response } from 'express';
 
 @Controller()
-@ApiTags('Synology AudioStation APIs')
+@ApiTags(SYNOLOGY_AUDIOSTATION_APIS)
 export class SynologyEntryController {
   private readonly logger: Logger = new Logger(SynologyEntryController.name);
 
@@ -58,10 +51,20 @@ export class SynologyEntryController {
   @Post('/webapi/entry.cgi')
   @AllowGuest()
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Authentication, session management, and miscellaneous operations for playlists and favorites',
+    description: [
+      // eslint-disable-next-line max-len
+      `This endpoint handles various system-level operations such as authentication, along with certain operations such as listing and managing favorite/pinned items, and adding certain items to playlists.\n\nSome of the operations require authentication - logging out, adding items to playlists, and listing/managing pinned items.  Other operations do not require authentication - retrieving the encryption key and signing in.`,
+      // eslint-disable-next-line max-len
+      `For the actions requiring authentication, the request must be authenticated using a valid Synology session ID and device ID cookie for the user, which can be obtained by signing in via the \`entry.cgi\` endpoint, a two-step process requesting the encryption public key from \`/certs\` and then submitting credentials encrypted with it.`,
+      AUTHENTICATED_REQUEST_DESCRIPTION,
+    ].join('\n\n'),
+  })
   @ApiHeader({
     name: 'cookie',
     description:
-      'The session ID and device ID tokens for the authenticated user if requesting "pins" or "logout" methods',
+      'The session ID and device ID cookies if requesting "pins", "playlist" or the "clearSessionToken" methods',
     required: false,
   })
   @ApiOkResponse({
@@ -129,9 +132,7 @@ export class SynologyEntryController {
       ],
     },
   })
-  async postEntryCgi(
-    @Headers() headers: string,
-    @Headers('user-agent') userAgent: string,
+  async route(
     @Body()
     variousBodies:
       | SynologyEntryCertificateBodyDto
@@ -144,6 +145,7 @@ export class SynologyEntryController {
       | SynologyEntryPlaylistAddArtistBodyDto
       | SynologyEntryPlaylistAddComposerBodyDto
       | SynologyEntryPlaylistAddGenreBodyDto,
+    @Req() req: Request,
     @Res({ passthrough: true }) response: Response,
     @User() user?: AccountEntity,
     @Session() session?: SessionEntity,
@@ -164,11 +166,8 @@ export class SynologyEntryController {
     }
     // Route #2: signing in with encrypted username/password credentials
     if (!('api' in variousBodies) && '__cIpHeRtExT' in variousBodies) {
-      return this.signIn(
-        userAgent,
-        plainToInstance(SynologyEntrySignInBodyDto, variousBodies),
-        response,
-      );
+      const userAgent = req.headers['user-agent'] || '';
+      return this.signIn(userAgent, plainToInstance(SynologyEntrySignInBodyDto, variousBodies), response);
     }
     // Route #3: returns pinned items
     if (
@@ -177,10 +176,7 @@ export class SynologyEntryController {
       variousBodies.api === SynologyApiEnum.PIN &&
       variousBodies.method === SynologyMethodEnum.LIST
     ) {
-      return this.listPinnedItems(
-        user,
-        plainToInstance(SynologyEntryListPinsBodyDto, variousBodies),
-      );
+      return this.listPinnedItems(user, plainToInstance(SynologyEntryListPinsBodyDto, variousBodies));
     }
     // Route #4: pinning items
     if (
@@ -189,10 +185,7 @@ export class SynologyEntryController {
       variousBodies.api === SynologyApiEnum.PIN &&
       variousBodies.method === SynologyMethodEnum.PIN
     ) {
-      return this.createPinnedItem(
-        user,
-        plainToInstance(SynologyEntryCreatePinBodyDto, variousBodies),
-      );
+      return this.createPinnedItem(user, plainToInstance(SynologyEntryCreatePinBodyDto, variousBodies));
     }
     // Route #5: unpinning an item
     if (
@@ -201,10 +194,7 @@ export class SynologyEntryController {
       variousBodies.api === SynologyApiEnum.PIN &&
       variousBodies.method === SynologyMethodEnum.UNPIN
     ) {
-      return this.deletePinnedItem(
-        user,
-        plainToInstance(SynologyEntryDeletePinBodyDto, variousBodies),
-      );
+      return this.deletePinnedItem(user, plainToInstance(SynologyEntryDeletePinBodyDto, variousBodies));
     }
     // Route #6: logging out, for some reason a request may be made without user/session
     if (
@@ -212,7 +202,7 @@ export class SynologyEntryController {
       variousBodies.api === SynologyApiEnum.AUTH &&
       variousBodies.method === SynologyMethodEnum.LOGOUT
     ) {
-      return this.logout(user, session);
+      return this.clearSessionToken(user, session);
     }
     if (
       user &&
@@ -222,39 +212,25 @@ export class SynologyEntryController {
     ) {
       // Route #7: adding albums to a playlist
       if ('album' in variousBodies) {
-        return this.addAlbumToPlaylist(
-          user,
-          plainToInstance(SynologyEntryPlaylistAddAlbumBodyDto, variousBodies),
-        );
+        return this.addAlbumToPlaylist(user, plainToInstance(SynologyEntryPlaylistAddAlbumBodyDto, variousBodies));
       }
       // Route #8: adding artists to a playlist
       if ('artist' in variousBodies) {
-        return this.addArtistToPlaylist(
-          user,
-          plainToInstance(SynologyEntryPlaylistAddArtistBodyDto, variousBodies),
-        );
+        return this.addArtistToPlaylist(user, plainToInstance(SynologyEntryPlaylistAddArtistBodyDto, variousBodies));
       }
       // Route #9: adding composers to a playlist
       if ('composer' in variousBodies) {
         return this.addComposerToPlaylist(
           user,
-          plainToInstance(
-            SynologyEntryPlaylistAddComposerBodyDto,
-            variousBodies,
-          ),
+          plainToInstance(SynologyEntryPlaylistAddComposerBodyDto, variousBodies),
         );
       }
       // Route #10: adding genres to a playlist
       if ('genre' in variousBodies) {
-        return this.addGenreToPlaylist(
-          user,
-          plainToInstance(SynologyEntryPlaylistAddGenreBodyDto, variousBodies),
-        );
+        return this.addGenreToPlaylist(user, plainToInstance(SynologyEntryPlaylistAddGenreBodyDto, variousBodies));
       }
     }
-    throw new BadRequestException(
-      `Invalid request body for entry.cgi: ${JSON.stringify(variousBodies, null, 2)}, ${JSON.stringify(headers, null, 2)}`,
-    );
+    throw new BadRequestException(`Invalid request body for entry.cgi`);
   }
 
   private async getEncryptionKey(): Promise<SynologyEntryCertificateResponseDto> {
@@ -287,12 +263,12 @@ export class SynologyEntryController {
     };
   }
 
-  private async logout(
+  private async clearSessionToken(
     user?: AccountEntity,
     session?: SessionEntity,
   ): Promise<SynologyEntryLogoutResponseDto> {
     if (user && session) {
-      const success = await this.entryService.logout(user.id, session.id);
+      const success = await this.entryService.clearSessionToken(user.id, session.id);
       if (!success) {
         throw new BadRequestException({
           success: false,
@@ -309,11 +285,7 @@ export class SynologyEntryController {
     user: AccountEntity,
     body: SynologyEntryListPinsBodyDto,
   ): Promise<SynologyEntryListPinsResponseDto> {
-    const data = await this.entryService.listPinnedItems(
-      user.id,
-      body.offset,
-      body.limit,
-    );
+    const data = await this.entryService.listPinnedItems(user.id, body.offset, body.limit);
     return {
       data,
       success: true,
@@ -346,12 +318,7 @@ export class SynologyEntryController {
     user: AccountEntity,
     body: SynologyEntryPlaylistAddAlbumBodyDto,
   ): Promise<SynologySuccessResponseDto> {
-    await this.entryService.addAlbumToPlaylist(
-      user.id,
-      body.id,
-      body.album,
-      body.album_artist,
-    );
+    await this.entryService.addAlbumToPlaylist(user.id, body.id, body.album, body.album_artist);
     return {
       success: true,
     };
@@ -371,11 +338,7 @@ export class SynologyEntryController {
     user: AccountEntity,
     body: SynologyEntryPlaylistAddComposerBodyDto,
   ): Promise<SynologySuccessResponseDto> {
-    await this.entryService.addComposerToPlaylist(
-      user.id,
-      body.id,
-      body.composer,
-    );
+    await this.entryService.addComposerToPlaylist(user.id, body.id, body.composer);
     return {
       success: true,
     };

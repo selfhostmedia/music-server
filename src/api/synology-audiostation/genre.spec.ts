@@ -1,6 +1,5 @@
 import { beforeAll, describe, expect, it } from '@jest/globals';
-import { createSignInCookie } from '../../test-helper';
-import { listDefaultGenres, listGenres } from '../../test-helper.synology';
+import { createSignInCookie, listDefaultGenres, listGenres } from '../../test-helper.synology';
 
 describe('/webapi/AudioStation/genre.cgi', () => {
   beforeAll(async () => {
@@ -14,14 +13,14 @@ describe('/webapi/AudioStation/genre.cgi', () => {
     expect(data.data.genres[0]?.name).toBe('Acid');
     expect(data.data.genres[1]?.name).toBe('Acid Jazz');
     expect(data.data.genres[2]?.name).toBe('Acoustic');
-    expect(data.data.genres[3]?.name).toBe('AlternRock');
-    expect(data.data.genres[4]?.name).toBe('Ballad');
-    expect(data.data.genres[5]?.name).toBe('Bebob');
-    expect(data.data.genres[6]?.name).toBe('Bluegrass');
-    expect(data.data.genres[7]?.name).toBe('Chanson');
-    expect(data.data.genres[8]?.name).toBe('Chorus');
-    expect(data.data.genres[9]?.name).toBe('Dance');
-    expect(data.data.genres[10]?.name).toBe('EDM');
+    expect(data.data.genres[3]?.name).toBe('Ballad');
+    expect(data.data.genres[4]?.name).toBe('Bebob');
+    expect(data.data.genres[5]?.name).toBe('Bluegrass');
+    expect(data.data.genres[6]?.name).toBe('Chanson');
+    expect(data.data.genres[7]?.name).toBe('Chorus');
+    expect(data.data.genres[8]?.name).toBe('Dance');
+    expect(data.data.genres[9]?.name).toBe('EDM');
+    expect(data.data.genres[10]?.name).toBe('Rock');
   });
 
   it('should paginate all genres with no filters', async () => {
@@ -36,22 +35,22 @@ describe('/webapi/AudioStation/genre.cgi', () => {
     const data2 = await listGenres(3, 3);
     expect(data2.data.total).toBe(11);
     expect(data2.data.genres.length).toBe(3);
-    expect(data2.data.genres[0]?.name).toBe('AlternRock');
-    expect(data2.data.genres[1]?.name).toBe('Ballad');
-    expect(data2.data.genres[2]?.name).toBe('Bebob');
+    expect(data2.data.genres[0]?.name).toBe('Ballad');
+    expect(data2.data.genres[1]?.name).toBe('Bebob');
+    expect(data2.data.genres[2]?.name).toBe('Bluegrass');
     // page 3
     const data3 = await listGenres(6, 3);
     expect(data3.data.total).toBe(11);
     expect(data3.data.genres.length).toBe(3);
-    expect(data3.data.genres[0]?.name).toBe('Bluegrass');
-    expect(data3.data.genres[1]?.name).toBe('Chanson');
-    expect(data3.data.genres[2]?.name).toBe('Chorus');
+    expect(data3.data.genres[0]?.name).toBe('Chanson');
+    expect(data3.data.genres[1]?.name).toBe('Chorus');
+    expect(data3.data.genres[2]?.name).toBe('Dance');
     // page 4
     const data4 = await listGenres(9, 3);
     expect(data4.data.total).toBe(11);
     expect(data4.data.genres.length).toBe(2);
-    expect(data4.data.genres[0]?.name).toBe('Dance');
-    expect(data4.data.genres[1]?.name).toBe('EDM');
+    expect(data4.data.genres[0]?.name).toBe('EDM');
+    expect(data4.data.genres[1]?.name).toBe('Rock');
   });
 
   it('should list all default genres', async () => {
@@ -72,6 +71,4 @@ describe('/webapi/AudioStation/genre.cgi', () => {
     expect(data.data.default_genres[11]?.name).toBe('Soundtrack');
     expect(data.data.default_genres[12]?.name).toBe('World/Spiritual');
   });
-
-  it.todo('should paginate default genres');
 });

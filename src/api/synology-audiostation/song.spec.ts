@@ -1,6 +1,5 @@
 import { beforeAll, describe, expect, it } from '@jest/globals';
-import { createSignInCookie } from '../../test-helper';
-import { listSongs } from '../../test-helper.synology';
+import { createSignInCookie, listSongs } from '../../test-helper.synology';
 
 describe('/webapi/AudioStation/song.cgi', () => {
   beforeAll(async () => {
@@ -15,9 +14,7 @@ describe('/webapi/AudioStation/song.cgi', () => {
     expect(data?.data.total).toBe(4);
     expect(data?.data.songs.length).toBe(4);
     expect(data?.data.songs[0]?.title).toBe('01 First Track');
-    expect(data?.data.songs[0]?.additional.song_tag.artist).toBe(
-      'Artist 3 ft. Artist 2',
-    );
+    expect(data?.data.songs[0]?.additional.song_tag.artist).toBe('Artist 3 ft. Artist 2');
     expect(data?.data.songs[0]?.additional.song_tag.album).toBe('Album 5');
     expect(data?.data.songs[1]?.title).toBe('02 Second Track');
     expect(data?.data.songs[1]?.additional.song_tag.artist).toBe('Artist 3');
@@ -37,9 +34,7 @@ describe('/webapi/AudioStation/song.cgi', () => {
     expect(data?.data.total).toBe(4);
     expect(data?.data.songs.length).toBe(2);
     expect(data?.data.songs[0]?.title).toBe('01 First Track');
-    expect(data?.data.songs[0]?.additional.song_tag.artist).toBe(
-      'Artist 3 ft. Artist 2',
-    );
+    expect(data?.data.songs[0]?.additional.song_tag.artist).toBe('Artist 3 ft. Artist 2');
     expect(data?.data.songs[0]?.additional.song_tag.album).toBe('Album 5');
     expect(data?.data.songs[1]?.title).toBe('02 Second Track');
     expect(data?.data.songs[1]?.additional.song_tag.artist).toBe('Artist 3');
@@ -72,9 +67,7 @@ describe('/webapi/AudioStation/song.cgi', () => {
     expect(data?.data.songs[2]?.additional.song_tag.artist).toBe('Artist 2');
     expect(data?.data.songs[2]?.additional.song_tag.album).toBe('Album 3');
     expect(data?.data.songs[3]?.title).toBe('05 Fifth Track');
-    expect(data?.data.songs[3]?.additional.song_tag.artist).toBe(
-      'Artist 3, Artist 2',
-    );
+    expect(data?.data.songs[3]?.additional.song_tag.artist).toBe('Artist 3, Artist 2');
     expect(data?.data.songs[3]?.additional.song_tag.album).toBe('Album 4');
   });
 
@@ -98,9 +91,7 @@ describe('/webapi/AudioStation/song.cgi', () => {
     expect(data2?.data.songs[0]?.additional.song_tag.artist).toBe('Artist 2');
     expect(data2?.data.songs[0]?.additional.song_tag.album).toBe('Album 3');
     expect(data2?.data.songs[1]?.title).toBe('05 Fifth Track');
-    expect(data2?.data.songs[1]?.additional.song_tag.artist).toBe(
-      'Artist 3, Artist 2',
-    );
+    expect(data2?.data.songs[1]?.additional.song_tag.artist).toBe('Artist 3, Artist 2');
     expect(data2?.data.songs[1]?.additional.song_tag.album).toBe('Album 4');
   });
 
@@ -159,9 +150,7 @@ describe('/webapi/AudioStation/song.cgi', () => {
     expect(data?.data.total).toBe(4);
     expect(data?.data.songs.length).toBe(4);
     expect(data?.data.songs[0]?.title).toBe('01 First Track');
-    expect(data?.data.songs[0]?.additional.song_tag.artist).toBe(
-      'Artist 3 ft. Artist 2',
-    );
+    expect(data?.data.songs[0]?.additional.song_tag.artist).toBe('Artist 3 ft. Artist 2');
     expect(data?.data.songs[0]?.additional.song_tag.album).toBe('Album 5');
     expect(data?.data.songs[1]?.title).toBe('02 Second Track');
     expect(data?.data.songs[1]?.additional.song_tag.artist).toBe('Artist 3');
@@ -170,9 +159,7 @@ describe('/webapi/AudioStation/song.cgi', () => {
     expect(data?.data.songs[2]?.additional.song_tag.artist).toBe('Artist 3');
     expect(data?.data.songs[2]?.additional.song_tag.album).toBe('Album 5');
     expect(data?.data.songs[3]?.title).toBe('05 Fifth Track');
-    expect(data?.data.songs[3]?.additional.song_tag.artist).toBe(
-      'Artist 3, Artist 2',
-    );
+    expect(data?.data.songs[3]?.additional.song_tag.artist).toBe('Artist 3, Artist 2');
     expect(data?.data.songs[3]?.additional.song_tag.album).toBe('Album 4');
   });
 
@@ -183,9 +170,7 @@ describe('/webapi/AudioStation/song.cgi', () => {
     expect(data?.data.total).toBe(4);
     expect(data?.data.songs.length).toBe(1);
     expect(data?.data.songs[0]?.title).toBe('01 First Track');
-    expect(data?.data.songs[0]?.additional.song_tag.artist).toBe(
-      'Artist 3 ft. Artist 2',
-    );
+    expect(data?.data.songs[0]?.additional.song_tag.artist).toBe('Artist 3 ft. Artist 2');
     expect(data?.data.songs[0]?.additional.song_tag.album).toBe('Album 5');
     // page 2
     const data2 = await listSongs(filter, 1, 2);
@@ -208,9 +193,7 @@ describe('/webapi/AudioStation/song.cgi', () => {
     expect(data?.data.total).toBe(3);
     expect(data?.data.songs.length).toBe(3);
     expect(data?.data.songs[0]?.title).toBe('01 First Track');
-    expect(data?.data.songs[0]?.additional.song_tag.artist).toBe(
-      'Artist 3 ft. Artist 2',
-    );
+    expect(data?.data.songs[0]?.additional.song_tag.artist).toBe('Artist 3 ft. Artist 2');
     expect(data?.data.songs[0]?.additional.song_tag.album).toBe('Album 5');
     expect(data?.data.songs[1]?.title).toBe('02 Second Track');
     expect(data?.data.songs[1]?.additional.song_tag.artist).toBe('Artist 3');
@@ -231,9 +214,7 @@ describe('/webapi/AudioStation/song.cgi', () => {
     expect(data?.data.total).toBe(3);
     expect(data?.data.songs.length).toBe(2);
     expect(data?.data.songs[0]?.title).toBe('01 First Track');
-    expect(data?.data.songs[0]?.additional.song_tag.artist).toBe(
-      'Artist 3 ft. Artist 2',
-    );
+    expect(data?.data.songs[0]?.additional.song_tag.artist).toBe('Artist 3 ft. Artist 2');
     expect(data?.data.songs[0]?.additional.song_tag.album).toBe('Album 5');
     expect(data?.data.songs[1]?.title).toBe('02 Second Track');
     expect(data?.data.songs[1]?.additional.song_tag.artist).toBe('Artist 3');
@@ -261,7 +242,23 @@ describe('/webapi/AudioStation/song.cgi', () => {
     expect(data?.data.songs[1]?.additional.song_tag.album).toBe('Album 3');
   });
 
-  it.todo('should paginate default genre songs');
+  it('should paginate default genre songs', async () => {
+    const filter = { genre_filter: 'Ballad' };
+    // page 1
+    const data = await listSongs(filter, 0, 1);
+    expect(data?.data.total).toBe(2);
+    expect(data?.data.songs.length).toBe(1);
+    expect(data?.data.songs[0]?.title).toBe('05 Fifth Track');
+    expect(data?.data.songs[0]?.additional.song_tag.artist).toBe('Artist 1');
+    expect(data?.data.songs[0]?.additional.song_tag.album).toBe('Album 1');
+    // page 2
+    const data2 = await listSongs(filter, 1, 1);
+    expect(data2?.data.total).toBe(2);
+    expect(data2?.data.songs.length).toBe(1);
+    expect(data2?.data.songs[0]?.title).toBe('05 Fifth Track');
+    expect(data2?.data.songs[0]?.additional.song_tag.artist).toBe('Artist 2');
+    expect(data2?.data.songs[0]?.additional.song_tag.album).toBe('Album 3');
+  });
 
   it('should list multi-genre songs', async () => {
     const data = await listSongs({
@@ -270,16 +267,30 @@ describe('/webapi/AudioStation/song.cgi', () => {
     expect(data?.data.total).toBe(2);
     expect(data?.data.songs.length).toBe(2);
     expect(data?.data.songs[0]?.title).toBe('06 Sixth Track');
-    expect(data?.data.songs[0]?.additional.song_tag.artist).toBe(
-      'Artist 3, Artist 2',
-    );
+    expect(data?.data.songs[0]?.additional.song_tag.artist).toBe('Artist 3, Artist 2');
     expect(data?.data.songs[0]?.additional.song_tag.album).toBe('Album 4');
     expect(data?.data.songs[1]?.title).toBe('03 Third Track');
     expect(data?.data.songs[1]?.additional.song_tag.artist).toBe('Artist 1');
     expect(data?.data.songs[1]?.additional.song_tag.album).toBe('Album 2');
   });
-  
-  it.todo('should paginate multi-genre songs');
+
+  it('should paginate multi-genre songs', async () => {
+    const filter = { genre_filter: 'EDM/Dance' };
+    // page 1
+    const data = await listSongs(filter, 0, 1);
+    expect(data?.data.total).toBe(2);
+    expect(data?.data.songs.length).toBe(1);
+    expect(data?.data.songs[0]?.title).toBe('06 Sixth Track');
+    expect(data?.data.songs[0]?.additional.song_tag.artist).toBe('Artist 3, Artist 2');
+    expect(data?.data.songs[0]?.additional.song_tag.album).toBe('Album 4');
+    // page 2
+    const data2 = await listSongs(filter, 1, 1);
+    expect(data2?.data.total).toBe(2);
+    expect(data2?.data.songs.length).toBe(1);
+    expect(data2?.data.songs[0]?.title).toBe('03 Third Track');
+    expect(data2?.data.songs[0]?.additional.song_tag.artist).toBe('Artist 1');
+    expect(data2?.data.songs[0]?.additional.song_tag.album).toBe('Album 2');
+  });
 
   it('should list default genre album songs', async () => {
     const data = await listSongs({
@@ -294,7 +305,27 @@ describe('/webapi/AudioStation/song.cgi', () => {
     expect(data?.data.songs[0]?.additional.song_tag.album).toBe('Album 1');
   });
 
-  it.todo('should paginate default genre album songs');
+  it('should paginate default genre album songs', async () => {
+    const filter = {
+      album: 'Album 2',
+      album_artist: 'Artist 1',
+      genre_filter: 'Rock/Metal',
+    };
+    // page 1
+    const data = await listSongs(filter, 0, 1);
+    expect(data?.data.total).toBe(6);
+    expect(data?.data.songs.length).toBe(1);
+    expect(data?.data.songs[0]?.title).toBe('01 First Track');
+    expect(data?.data.songs[0]?.additional.song_tag.artist).toBe('Artist 1');
+    expect(data?.data.songs[0]?.additional.song_tag.album).toBe('Album 2');
+    // page 2
+    const data2 = await listSongs(filter, 1, 1);
+    expect(data2?.data.total).toBe(6);
+    expect(data2?.data.songs.length).toBe(1);
+    expect(data2?.data.songs[0]?.title).toBe('02 Second Track');
+    expect(data2?.data.songs[0]?.additional.song_tag.artist).toBe('Artist 1');
+    expect(data2?.data.songs[0]?.additional.song_tag.album).toBe('Album 2');
+  });
 
   it('should list multi-genre album songs', async () => {
     const data = await listSongs({
@@ -322,7 +353,25 @@ describe('/webapi/AudioStation/song.cgi', () => {
     expect(data?.data.songs[5]?.additional.song_tag.album).toBe('Album 3');
   });
 
-  it.todo('should paginate multi-genre album songs');
+  it('should paginate multi-genre album songs', async () => {
+    const filter = {
+      genre_filter: 'Ballad/Acid',
+    };
+    // page 1
+    const data = await listSongs(filter, 0, 1);
+    expect(data?.data.total).toBe(6);
+    expect(data?.data.songs.length).toBe(1);
+    expect(data?.data.songs[0]?.title).toBe('01 First Track');
+    expect(data?.data.songs[0]?.additional.song_tag.artist).toBe('Artist 1');
+    expect(data?.data.songs[0]?.additional.song_tag.album).toBe('Album 1');
+    // page 2
+    const data2 = await listSongs(filter, 1, 1);
+    expect(data2?.data.total).toBe(6);
+    expect(data2?.data.songs.length).toBe(1);
+    expect(data2?.data.songs[0]?.title).toBe('02 Second Track');
+    expect(data2?.data.songs[0]?.additional.song_tag.artist).toBe('Artist 1');
+    expect(data2?.data.songs[0]?.additional.song_tag.album).toBe('Album 1');
+  });
 
   it('should list all songs with no filters', async () => {
     const data = await listSongs({});
@@ -386,33 +435,23 @@ describe('/webapi/AudioStation/song.cgi', () => {
     expect(data?.data.songs[17]?.additional.song_tag.artist).toBe('Artist 3');
     expect(data?.data.songs[17]?.additional.song_tag.album).toBe('Album 4');
     expect(data?.data.songs[18]?.title).toBe('02 Second Track');
-    expect(data?.data.songs[18]?.additional.song_tag.artist).toBe(
-      'Artist 3, Artist 2',
-    );
+    expect(data?.data.songs[18]?.additional.song_tag.artist).toBe('Artist 3, Artist 2');
     expect(data?.data.songs[18]?.additional.song_tag.album).toBe('Album 4');
     expect(data?.data.songs[19]?.title).toBe('03 Third Track');
     expect(data?.data.songs[19]?.additional.song_tag.artist).toBe('Artist 3');
     expect(data?.data.songs[19]?.additional.song_tag.album).toBe('Album 4');
     expect(data?.data.songs[20]?.title).toBe('04 Fourth Track');
-    expect(data?.data.songs[20]?.additional.song_tag.artist).toBe(
-      'Artist 3, Artist 2',
-    );
+    expect(data?.data.songs[20]?.additional.song_tag.artist).toBe('Artist 3, Artist 2');
     expect(data?.data.songs[20]?.additional.song_tag.album).toBe('Album 4');
     expect(data?.data.songs[21]?.title).toBe('05 Fifth Track');
-    expect(data?.data.songs[21]?.additional.song_tag.artist).toBe(
-      'Artist 3, Artist 2',
-    );
+    expect(data?.data.songs[21]?.additional.song_tag.artist).toBe('Artist 3, Artist 2');
     expect(data?.data.songs[21]?.additional.song_tag.album).toBe('Album 4');
     expect(data?.data.songs[22]?.title).toBe('06 Sixth Track');
-    expect(data?.data.songs[22]?.additional.song_tag.artist).toBe(
-      'Artist 3, Artist 2',
-    );
+    expect(data?.data.songs[22]?.additional.song_tag.artist).toBe('Artist 3, Artist 2');
 
     expect(data?.data.songs[22]?.additional.song_tag.album).toBe('Album 4');
     expect(data?.data.songs[23]?.title).toBe('01 First Track');
-    expect(data?.data.songs[23]?.additional.song_tag.artist).toBe(
-      'Artist 3 ft. Artist 2',
-    );
+    expect(data?.data.songs[23]?.additional.song_tag.artist).toBe('Artist 3 ft. Artist 2');
     expect(data?.data.songs[23]?.additional.song_tag.album).toBe('Album 5');
     expect(data?.data.songs[24]?.title).toBe('02 Second Track');
     expect(data?.data.songs[24]?.additional.song_tag.artist).toBe('Artist 3');
@@ -489,9 +528,7 @@ describe('/webapi/AudioStation/song.cgi', () => {
     expect(data2?.data.songs[7]?.additional.song_tag.artist).toBe('Artist 3');
     expect(data2?.data.songs[7]?.additional.song_tag.album).toBe('Album 4');
     expect(data2?.data.songs[8]?.title).toBe('02 Second Track');
-    expect(data2?.data.songs[8]?.additional.song_tag.artist).toBe(
-      'Artist 3, Artist 2',
-    );
+    expect(data2?.data.songs[8]?.additional.song_tag.artist).toBe('Artist 3, Artist 2');
     expect(data2?.data.songs[8]?.additional.song_tag.album).toBe('Album 4');
     expect(data2?.data.songs[9]?.title).toBe('03 Third Track');
     expect(data2?.data.songs[9]?.additional.song_tag.artist).toBe('Artist 3');
@@ -501,25 +538,17 @@ describe('/webapi/AudioStation/song.cgi', () => {
     expect(data3?.data.total).toBe(27);
     expect(data3?.data.songs.length).toBe(7);
     expect(data3?.data.songs[0]?.title).toBe('04 Fourth Track');
-    expect(data3?.data.songs[0]?.additional.song_tag.artist).toBe(
-      'Artist 3, Artist 2',
-    );
+    expect(data3?.data.songs[0]?.additional.song_tag.artist).toBe('Artist 3, Artist 2');
     expect(data3?.data.songs[0]?.additional.song_tag.album).toBe('Album 4');
     expect(data3?.data.songs[1]?.title).toBe('05 Fifth Track');
-    expect(data3?.data.songs[1]?.additional.song_tag.artist).toBe(
-      'Artist 3, Artist 2',
-    );
+    expect(data3?.data.songs[1]?.additional.song_tag.artist).toBe('Artist 3, Artist 2');
     expect(data3?.data.songs[1]?.additional.song_tag.album).toBe('Album 4');
     expect(data3?.data.songs[2]?.title).toBe('06 Sixth Track');
-    expect(data3?.data.songs[2]?.additional.song_tag.artist).toBe(
-      'Artist 3, Artist 2',
-    );
+    expect(data3?.data.songs[2]?.additional.song_tag.artist).toBe('Artist 3, Artist 2');
     expect(data3?.data.songs[2]?.additional.song_tag.album).toBe('Album 4');
 
     expect(data3?.data.songs[3]?.title).toBe('01 First Track');
-    expect(data3?.data.songs[3]?.additional.song_tag.artist).toBe(
-      'Artist 3 ft. Artist 2',
-    );
+    expect(data3?.data.songs[3]?.additional.song_tag.artist).toBe('Artist 3 ft. Artist 2');
     expect(data3?.data.songs[3]?.additional.song_tag.album).toBe('Album 5');
     expect(data3?.data.songs[4]?.title).toBe('02 Second Track');
     expect(data3?.data.songs[4]?.additional.song_tag.artist).toBe('Artist 3');

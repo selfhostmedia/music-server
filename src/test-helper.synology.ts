@@ -1,12 +1,16 @@
 import {
-  SmartPlaylistConjugal,
+  SmartPlaylistConjugalEnum,
   SynologyApiEnum,
   SynologyLibraryEnum,
   SynologyMethodEnum,
+  components,
+  paths,
 } from './types/api-schema';
 import {
   SynologyDefaultGenreResponseDto,
+  SynologyEntryCertificateResponseDto,
   SynologyEntryListPinsResponseDto,
+  SynologyEntrySignInResponseDto,
   SynologyGenreResponseDto,
   SynologyPlaylistIdResponseDto,
   SynologyPlaylistResponseDto,
@@ -16,8 +20,83 @@ import {
   SynologySearchResponseDto,
 } from './api/synology-audiostation/dtos';
 import { SynologySuccessResponseDto } from './api/synology-audiostation/dtos/synology.dto';
-import { api, getAuthenticationHeaders } from './test-helper';
 import { expect } from '@jest/globals';
+import createClient from 'openapi-fetch';
+import crypto from 'node:crypto';
+
+let sessionId: string;
+let deviceId: string;
+
+export const api: ReturnType<typeof createClient<paths>> = createClient<paths>({
+  baseUrl: `http://localhost:${process.env.SERVER_PORT}`,
+  credentials: 'include',
+});
+
+export function encryptCredentials(username: string, password: string, publicKeyPem: string) {
+  const plaintext = `account=${username}&passwd=${password}`;
+  const publicKeyData = `-----BEGIN PUBLIC KEY-----\n${publicKeyPem}\n-----END PUBLIC KEY-----`;
+  const publicKey = crypto.createPublicKey({
+    key: publicKeyData,
+    format: 'pem',
+    type: 'spki',
+  });
+  const encrypted = crypto.publicEncrypt(
+    {
+      key: publicKey,
+      padding: crypto.constants.RSA_PKCS1_PADDING,
+    },
+    Buffer.from(plaintext, 'utf8'),
+  );
+  return encrypted.toString('base64');
+}
+
+export function clearSessionToken() {
+  sessionId = '';
+  deviceId = '';
+}
+
+export function getAuthenticationHeaders() {
+  if (!sessionId || !deviceId) {
+    throw new Error(`Session ID and device ID are not set.  Call signInEntryCgi() first.`);
+  }
+  return {
+    cookie: `id=${sessionId}; did=${deviceId}`,
+  };
+}
+
+export async function createSignInCookie() {
+  if (sessionId && deviceId) {
+    return;
+  }
+  // get the encryption key
+  const encryptionKeyResponse = await api.POST(`/webapi/entry.cgi`, {
+    body: {
+      api: SynologyApiEnum.SYNO_API_Encryption,
+      method: SynologyMethodEnum.getinfo,
+      version: 1,
+    },
+  });
+  const encryptionKey = encryptionKeyResponse?.data as SynologyEntryCertificateResponseDto;
+  if (!encryptionKey?.data?.public_key?.length) {
+    throw new Error(`Failed to get encryption key`);
+  }
+  // encrypt the payload
+  const payload = encryptCredentials(
+    process.env.DEFAULT_USERNAME || 'admin',
+    process.env.DEFAULT_PASSWORD || 'admin',
+    encryptionKey.data.public_key,
+  );
+  // do the sign in
+  const signinResponse = await api.POST(`/webapi/entry.cgi`, {
+    body: {
+      __cIpHeRtExT: payload,
+      client_time: encryptionKey.data.server_time,
+    },
+  });
+  const signIn = signinResponse?.data as SynologyEntrySignInResponseDto;
+  sessionId = signIn.data.sid;
+  deviceId = signIn.data.did;
+}
 
 type AlbumFilter = {
   artist?: string;
@@ -41,35 +120,18 @@ type SongFilter = {
   genre_filter?: string;
 };
 
-type FavoriteItem = {
-  criteria: {
-    album?: string;
-    album_artist?: string;
-    artist?: string;
-    composer?: string;
-    folder?: number;
-    genre?: string;
-    library?: string;
-    playlist?: string;
+type SynologyEntryNewPinItemDto = components['schemas']['SynologyEntryNewPinItemDto'];
+
+export async function addFavorite(items: SynologyEntryNewPinItemDto[]) {
+  type BodyType = components['schemas']['SynologyEntryCreatePinBodyDto'];
+  const body: BodyType = {
+    api: SynologyApiEnum.SYNO_AudioStation_Pin,
+    method: SynologyMethodEnum.pin,
+    version: 1,
+    items,
   };
-  name: string;
-  type: string;
-};
-
-export type ContainerItem =
-  | { album: string; album_artist: string }
-  | { artist: string }
-  | { composer: string }
-  | { genre: string };
-
-export async function addFavorite(items: FavoriteItem[]) {
   const { data, error } = await api.POST('/webapi/entry.cgi', {
-    body: {
-      api: SynologyApiEnum.SYNO_AudioStation_Pin,
-      method: SynologyMethodEnum.pin,
-      version: 1,
-      items: JSON.stringify(items),
-    },
+    body,
     params: {
       header: {
         ...getAuthenticationHeaders(),
@@ -108,11 +170,7 @@ export async function search(keyword: string) {
   return typedData;
 }
 
-export async function listFolders(
-  id?: string,
-  offset?: number,
-  limit?: number,
-) {
+export async function listFolders(id?: string, offset?: number, limit?: number) {
   const { data, error } = await api.POST('/webapi/AudioStation/folder.cgi', {
     body: {
       api: SynologyApiEnum.SYNO_AudioStation_Folder,
@@ -183,11 +241,7 @@ export async function listGenres(offset?: number, limit?: number) {
   return typedData;
 }
 
-export async function listComposers(
-  filters: ComposerFilter,
-  offset?: number,
-  limit?: number,
-) {
+export async function listComposers(filters: ComposerFilter, offset?: number, limit?: number) {
   const { data, error } = await api.POST('/webapi/AudioStation/composer.cgi', {
     body: {
       api: SynologyApiEnum.SYNO_AudioStation_Composer,
@@ -212,11 +266,7 @@ export async function listComposers(
   return data;
 }
 
-export async function listAlbums(
-  filters: AlbumFilter,
-  offset?: number,
-  limit?: number,
-) {
+export async function listAlbums(filters: AlbumFilter, offset?: number, limit?: number) {
   const { data, error } = await api.POST('/webapi/AudioStation/album.cgi', {
     body: {
       api: SynologyApiEnum.SYNO_AudioStation_Album,
@@ -241,11 +291,7 @@ export async function listAlbums(
   return data;
 }
 
-export async function listArtists(
-  filters: ArtistFilter,
-  offset?: number,
-  limit?: number,
-) {
+export async function listArtists(filters: ArtistFilter, offset?: number, limit?: number) {
   const { data, error } = await api.POST('/webapi/AudioStation/artist.cgi', {
     body: {
       api: SynologyApiEnum.SYNO_AudioStation_Artist,
@@ -270,11 +316,7 @@ export async function listArtists(
   return data;
 }
 
-export async function listSongs(
-  filters: SongFilter,
-  offset?: number,
-  limit?: number,
-) {
+export async function listSongs(filters: SongFilter, offset?: number, limit?: number) {
   const { data, error } = await api.POST('/webapi/AudioStation/song.cgi', {
     body: {
       additional: 'avg_rating',
@@ -327,16 +369,35 @@ export async function retrievePlaylistInfo(id: string) {
   return typedData.data.playlists[0];
 }
 
+export async function listPlaylists() {
+  const { data, error } = await api.POST('/webapi/AudioStation/playlist.cgi', {
+    body: {
+      api: SynologyApiEnum.SYNO_AudioStation_Playlist,
+      method: SynologyMethodEnum.list,
+      version: 1,
+      library: SynologyLibraryEnum.all,
+    },
+    params: {
+      header: {
+        ...getAuthenticationHeaders(),
+      },
+    },
+  });
+  if (error) {
+    throw new Error(typeof error === 'string' ? error : JSON.stringify(error));
+  }
+  const typedData = data as unknown as SynologyPlaylistResponseDto;
+  expect(typedData.data.playlists).toBeDefined();
+  return typedData.data.playlists;
+}
+
 export async function createPlaylist(
   name: string,
   type: 'normal' | 'smart',
-  conj_rule?: SmartPlaylistConjugal,
+  conj_rule?: SmartPlaylistConjugalEnum,
   rules_json?: string,
 ) {
-  const method =
-    type === 'normal'
-      ? SynologyMethodEnum.create
-      : SynologyMethodEnum.createsmart;
+  const method = type === 'normal' ? SynologyMethodEnum.create : SynologyMethodEnum.createsmart;
   const { data, error } = await api.POST('/webapi/AudioStation/playlist.cgi', {
     body: {
       api: SynologyApiEnum.SYNO_AudioStation_Playlist,
@@ -364,13 +425,10 @@ export async function updatePlaylist(
   id: string,
   name: string,
   type: 'normal' | 'smart',
-  conj_rule?: SmartPlaylistConjugal,
+  conj_rule?: SmartPlaylistConjugalEnum,
   rules_json?: string,
 ) {
-  const method =
-    type === 'normal'
-      ? SynologyMethodEnum.rename
-      : SynologyMethodEnum.updatesmart;
+  const method = type === 'normal' ? SynologyMethodEnum.rename : SynologyMethodEnum.updatesmart;
   const { data, error } = await api.POST('/webapi/AudioStation/playlist.cgi', {
     body: {
       api: SynologyApiEnum.SYNO_AudioStation_Playlist,
@@ -395,10 +453,7 @@ export async function updatePlaylist(
   return typedData.data.id;
 }
 
-export async function addItemToPlaylist(
-  playlistId: string,
-  items: (number | string)[],
-) {
+export async function addItemToPlaylist(playlistId: string, items: (number | string)[]) {
   const { data, error } = await api.POST('/webapi/AudioStation/playlist.cgi', {
     body: {
       api: SynologyApiEnum.SYNO_AudioStation_Playlist,
@@ -406,9 +461,7 @@ export async function addItemToPlaylist(
       version: 1,
       library: SynologyLibraryEnum.all,
       id: playlistId,
-      songs: items
-        .map((id) => (typeof id === 'number' && id > 0 ? `music_${id}` : id))
-        .join(','),
+      songs: items.map((id) => (typeof id === 'number' && id > 0 ? `music_${id}` : id)).join(','),
       offset: -1,
     },
     params: {
@@ -424,19 +477,28 @@ export async function addItemToPlaylist(
   expect(typedData.success).toBe(true);
 }
 
-export async function addContainerToPlaylist(
-  playlistId: string,
-  item: ContainerItem,
-) {
+export type PlaylistContainerItem =
+  | { album: string; album_artist: string }
+  | { artist: string }
+  | { composer: string }
+  | { genre: string };
+
+type SynologyEntryPlaylistAddBodyDto =
+  | components['schemas']['SynologyEntryPlaylistAddAlbumBodyDto']
+  | components['schemas']['SynologyEntryPlaylistAddArtistBodyDto']
+  | components['schemas']['SynologyEntryPlaylistAddComposerBodyDto']
+  | components['schemas']['SynologyEntryPlaylistAddGenreBodyDto'];
+
+export async function addContainerToPlaylist(playlistId: string, item: PlaylistContainerItem) {
+  const body: SynologyEntryPlaylistAddBodyDto = {
+    api: SynologyApiEnum.SYNO_AudioStation_Playlist,
+    method: SynologyMethodEnum.add_track,
+    version: 1,
+    id: playlistId,
+    ...item,
+  };
   const { data, error } = await api.POST('/webapi/entry.cgi', {
-    body: {
-      api: SynologyApiEnum.SYNO_AudioStation_Playlist,
-      method: SynologyMethodEnum.add_track,
-      version: 1,
-      library: SynologyLibraryEnum.all,
-      id: playlistId,
-      ...item,
-    },
+    body,
     params: {
       header: {
         ...getAuthenticationHeaders(),
@@ -449,11 +511,7 @@ export async function addContainerToPlaylist(
   return data;
 }
 
-export async function removeItemFromPlaylist(
-  playlistId: string,
-  offset: number,
-  limit?: number,
-) {
+export async function removeItemFromPlaylist(playlistId: string, offset: number, limit?: number) {
   const { data, error } = await api.POST('/webapi/AudioStation/playlist.cgi', {
     body: {
       api: SynologyApiEnum.SYNO_AudioStation_Playlist,
@@ -477,11 +535,7 @@ export async function removeItemFromPlaylist(
   return data;
 }
 
-export async function movePlaylistItems(
-  playlistId: string,
-  items: (number | string)[],
-  offset: number,
-) {
+export async function movePlaylistItems(playlistId: string, items: (number | string)[], offset: number) {
   const { data, error } = await api.POST('/webapi/AudioStation/playlist.cgi', {
     body: {
       api: SynologyApiEnum.SYNO_AudioStation_Playlist,
@@ -489,9 +543,7 @@ export async function movePlaylistItems(
       version: 1,
       library: SynologyLibraryEnum.all,
       id: playlistId,
-      songs: items
-        .map((id) => (typeof id === 'number' && id > 0 ? `music_${id}` : id))
-        .join(','),
+      songs: items.map((id) => (typeof id === 'number' && id > 0 ? `music_${id}` : id)).join(','),
       offset,
     },
     params: {
@@ -569,29 +621,24 @@ export async function getStationIndex(
   title: string,
   url: string,
 ): Promise<number> {
-  const { data: listData, error: listError } = await api.POST(
-    '/webapi/AudioStation/radio.cgi',
-    {
-      body: {
-        api: SynologyApiEnum.SYNO_AudioStation_Radio,
-        container,
-        method: SynologyMethodEnum.list,
-        version: 1,
-        offset: 0,
-        limit: 100000,
-      },
-      params: {
-        header: {
-          ...getAuthenticationHeaders(),
-        },
+  const { data: listData, error: listError } = await api.POST('/webapi/AudioStation/radio.cgi', {
+    body: {
+      api: SynologyApiEnum.SYNO_AudioStation_Radio,
+      container,
+      method: SynologyMethodEnum.list,
+      version: 1,
+      offset: 0,
+      limit: 100000,
+    },
+    params: {
+      header: {
+        ...getAuthenticationHeaders(),
       },
     },
-  );
+  });
   const typedListData = listData as unknown as SynologyRadioItemResponseDto;
   expect(listError).toBeUndefined();
-  const index = typedListData.data.radios.findIndex(
-    (item) => item.title === title && item.url === url,
-  );
+  const index = typedListData.data.radios.findIndex((item) => item.title === title && item.url === url);
   expect(index).toBeGreaterThanOrEqual(0);
   return index;
 }
@@ -619,10 +666,7 @@ export async function listStationsInContainer(
   return typedData.data.radios;
 }
 
-export async function deleteStation(
-  container: 'User defined' | 'My favorite',
-  stationIndex: number,
-) {
+export async function deleteStation(container: 'User defined' | 'My favorite', stationIndex: number) {
   const { data, error } = await api.POST('/webapi/AudioStation/radio.cgi', {
     body: {
       api: SynologyApiEnum.SYNO_AudioStation_Radio,

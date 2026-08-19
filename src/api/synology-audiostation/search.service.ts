@@ -1,18 +1,9 @@
-import {
-  CollatedAlbumEntity,
-  CollatedArtistEntity,
-  CollatedTrackEntity,
-} from 'src/database/entities';
-import { ContentType } from 'src/types/enums';
+import { CollatedAlbumEntity, CollatedArtistEntity, CollatedTrackEntity } from 'src/database/entities';
+import { ContentTypeEnum } from 'src/types/enums';
 import { InjectModel } from '@nestjs/sequelize';
 import { Injectable } from '@nestjs/common';
 import { Op, Sequelize } from 'sequelize';
-import {
-  SynologySearchAlbumDto,
-  SynologySearchArtistDto,
-  SynologySearchDataDto,
-  SynologySongDto,
-} from './dtos';
+import { SynologySearchAlbumDto, SynologySearchArtistDto, SynologySearchDataDto, SynologySongDto } from './dtos';
 import { replaceDoubleQuotes } from 'src/utils/strings';
 
 function albumToRow(album: CollatedAlbumEntity): SynologySearchAlbumDto {
@@ -61,7 +52,7 @@ function songToRow(song: CollatedTrackEntity): SynologySongDto {
     id: song.fileId.toString(),
     path: song.filePath,
     title: song.trackTitle,
-    type: ContentType.FILE,
+    type: ContentTypeEnum.FILE,
   };
 }
 
@@ -76,19 +67,12 @@ export class SynologySearchService {
     private readonly collatedTrackEntity: typeof CollatedTrackEntity,
   ) {}
 
-  async listSearchResults(
-    accountId: number,
-    keyword: string,
-  ): Promise<SynologySearchDataDto> {
+  async listSearchResults(accountId: number, keyword: string): Promise<SynologySearchDataDto> {
     const albums = await this.collatedAlbumEntity.findAll({
       where: {
         [Op.and]: [
           { accountId },
-          Sequelize.where(
-            Sequelize.fn('LOWER', Sequelize.col('title')),
-            Op.like,
-            `%${keyword.toLocaleLowerCase()}%`,
-          ),
+          Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('title')), Op.like, `%${keyword.toLocaleLowerCase()}%`),
         ],
       },
     });
@@ -96,11 +80,7 @@ export class SynologySearchService {
       where: {
         [Op.and]: [
           { accountId },
-          Sequelize.where(
-            Sequelize.fn('LOWER', Sequelize.col('name')),
-            Op.like,
-            `%${keyword.toLocaleLowerCase()}%`,
-          ),
+          Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('name')), Op.like, `%${keyword.toLocaleLowerCase()}%`),
         ],
       },
     });

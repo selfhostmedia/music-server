@@ -1,20 +1,16 @@
+import { AUTHENTICATED_REQUEST_DESCRIPTION, PAGINATED_DATA_DESCRIPTION } from './consts';
 import { AccountEntity } from 'src/database/entities';
 import {
   ApiBody,
   ApiExtraModels,
   ApiHeader,
   ApiOkResponse,
+  ApiOperation,
   ApiTags,
   getSchemaPath,
 } from '@nestjs/swagger';
-import {
-  Body,
-  Controller,
-  HttpCode,
-  HttpStatus,
-  Logger,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Logger, Post } from '@nestjs/common';
+import { SYNOLOGY_AUDIOSTATION_APIS } from 'src/constants/swagger';
 import {
   SynologyArtistResponseDto,
   SynologyArtistsBodyDto,
@@ -26,7 +22,7 @@ import { User } from '../user.decorator';
 import { plainToInstance } from 'class-transformer';
 
 @Controller()
-@ApiTags('Synology AudioStation APIs')
+@ApiTags(SYNOLOGY_AUDIOSTATION_APIS)
 export class SynologyArtistController {
   private readonly logger: Logger = new Logger(SynologyArtistController.name);
 
@@ -34,21 +30,23 @@ export class SynologyArtistController {
 
   @Post('/webapi/AudioStation/artist.cgi')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Lists artists in the music library',
+    description: [
+      `Lists artists found in the music library.  The artists can be filtered by genre.`,
+      PAGINATED_DATA_DESCRIPTION,
+      AUTHENTICATED_REQUEST_DESCRIPTION,
+    ].join('\n\n'),
+  })
   @ApiHeader({
     name: 'cookie',
-    description:
-      'The session ID and device ID tokens for the authenticated user',
-    required: true,
+    description: 'The session ID and device ID cookies for the user `id={sessionId}; did={deviceId}`',
   })
   @ApiOkResponse({
     description: 'Returns a list of artists',
     type: SynologyArtistResponseDto,
   })
-  @ApiExtraModels(
-    SynologyArtistsBodyDto,
-    SynologyArtistsByGenreBodyDto,
-    SynologyArtistsByDefaultGenreBodyDto,
-  )
+  @ApiExtraModels(SynologyArtistsBodyDto, SynologyArtistsByGenreBodyDto, SynologyArtistsByDefaultGenreBodyDto)
   @ApiBody({
     schema: {
       oneOf: [
@@ -64,61 +62,33 @@ export class SynologyArtistController {
       ],
     },
   })
-  async routeArtistCgi(
+  async route(
     @User() user: AccountEntity,
     @Body()
-    variousBodies:
-      | SynologyArtistsBodyDto
-      | SynologyArtistsByGenreBodyDto
-      | SynologyArtistsByDefaultGenreBodyDto,
+    variousBodies: SynologyArtistsBodyDto | SynologyArtistsByGenreBodyDto | SynologyArtistsByDefaultGenreBodyDto,
   ) {
     // Route #1:  artists in a genre
     if ('genre' in variousBodies) {
-      return this.listArtistsInGenre(
-        user,
-        plainToInstance(SynologyArtistsByGenreBodyDto, variousBodies),
-      );
+      return this.listArtistsInGenre(user, plainToInstance(SynologyArtistsByGenreBodyDto, variousBodies));
     }
     // Route #2:  artists in a "default" genre
     if ('genre_filter' in variousBodies) {
-      return this.listArtistsInDefaultGenre(
-        user,
-        plainToInstance(SynologyArtistsByDefaultGenreBodyDto, variousBodies),
-      );
+      return this.listArtistsInDefaultGenre(user, plainToInstance(SynologyArtistsByDefaultGenreBodyDto, variousBodies));
     }
     // Route #3:  all artists
-    return this.listArtists(
-      user,
-      plainToInstance(SynologyArtistsBodyDto, variousBodies),
-    );
+    return this.listArtists(user, plainToInstance(SynologyArtistsBodyDto, variousBodies));
   }
 
-  private async listArtistsInGenre(
-    user: AccountEntity,
-    body: SynologyArtistsByGenreBodyDto,
-  ) {
-    const data = await this.artistService.listArtistsByGenre(
-      user.id,
-      body.genre,
-      body.offset,
-      body.limit,
-    );
+  private async listArtistsInGenre(user: AccountEntity, body: SynologyArtistsByGenreBodyDto) {
+    const data = await this.artistService.listArtistsByGenre(user.id, body.genre, body.offset, body.limit);
     return {
       data,
       success: true,
     };
   }
 
-  private async listArtistsInDefaultGenre(
-    user: AccountEntity,
-    body: SynologyArtistsByDefaultGenreBodyDto,
-  ) {
-    const data = await this.artistService.listArtistsByGenre(
-      user.id,
-      body.genre_filter,
-      body.offset,
-      body.limit,
-    );
+  private async listArtistsInDefaultGenre(user: AccountEntity, body: SynologyArtistsByDefaultGenreBodyDto) {
+    const data = await this.artistService.listArtistsByGenre(user.id, body.genre_filter, body.offset, body.limit);
     return {
       data,
       success: true,
@@ -126,11 +96,7 @@ export class SynologyArtistController {
   }
 
   private async listArtists(user: AccountEntity, body: SynologyArtistsBodyDto) {
-    const data = await this.artistService.listArtists(
-      user.id,
-      body.offset,
-      body.limit,
-    );
+    const data = await this.artistService.listArtists(user.id, body.offset, body.limit);
     return {
       data,
       success: true,

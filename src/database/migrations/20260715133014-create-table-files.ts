@@ -15,7 +15,6 @@ export async function up(queryInterface: QueryInterface) {
         model: 'accounts',
         key: 'id',
       },
-      onUpdate: 'CASCADE',
       onDelete: 'CASCADE',
     },
     album_id: {
@@ -25,7 +24,6 @@ export async function up(queryInterface: QueryInterface) {
         model: 'albums',
         key: 'id',
       },
-      onUpdate: 'CASCADE',
       onDelete: 'CASCADE',
     },
     bit_rate: DataTypes.INTEGER,
@@ -54,7 +52,6 @@ export async function up(queryInterface: QueryInterface) {
         model: 'root_paths',
         key: 'id',
       },
-      onUpdate: 'CASCADE',
       onDelete: 'CASCADE',
     },
     title: DataTypes.STRING(255),

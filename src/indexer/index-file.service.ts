@@ -14,12 +14,7 @@ export class IndexFileService {
     private readonly fileEntity: typeof FileEntity,
   ) {}
 
-  async updateFile(
-    embeddedData: IAudioMetadata,
-    fileId: number,
-    accountId: number,
-    transaction?: Transaction,
-  ) {
+  async updateFile(embeddedData: IAudioMetadata, fileId: number, accountId: number, transaction?: Transaction) {
     const file = await this.fileEntity.findByPk(fileId, { transaction });
     if (!file) {
       throw new Error(`File with id ${fileId} not found`);
@@ -40,8 +35,7 @@ export class IndexFileService {
         discNumber: embeddedData?.common.disk?.no || file.discNumber || 0,
         duration: embeddedData?.format.duration || file.duration || 0,
         frequency: embeddedData?.format.sampleRate || file.frequency || 0,
-        title:
-          sanitizeString(embeddedData?.common.title || '') || file.title || '',
+        title: sanitizeString(embeddedData?.common.title || '') || file.title || '',
         trackNumber: embeddedData?.common.track?.no || file.trackNumber || 0,
         year: embeddedData?.common.year || file.year || 0,
       },

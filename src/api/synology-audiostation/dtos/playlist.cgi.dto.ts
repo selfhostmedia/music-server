@@ -2,21 +2,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsInt, IsNumber, IsString } from 'class-validator';
 import {
-  PlaylistType,
-  SmartPlaylistConjugal,
-  SmartPlaylistField,
-  SmartPlaylistIntervalTag,
-  SmartPlaylistOperation,
+  PlaylistTypeEnum,
+  SmartPlaylistConjugalEnum,
+  SmartPlaylistFieldEnum,
+  SmartPlaylistIntervalTagEnum,
+  SmartPlaylistOperationEnum,
 } from 'src/types/enums';
-import {
-  SynologyApiEnum,
-  SynologyLibraryEnum,
-  SynologyMethodEnum,
-} from '../enums';
-import {
-  SynologyPaginationDto,
-  SynologySuccessResponseDto,
-} from './synology.dto';
+import { SynologyApiEnum, SynologyLibraryEnum, SynologyMethodEnum } from '../enums';
+import { SynologyPaginationDto, SynologySuccessResponseDto } from './synology.dto';
 import { SynologySongDto } from './song.cgi.dto';
 import { Transform, plainToInstance } from 'class-transformer';
 
@@ -90,6 +83,23 @@ export class SynologyPlaylistRetrieveBodyDto extends SynologyPlaylistBodyDto {
   declare id: string;
 }
 
+export class SynologyPlaylistListBodyDto extends SynologyPlaylistBodyDto {
+  /**
+   * Synology's API uses this value to route requests appropriately but NestJS controllers
+   * handle the routing between URL paths so this value is ignored for now but defined to
+   * match the Synology API.
+   *
+   * This endpoint requires a value of `list` be provided for correctness.
+   */
+  @ApiProperty({
+    enum: SynologyMethodEnum,
+    enumName: 'SynologyMethodEnum',
+    example: SynologyMethodEnum.LIST,
+  })
+  @IsEnum(SynologyMethodEnum)
+  declare method: SynologyMethodEnum;
+}
+
 export class SynologyPlaylistCreateNormalBodyDto extends SynologyPlaylistBodyDto {
   /**
    * Synology's API uses this value to route requests appropriately but NestJS controllers
@@ -125,68 +135,68 @@ class SynologySmartListRule {
   @IsString()
   declare tagval: string;
 
-  get intervalName(): SmartPlaylistIntervalTag | undefined {
+  get intervalName(): SmartPlaylistIntervalTagEnum | undefined {
     switch (this.interval) {
       case 1:
-        return SmartPlaylistIntervalTag.DAYS;
+        return SmartPlaylistIntervalTagEnum.DAYS;
       case 2:
-        return SmartPlaylistIntervalTag.WEEKS;
+        return SmartPlaylistIntervalTagEnum.WEEKS;
       case 3:
-        return SmartPlaylistIntervalTag.MONTHS;
+        return SmartPlaylistIntervalTagEnum.MONTHS;
       default:
         return undefined;
     }
   }
 
-  get operationName(): SmartPlaylistOperation | undefined {
+  get operationName(): SmartPlaylistOperationEnum | undefined {
     switch (this.op) {
       case 1:
-        return SmartPlaylistOperation.IS;
+        return SmartPlaylistOperationEnum.IS;
       case 2:
-        return SmartPlaylistOperation.IS_NOT;
+        return SmartPlaylistOperationEnum.IS_NOT;
       case 3:
-        return SmartPlaylistOperation.CONTAINS;
+        return SmartPlaylistOperationEnum.CONTAINS;
       case 4:
-        return SmartPlaylistOperation.DOES_NOT_CONTAIN;
+        return SmartPlaylistOperationEnum.DOES_NOT_CONTAIN;
       case 5:
-        return SmartPlaylistOperation.LESS_THAN;
+        return SmartPlaylistOperationEnum.LESS_THAN;
       case 6:
-        return SmartPlaylistOperation.GREATER_THAN_OR_EQUAL_TO;
+        return SmartPlaylistOperationEnum.GREATER_THAN_OR_EQUAL_TO;
       case 7:
-        return SmartPlaylistOperation.IN_THE_LAST;
+        return SmartPlaylistOperationEnum.IN_THE_LAST;
       case 8:
-        return SmartPlaylistOperation.NOT_IN_THE_LAST;
+        return SmartPlaylistOperationEnum.NOT_IN_THE_LAST;
       case 9:
-        return SmartPlaylistOperation.AFTER;
+        return SmartPlaylistOperationEnum.AFTER;
       case 10:
-        return SmartPlaylistOperation.BEFORE;
+        return SmartPlaylistOperationEnum.BEFORE;
       default:
         return undefined;
     }
   }
 
-  get fieldName(): SmartPlaylistField | undefined {
+  get fieldName(): SmartPlaylistFieldEnum | undefined {
     switch (this.tag) {
       case 1:
-        return SmartPlaylistField.ARTIST;
+        return SmartPlaylistFieldEnum.ARTIST;
       case 2:
-        return SmartPlaylistField.ALBUM;
+        return SmartPlaylistFieldEnum.ALBUM;
       case 11:
-        return SmartPlaylistField.ALBUM_ARTIST;
+        return SmartPlaylistFieldEnum.ALBUM_ARTIST;
       case 12:
-        return SmartPlaylistField.COMPOSER;
+        return SmartPlaylistFieldEnum.COMPOSER;
       case 3:
-        return SmartPlaylistField.GENRE;
+        return SmartPlaylistFieldEnum.GENRE;
       case 4:
-        return SmartPlaylistField.FILE_PATH;
+        return SmartPlaylistFieldEnum.FILE_PATH;
       case 7:
-        return SmartPlaylistField.YEAR;
+        return SmartPlaylistFieldEnum.YEAR;
       case 9:
-        return SmartPlaylistField.BIT_RATE;
+        return SmartPlaylistFieldEnum.BIT_RATE;
       case 10:
-        return SmartPlaylistField.DATE_ADDED;
+        return SmartPlaylistFieldEnum.DATE_ADDED;
       case 13:
-        return SmartPlaylistField.RATING;
+        return SmartPlaylistFieldEnum.RATING;
       default:
         return undefined;
     }
@@ -195,12 +205,12 @@ class SynologySmartListRule {
 
 export class SynologyPlaylistCreateSmartBodyDto extends SynologyPlaylistBodyDto {
   @ApiProperty({
-    enum: SmartPlaylistConjugal,
-    enumName: 'SmartPlaylistConjugal',
-    example: SmartPlaylistConjugal.AND,
+    enum: SmartPlaylistConjugalEnum,
+    enumName: 'SmartPlaylistConjugalEnum',
+    example: SmartPlaylistConjugalEnum.AND,
   })
-  @IsEnum(SmartPlaylistConjugal)
-  declare conj_rule: SmartPlaylistConjugal;
+  @IsEnum(SmartPlaylistConjugalEnum)
+  declare conj_rule: SmartPlaylistConjugalEnum;
 
   /**
    * Synology's API uses this value to route requests appropriately but NestJS controllers
@@ -227,11 +237,7 @@ export class SynologyPlaylistCreateSmartBodyDto extends SynologyPlaylistBodyDto 
     type: SynologySmartListRule,
     isArray: true,
   })
-  @Transform(({ value }) =>
-    JSON.parse(value).map((rule) =>
-      plainToInstance(SynologySmartListRule, rule),
-    ),
-  )
+  @Transform(({ value }) => JSON.parse(value).map((rule) => plainToInstance(SynologySmartListRule, rule)))
   declare rules_json: SynologySmartListRule[];
 }
 
@@ -307,14 +313,14 @@ export class SynologyPlaylistDeleteBodyDto extends SynologyPlaylistBodyDto {
     const type = obj.id.split('/')[0].split('_')[2];
     switch (type) {
       case 'normal':
-        return PlaylistType.NORMAL;
+        return PlaylistTypeEnum.NORMAL;
       case 'smart':
-        return PlaylistType.SMART;
+        return PlaylistTypeEnum.SMART;
       default:
         return undefined;
     }
   })
-  declare type: PlaylistType;
+  declare type: PlaylistTypeEnum;
 
   /**
    * Synology's API uses this value to route requests appropriately but NestJS controllers
@@ -433,9 +439,7 @@ export class SynologyPlaylistMoveItemsBodyDto extends SynologyPlaylistBodyDto {
    * or when deleting, an empty value.
    */
   @IsInt()
-  @Transform(({ value }) =>
-    value.split(',').map((v) => Number.parseInt(v.split('_').pop(), 10)),
-  )
+  @Transform(({ value }) => value.split(',').map((v) => Number.parseInt(v.split('_').pop(), 10)))
   declare songs: number[];
 }
 
@@ -543,12 +547,12 @@ export class SynologyPlaylistRuleDto {
 
 class SynologyPlaylistAdditionalDto {
   @ApiProperty({
-    enum: SmartPlaylistConjugal,
-    enumName: 'SmartPlaylistConjugal',
-    example: SmartPlaylistConjugal.AND,
+    enum: SmartPlaylistConjugalEnum,
+    enumName: 'SmartPlaylistConjugalEnum',
+    example: SmartPlaylistConjugalEnum.AND,
   })
-  @IsEnum(SmartPlaylistConjugal)
-  rules_conjunction?: SmartPlaylistConjugal;
+  @IsEnum(SmartPlaylistConjugalEnum)
+  rules_conjunction?: SmartPlaylistConjugalEnum;
 
   @ApiProperty({
     type: SynologyPlaylistRuleDto,
@@ -576,12 +580,12 @@ class SynologyPlaylistDto {
   declare sharing_status: string;
 
   @ApiProperty({
-    enum: PlaylistType,
-    enumName: 'PlaylistType',
-    example: PlaylistType.NORMAL,
+    enum: PlaylistTypeEnum,
+    enumName: 'PlaylistTypeEnum',
+    example: PlaylistTypeEnum.NORMAL,
   })
-  @IsEnum(PlaylistType)
-  declare type: PlaylistType;
+  @IsEnum(PlaylistTypeEnum)
+  declare type: PlaylistTypeEnum;
 
   @ApiProperty({
     type: SynologyPlaylistAdditionalDto,

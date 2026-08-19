@@ -6,9 +6,7 @@ export class AppLoggerMiddleware implements NestMiddleware {
 
   use(request: Request, response: Response, next: NextFunction): void {
     response.on('close', () => {
-      this.logger.log(
-        `${request.method} ${request.url} ${request.path} ${response.statusCode}`,
-      );
+      this.logger.log(`${request.method} ${request.url} ${request.path} ${response.statusCode}`);
     });
     next();
   }
