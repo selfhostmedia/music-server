@@ -334,3 +334,15 @@ export async function signInDefaultAccount(administrator = true) {
     userJwtToken = jwtToken;
   }
 }
+
+export async function extraAdminsCleared() {
+  const accounts = await listAccounts();
+  const adminUsers = accounts.data?.accounts.filter((user) => user.roles.includes(UserRoleEnum.admin));
+  if (adminUsers?.length === 1) {
+    return true;
+  }
+  await new Promise((resolve) => {
+    setTimeout(resolve, 1000);
+  });
+  return extraAdminsCleared();
+}

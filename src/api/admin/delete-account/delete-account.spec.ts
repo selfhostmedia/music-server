@@ -1,6 +1,6 @@
 import { ErrorCodes } from '../../../constants/error-codes';
 import { UserRoleEnum } from '../../../types/api-schema';
-import { api, createTestAccount, deleteAccount, listAccounts, signInDefaultAccount } from '../../../test-helper';
+import { api, createTestAccount, deleteAccount, extraAdminsCleared, listAccounts, signInDefaultAccount } from '../../../test-helper';
 import { beforeAll, describe, expect, it } from '@jest/globals';
 
 describe('/api/admin/delete-account', () => {
@@ -38,12 +38,13 @@ describe('/api/admin/delete-account', () => {
     });
 
     it('should reject only administrator', async () => {
-      const { data } = await listAccounts();
-      const adminAccount = data?.accounts.find((user) => user.roles.includes(UserRoleEnum.admin));
-      if (!adminAccount) {
+      await extraAdminsCleared();
+      const users = await listAccounts();
+      const adminUser = users.data?.accounts.find((user) => user.roles.includes(UserRoleEnum.admin));
+      if (!adminUser) {
         throw new Error('No admin account found');
       }
-      const { error } = await deleteAccount(adminAccount.id);
+      const { error } = await deleteAccount(adminUser.id);
       expect(error?.message[0]).toBe(ErrorCodes.ACCOUNT_ONLY_ADMIN_ERROR);
     });
   });

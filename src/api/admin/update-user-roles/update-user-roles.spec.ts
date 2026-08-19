@@ -6,6 +6,7 @@ import {
   createTestAccount,
   deleteAccount,
   deleteTestData,
+  extraAdminsCleared,
   listAccounts,
   signInDefaultAccount,
   updateUserRoles,
@@ -62,15 +63,12 @@ describe('/api/admin/update-user-roles', () => {
     });
 
     it(`should reject revoking only admin's role`, async () => {
+      await extraAdminsCleared();
       const users = await listAccounts();
       const adminUser = users.data?.accounts.find((a) => a.roles.includes(UserRoleEnum.admin));
       if (!adminUser) {
         throw new Error('No admin user found');
       }
-      const otherAdmins = users.data?.accounts.filter(
-        (a) => a.roles.includes(UserRoleEnum.admin) && a.id !== adminUser.id,
-      );
-      expect(otherAdmins?.length).toBe(0);
       const { error } = await updateUserRoles(adminUser.id, [UserRoleEnum.user]);
       expect(error?.message[0]).toBe(ErrorCodes.ACCOUNT_ONLY_ADMIN_ERROR);
     });
