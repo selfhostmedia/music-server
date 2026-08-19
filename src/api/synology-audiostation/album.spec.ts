@@ -1,6 +1,5 @@
 import { beforeAll, describe, expect, it } from '@jest/globals';
-import { createSignInCookie } from '../../test-helper';
-import { listAlbums } from '../../test-helper.synology';
+import { createSignInCookie, listAlbums } from '../../test-helper.synology';
 
 describe('/webapi/AudioStation/album.cgi', () => {
   beforeAll(async () => {
@@ -38,12 +37,12 @@ describe('/webapi/AudioStation/album.cgi', () => {
 
   it('should paginate albums by genre', async () => {
     // page 1
-    const data = await listAlbums({ genre: 'AlternRock' }, 0, 1);
+    const data = await listAlbums({ genre: 'Rock' }, 0, 1);
     expect(data?.data.total).toBe(2);
     expect(data?.data.albums.length).toBe(1);
     expect(data?.data.albums[0]?.name).toBe('Album 2');
     // page 2
-    const data2 = await listAlbums({ genre: 'AlternRock' }, 1, 1);
+    const data2 = await listAlbums({ genre: 'Rock' }, 1, 1);
     expect(data?.data.total).toBe(2);
     expect(data2?.data.albums.length).toBe(1);
     expect(data2?.data.albums[0]?.name).toBe('Album 4');
@@ -56,7 +55,17 @@ describe('/webapi/AudioStation/album.cgi', () => {
     expect(data?.data.albums[0]?.name).toBe('Album 4');
   });
 
-  it.todo('should paginate albums by default genre');
+  it('should paginate albums by default genre', async () => {
+    // page 1
+    const data = await listAlbums({ genre: 'EDM' }, 0, 1);
+    expect(data?.data.total).toBe(1);
+    expect(data?.data.albums.length).toBe(1);
+    expect(data?.data.albums[0]?.name).toBe('Album 4');
+    // page 2
+    const data2 = await listAlbums({ genre: 'EDM' }, 1, 1);
+    expect(data2?.data.total).toBe(1);
+    expect(data2?.data.albums.length).toBe(0);
+  });
 
   it('should list albums by multi-genre', async () => {
     const data = await listAlbums({ genre: 'EDM/Dance' });
@@ -68,7 +77,18 @@ describe('/webapi/AudioStation/album.cgi', () => {
     expect(data?.data.albums[1]?.name).toBe('Album 4');
   });
 
-  it.todo('should paginate albums by multi-genre');
+  it('should paginate albums by multi-genre', async () => {
+    // page 1
+    const data = await listAlbums({ genre: 'EDM/Dance' }, 0, 1);
+    expect(data?.data.total).toBe(2);
+    expect(data?.data.albums.length).toBe(1);
+    expect(data?.data.albums[0]?.name).toBe('Album 2');
+    // page 2
+    const data2 = await listAlbums({ genre: 'EDM/Dance' }, 1, 1);
+    expect(data2?.data.total).toBe(2);
+    expect(data2?.data.albums.length).toBe(1);
+    expect(data2?.data.albums[0]?.name).toBe('Album 4');
+  });
 
   it('should list albums by composer', async () => {
     const data = await listAlbums({ composer: 'Composer 4' });
@@ -126,7 +146,17 @@ describe('/webapi/AudioStation/album.cgi', () => {
     expect(data?.data.albums[0]?.album_artist).toBe('Artist 3');
   });
 
-  it.todo('should paginate albums by artist + default genre');
+  it('should paginate albums by artist + default genre', async () => {
+    // page 1
+    const data = await listAlbums({ artist: 'Artist 3', genre: 'EDM' }, 0, 1);
+    expect(data?.data.total).toBe(1);
+    expect(data?.data.albums.length).toBe(1);
+    expect(data?.data.albums[0]?.name).toBe('Album 4');
+    // page 2
+    const data2 = await listAlbums({ artist: 'Artist 3', genre: 'EDM' }, 1, 1);
+    expect(data2?.data.total).toBe(1);
+    expect(data2?.data.albums.length).toBe(0);
+  });
 
   it('should list albums by artist in genre', async () => {
     const data = await listAlbums({ artist: 'Artist 3', genre: 'Chanson' });
@@ -137,7 +167,18 @@ describe('/webapi/AudioStation/album.cgi', () => {
     expect(data?.data.albums[1]?.album_artist).toBe('Artist 3');
   });
 
-  it.todo('should paginate albums by artist in genre');
+  it('should paginate albums by artist in genre', async () => {
+    // page 1
+    const data = await listAlbums({ artist: 'Artist 3', genre: 'Chanson' }, 0, 1);
+    expect(data?.data.total).toBe(2);
+    expect(data?.data.albums.length).toBe(1);
+    expect(data?.data.albums[0]?.name).toBe('Album 4');
+    // page 2
+    const data2 = await listAlbums({ artist: 'Artist 3', genre: 'Chanson' }, 1, 1);
+    expect(data2?.data.total).toBe(2);
+    expect(data2?.data.albums.length).toBe(1);
+    expect(data2?.data.albums[0]?.name).toBe('Album 5');
+  });
 
   it('should list all albums with no filters', async () => {
     const data = await listAlbums({});

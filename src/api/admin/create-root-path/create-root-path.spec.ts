@@ -1,0 +1,85 @@
+import { ErrorCodes } from '../../../constants/error-codes';
+import { UserRoleEnum } from '../../../types/api-schema';
+import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
+import {
+  api,
+  createRootPath,
+  createTestAccount,
+  deleteTestData,
+  listRootPaths,
+  signInDefaultAccount,
+} from '../../../test-helper';
+import { join } from 'node:path';
+import { mkdirSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+
+describe('/api/admin/create-root-path', () => {
+  beforeAll(async () => {
+    await signInDefaultAccount(true);
+    await signInDefaultAccount(false);
+  });
+
+  describe('authorized access', () => {
+    it('should reject guest access', async () => {
+      const newRootPath = join(tmpdir(), `test-guest-create-unauthorized-access-${Date.now()}`);
+      const { error } = await api.POST(`/api/admin/create-root-path`, {
+        body: {
+          rootPath: newRootPath,
+        },
+        params: {
+          query: {
+            accountId: 1,
+          },
+          header: {
+            Authorization: '',
+          },
+        },
+      });
+      expect(error?.error).toBe(ErrorCodes.FORBIDDEN_ERROR);
+    });
+
+    it('should reject non-admin access', async () => {
+      const newRootPath = join(tmpdir(), `test-user-create-unauthorized-access-${Date.now()}`);
+      const { error } = await createRootPath(1, newRootPath, false);
+      expect(error?.message[0]).toBe(ErrorCodes.AUTHORIZATION_ERROR);
+    });
+  });
+
+  describe('errors', () => {
+    it('should reject invalid account id', async () => {
+      const { error } = await createRootPath(0, tmpdir());
+      const typedError = error as unknown as Record<string, string | string[]>;
+      expect(typedError?.message?.[0]).toBe(ErrorCodes.ACCOUNT_NOT_FOUND_ERROR);
+    });
+
+    it('should reject invalid path', async () => {
+      const invalidPath = join(tmpdir(), `test-create-invalid-${Date.now()}`);
+      const { error } = await createRootPath(1, invalidPath);
+      expect(error?.message?.[0]).toBe(ErrorCodes.ROOT_PATH_DOES_NOT_EXIST_ERROR);
+    });
+  });
+
+  describe('success', () => {
+    const deleteAccounts: number[] = [];
+
+    afterAll(async () => {
+      await deleteTestData(deleteAccounts);
+    });
+
+    it('should create a new root path for an account', async () => {
+      // create a user
+      const username = `testuser-${Date.now()}`;
+      const account = await createTestAccount(username, 'password', [UserRoleEnum.user]);
+      // create the path
+      const originalRootPath = join(tmpdir(), `test-new-root-path-${Date.now()}`);
+      mkdirSync(originalRootPath, { recursive: true });
+      const { data } = await createRootPath(account.id, originalRootPath);
+      expect(data?.success).toBe(true);
+      // verify it
+      const updatedRootPathList = await listRootPaths();
+      const rootPath = updatedRootPathList.data?.rootPaths.find((path) => path.rootPath === originalRootPath);
+      expect(rootPath).toBeDefined();
+      deleteAccounts.push(account.id);
+    });
+  });
+});

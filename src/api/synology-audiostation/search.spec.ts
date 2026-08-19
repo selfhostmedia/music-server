@@ -1,6 +1,5 @@
 import { beforeAll, describe, expect, it } from '@jest/globals';
-import { createSignInCookie } from '../../test-helper';
-import { search } from '../../test-helper.synology';
+import { createSignInCookie, search } from '../../test-helper.synology';
 
 describe('/webapi/AudioStation/search.cgi', () => {
   beforeAll(async () => {

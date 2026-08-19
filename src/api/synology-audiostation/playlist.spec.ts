@@ -1,23 +1,22 @@
 import {
-  SmartPlaylistConjugal,
+  SmartPlaylistConjugalEnum,
   SynologyApiEnum,
   SynologyLibraryEnum,
   SynologyMethodEnum,
 } from '../../types/api-schema';
 import {
   addItemToPlaylist,
+  api,
   createPlaylist,
+  createSignInCookie,
+  getAuthenticationHeaders,
   getPlaylistItems,
+  listPlaylists,
   movePlaylistItems,
   removeItemFromPlaylist,
   retrievePlaylistInfo,
   updatePlaylist,
 } from '../../test-helper.synology';
-import {
-  api,
-  createSignInCookie,
-  getAuthenticationHeaders,
-} from '../../test-helper';
 import { beforeAll, describe, expect, it } from '@jest/globals';
 
 describe('/webapi/AudioStation/playlist.cgi', () => {
@@ -39,11 +38,7 @@ describe('/webapi/AudioStation/playlist.cgi', () => {
     const newPlaylistId = await createPlaylist(name, 'normal');
     expect(newPlaylistId).toBeDefined();
     const newName = `Updated playlist ${Date.now()}`;
-    const updatedPlaylistId = await updatePlaylist(
-      newPlaylistId,
-      newName,
-      'normal',
-    );
+    const updatedPlaylistId = await updatePlaylist(newPlaylistId, newName, 'normal');
     const playlist = await retrievePlaylistInfo(updatedPlaylistId);
     expect(playlist.name).toBe(newName);
     expect(playlist.type).toBe('normal');
@@ -54,7 +49,7 @@ describe('/webapi/AudioStation/playlist.cgi', () => {
     const newPlaylistId = await createPlaylist(
       name,
       'smart',
-      SmartPlaylistConjugal.and,
+      SmartPlaylistConjugalEnum.and,
       JSON.stringify([
         {
           interval: 0,
@@ -82,7 +77,7 @@ describe('/webapi/AudioStation/playlist.cgi', () => {
     const newPlaylistId = await createPlaylist(
       name,
       'smart',
-      SmartPlaylistConjugal.and,
+      SmartPlaylistConjugalEnum.and,
       JSON.stringify([
         {
           interval: 0,
@@ -98,7 +93,7 @@ describe('/webapi/AudioStation/playlist.cgi', () => {
       newPlaylistId,
       newName,
       'smart',
-      SmartPlaylistConjugal.and,
+      SmartPlaylistConjugalEnum.and,
       JSON.stringify([
         {
           interval: 1,
@@ -172,7 +167,7 @@ describe('/webapi/AudioStation/playlist.cgi', () => {
     const newPlaylistId = await createPlaylist(
       name,
       'smart',
-      SmartPlaylistConjugal.and,
+      SmartPlaylistConjugalEnum.and,
       JSON.stringify([
         {
           interval: 0,
@@ -195,14 +190,34 @@ describe('/webapi/AudioStation/playlist.cgi', () => {
     expect(playlist.additional.rules?.[0]?.interval).toBe(0);
   });
 
-  it('should get items from a playlist', async () => {});
+  it('should list playlists', async () => {
+    const newPlaylist1 = await createPlaylist(`Test playlist 1 ${Date.now()}`, 'normal');
+    const newPlaylist2 = await createPlaylist(`Test playlist 2 ${Date.now()}`, 'normal');
+    const newPlaylist3 = await createPlaylist(`Test playlist 3 ${Date.now()}`, 'normal');
+    const newPlaylist4 = await createPlaylist(`Test playlist 4 ${Date.now()}`, 'normal');
+    const playlists = await listPlaylists();
+    expect(playlists.some((p) => p.id === newPlaylist1)).toBe(true);
+    expect(playlists.some((p) => p.id === newPlaylist2)).toBe(true);
+    expect(playlists.some((p) => p.id === newPlaylist3)).toBe(true);
+    expect(playlists.some((p) => p.id === newPlaylist4)).toBe(true);
+  });
+
+  it('should get items from a playlist', async () => {
+    const name = `Test playlist ${Date.now()}`;
+    const playlistId = await createPlaylist(name, 'normal');
+    await addItemToPlaylist(playlistId, [1]);
+    const contents = await getPlaylistItems(playlistId);
+    expect(contents?.additional.songs).toBeDefined();
+    expect(contents?.additional.songs?.length).toBe(1);
+    expect(contents?.additional.songs?.[0]?.id).toBeDefined();
+  });
 
   it('should reject adding to a smart playlist', async () => {
     const name = `Test playlist ${Date.now()}`;
     const playlistId = await createPlaylist(
       name,
       'smart',
-      SmartPlaylistConjugal.and,
+      SmartPlaylistConjugalEnum.and,
       JSON.stringify([
         {
           interval: 0,
@@ -228,9 +243,7 @@ describe('/webapi/AudioStation/playlist.cgi', () => {
   it('should add radio to a playlist', async () => {
     const name = `Test playlist ${Date.now()}`;
     const playlistId = await createPlaylist(name, 'normal');
-    await addItemToPlaylist(playlistId, [
-      'radio_Station 1 http://station1.url',
-    ]);
+    await addItemToPlaylist(playlistId, ['radio_Station 1 http://station1.url']);
     const contents = await getPlaylistItems(playlistId);
     expect(contents?.additional.songs).toBeDefined();
     expect(contents?.additional.songs?.length).toBe(1);

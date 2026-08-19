@@ -1,14 +1,7 @@
 import { SynologyApiEnum, SynologyMethodEnum } from '../../types/api-schema';
-import {
-  SynologyProxySongInfoResponseDto,
-  SynologyProxyStreamInfoResponseDto,
-} from './dtos/proxy.cgi.dto';
+import { SynologyProxySongInfoResponseDto, SynologyProxyStreamInfoResponseDto } from './dtos/proxy.cgi.dto';
 import { SynologyRadioItemDto, SynologyRadioItemResponseDto } from './dtos';
-import {
-  api,
-  createSignInCookie,
-  getAuthenticationHeaders,
-} from '../../test-helper';
+import { api, createSignInCookie, getAuthenticationHeaders } from '../../test-helper.synology';
 import { beforeAll, describe, expect, it } from '@jest/globals';
 
 describe('/webapi/AudioStation/proxy.cgi', () => {
