@@ -1,6 +1,13 @@
 import { ErrorCodes } from '../../../constants/error-codes';
 import { UserRoleEnum } from '../../../types/api-schema';
-import { api, createTestAccount, deleteAccount, extraAdminsCleared, listAccounts, signInDefaultAccount } from '../../../test-helper';
+import {
+  api,
+  createTestAccount,
+  deleteAccount,
+  extraAdminsCleared,
+  listAccounts,
+  signInDefaultAccount,
+} from '../../../test-helper';
 import { beforeAll, describe, expect, it } from '@jest/globals';
 
 describe('/api/admin/delete-account', () => {
