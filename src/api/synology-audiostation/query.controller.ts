@@ -1,10 +1,12 @@
+import { AUTHENTICATED_REQUEST_DESCRIPTION } from './consts';
 import { AllowGuest } from '../role.guard';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Controller, HttpCode, HttpStatus, Logger, Post } from '@nestjs/common';
+import { SYNOLOGY_AUDIOSTATION_APIS } from 'src/constants/swagger';
 import { SynologyQueryService } from './query.service';
 
 @Controller()
-@ApiTags('Synology AudioStation APIs')
+@ApiTags(SYNOLOGY_AUDIOSTATION_APIS)
 export class SynologyQueryController {
   private readonly logger: Logger = new Logger(SynologyQueryController.name);
 
@@ -17,8 +19,15 @@ export class SynologyQueryController {
    */
   @Post('/webapi/query.cgi')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Returns information about the Synology AudioStation API',
+    description: [
+      `Provides information to Synology DS Audio apps about the server and its capabilities.`,
+      AUTHENTICATED_REQUEST_DESCRIPTION,
+    ].join('\n\n'),
+  })
   @AllowGuest()
-  async postQueryCgi() {
+  async route() {
     const data = this.queryService.getApiCapabilities();
     return {
       data,

@@ -1,13 +1,14 @@
 /* eslint-disable max-classes-per-file */
+import { ErrorCodes } from 'src/constants/error-codes';
 import { IsBoolean } from 'class-validator';
-import { SuccessResponse } from 'src/api/response.dto';
+import { SuccessResponseDto } from 'src/api/response.dto';
 
 export class AdminSetIndexerStatusBodyDto {
   /**
    * Whether the scanner should be enabled or disabled
    */
-  @IsBoolean()
+  @IsBoolean({ message: ErrorCodes.INVALID_ENABLED_ERROR })
   declare enabled: boolean;
 }
 
-export class AdminSetIndexerStatusResponseDto extends SuccessResponse {}
+export class AdminSetIndexerStatusResponseDto extends SuccessResponseDto {}

@@ -1,30 +1,27 @@
 /* eslint-disable max-classes-per-file */
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  BadRequestResponse,
-  NotFoundResponse,
-  SuccessResponse,
-} from 'src/api/response.dto';
+import { BadRequestResponseDto, NotFoundResponseDto, SuccessResponseDto } from 'src/api/response.dto';
 import { ErrorCodes } from 'src/constants/error-codes';
-import { IsInt, IsString, Length } from 'class-validator';
+import { IsInt, IsNotEmpty, IsString, Length } from 'class-validator';
 
 export class AdminResetUserPasswordQueryDto {
   /**
    * The ID of the account whose password is to be reset.
    */
   @IsInt({ message: ErrorCodes.INVALID_ACCOUNT_ID_ERROR })
-  declare accountId: number;
+  declare id: number;
 }
 
 export class AdminResetUserPasswordBodyDto {
   @IsString({ message: ErrorCodes.INVALID_PASSWORD_ERROR })
   @Length(1, 255, { message: ErrorCodes.INVALID_PASSWORD_LENGTH_ERROR })
+  @IsNotEmpty({ message: ErrorCodes.INVALID_PASSWORD_ERROR })
   declare newPassword: string;
 }
 
-export class AdminResetUserPasswordResponseDto extends SuccessResponse {}
+export class AdminResetUserPasswordResponseDto extends SuccessResponseDto {}
 
-export class AdminResetUserPasswordNotFoundResponseDto extends NotFoundResponse {
+export class AdminResetUserPasswordNotFoundResponseDto extends NotFoundResponseDto {
   /**
    * The error message(s) that occurred during the validation of the request data or additional requirements
    * applied during the execution of the request
@@ -32,24 +29,21 @@ export class AdminResetUserPasswordNotFoundResponseDto extends NotFoundResponse 
   @ApiProperty({
     isArray: true,
     enum: [ErrorCodes.ACCOUNT_NOT_FOUND_ERROR],
-    enumName: 'AdminResetUserPasswordNotFoundErrorMessage',
+    enumName: 'AdminResetUserPasswordNotFoundErrorMessageEnum',
     default: ErrorCodes.ACCOUNT_NOT_FOUND_ERROR,
   })
   declare message: ErrorCodes[];
 }
 
-export class AdminResetUserPasswordBadRequestResponseDto extends BadRequestResponse {
+export class AdminResetUserPasswordBadRequestResponseDto extends BadRequestResponseDto {
   /**
    * The error message(s) that occurred during the validation of the request data or additional requirements
    * applied during the execution of the request
    */
   @ApiProperty({
     isArray: true,
-    enum: [
-      ErrorCodes.INVALID_PASSWORD_ERROR,
-      ErrorCodes.INVALID_PASSWORD_LENGTH_ERROR,
-    ],
-    enumName: 'AdminResetUserPasswordBadRequestErrorMessage',
+    enum: [ErrorCodes.INVALID_PASSWORD_ERROR, ErrorCodes.INVALID_PASSWORD_LENGTH_ERROR],
+    enumName: 'AdminResetUserPasswordBadRequestErrorMessageEnum',
     default: ErrorCodes.INVALID_PASSWORD_ERROR,
   })
   declare message: ErrorCodes[];

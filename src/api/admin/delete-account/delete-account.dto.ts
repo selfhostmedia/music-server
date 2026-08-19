@@ -1,10 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  BadRequestResponse,
-  NotFoundResponse,
-  SuccessResponse,
-} from 'src/api/response.dto';
+import { BadRequestResponseDto, NotFoundResponseDto, SuccessResponseDto } from 'src/api/response.dto';
 import { ErrorCodes } from 'src/constants/error-codes';
 import { IsInt } from 'class-validator';
 
@@ -16,38 +12,31 @@ export class AdminDeleteAccountQueryDto {
   declare accountId: number;
 }
 
-export class AdminDeleteAccountResponseDto extends SuccessResponse {}
+export class AdminDeleteAccountResponseDto extends SuccessResponseDto {}
 
-export class AdminDeleteAccountNotFoundResponseDto extends NotFoundResponse {
+export class AdminDeleteAccountNotFoundResponseDto extends NotFoundResponseDto {
   /**
    * The error message(s) that occurred during the validation of the request data or additional requirements
    * applied during the execution of the request
    */
   @ApiProperty({
     isArray: true,
-    enum: [
-      ErrorCodes.INVALID_ACCOUNT_ID_ERROR,
-      ErrorCodes.ACCOUNT_NOT_FOUND_ERROR,
-    ],
-    enumName: 'AdminDeleteAccountNotFoundErrorMessage',
+    enum: [ErrorCodes.INVALID_ACCOUNT_ID_ERROR, ErrorCodes.ACCOUNT_NOT_FOUND_ERROR],
+    enumName: 'AdminDeleteAccountNotFoundErrorMessageEnum',
     default: ErrorCodes.INVALID_ACCOUNT_ID_ERROR,
   })
   declare message: ErrorCodes[];
 }
 
-export class AdminDeleteAccountBadRequestResponseDto extends BadRequestResponse {
+export class AdminDeleteAccountBadRequestResponseDto extends BadRequestResponseDto {
   /**
    * The error message(s) that occurred during the validation of the request data or additional requirements
    * applied during the execution of the request
    */
   @ApiProperty({
     isArray: true,
-    enum: [
-      ErrorCodes.INVALID_ACCOUNT_ID_ERROR,
-      ErrorCodes.INVALID_ACCOUNT_ERROR,
-      ErrorCodes.ACCOUNT_ONLY_ADMIN_ERROR,
-    ],
-    enumName: 'AdminDeleteAccountBadRequestErrorMessage',
+    enum: [ErrorCodes.INVALID_ACCOUNT_ID_ERROR, ErrorCodes.INVALID_ACCOUNT_ERROR, ErrorCodes.ACCOUNT_ONLY_ADMIN_ERROR],
+    enumName: 'AdminDeleteAccountBadRequestErrorMessageEnum',
     default: ErrorCodes.INVALID_ACCOUNT_ID_ERROR,
   })
   declare message: ErrorCodes[];

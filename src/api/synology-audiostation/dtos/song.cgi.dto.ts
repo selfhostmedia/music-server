@@ -1,17 +1,9 @@
 /* eslint-disable max-classes-per-file */
 import { ApiProperty } from '@nestjs/swagger';
-import { ContentType, FileType } from 'src/types/enums';
+import { ContentTypeEnum, FileTypeEnum } from 'src/types/enums';
 import { IsEnum, IsInt, IsNumber, IsString } from 'class-validator';
-import {
-  SynologyApiEnum,
-  SynologyLibraryEnum,
-  SynologyMethodEnum,
-} from '../enums';
-import {
-  SynologyPaginationDto,
-  SynologyPaginationResponseDto,
-  SynologySuccessResponseDto,
-} from './synology.dto';
+import { SynologyApiEnum, SynologyLibraryEnum, SynologyMethodEnum } from '../enums';
+import { SynologyPaginationDto, SynologyPaginationResponseDto, SynologySuccessResponseDto } from './synology.dto';
 import { Transform } from 'class-transformer';
 
 export class SynologySongsBodyDto extends SynologyPaginationDto {
@@ -156,20 +148,20 @@ class SynologySongAudioDto {
   declare channel: number;
 
   @ApiProperty({
-    enum: FileType,
-    enumName: 'FileType',
-    example: FileType.FLAC,
+    enum: FileTypeEnum,
+    enumName: 'FileTypeEnum',
+    example: FileTypeEnum.FLAC,
   })
-  @IsEnum(FileType)
-  declare codec: FileType;
+  @IsEnum(FileTypeEnum)
+  declare codec: FileTypeEnum;
 
   @ApiProperty({
-    enum: FileType,
-    enumName: 'FileType',
-    example: FileType.FLAC,
+    enum: FileTypeEnum,
+    enumName: 'FileTypeEnum',
+    example: FileTypeEnum.FLAC,
   })
-  @IsEnum(FileType)
-  declare container: FileType;
+  @IsEnum(FileTypeEnum)
+  declare container: FileTypeEnum;
 
   @IsNumber()
   declare duration: number;
@@ -243,11 +235,11 @@ export class SynologySongDto {
   declare title: string;
 
   @ApiProperty({
-    enum: ContentType,
-    enumName: 'ContentType',
+    enum: ContentTypeEnum,
+    enumName: 'ContentTypeEnum',
   })
-  @IsEnum(ContentType)
-  declare type: ContentType;
+  @IsEnum(ContentTypeEnum)
+  declare type: ContentTypeEnum;
 }
 
 export class SynologySongDataDto extends SynologyPaginationResponseDto {

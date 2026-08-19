@@ -1,16 +1,8 @@
 import { AccountEntity } from './account.entity';
-import {
-  Column,
-  DataType,
-  ForeignKey,
-  HasMany,
-  Model,
-  Sequelize,
-  Table,
-} from 'sequelize-typescript';
+import { Column, DataType, ForeignKey, HasMany, Model, Sequelize, Table } from 'sequelize-typescript';
 import { PlaylistItemEntity } from './playlist-item.entity';
 import { PlaylistSmartRuleEntity } from './playlist-smart-rule.entity';
-import { PlaylistType, SmartPlaylistConjugal } from 'src/types/enums';
+import { PlaylistTypeEnum, SmartPlaylistConjugalEnum } from 'src/types/enums';
 
 /**
  * The PlaylistEntity holds a reference to a user's playlist. A user may have
@@ -25,7 +17,7 @@ import { PlaylistType, SmartPlaylistConjugal } from 'src/types/enums';
 })
 export class PlaylistEntity extends Model<PlaylistEntity> {
   /**
-   * The account ID the playlist belongs to
+   * The account ID the playlist belongs to.
    */
   @Column({
     type: DataType.INTEGER,
@@ -40,8 +32,8 @@ export class PlaylistEntity extends Model<PlaylistEntity> {
   declare accountId: number;
 
   /**
-   * This field is managed by Sequelize and tracks the date and time the row was created.  This field should not be specified if you are
-   * inserting and updating data
+   * This field is managed by Sequelize and tracks the date and time the row was created.  This
+   * field should not be specified if you are inserting and updating data.
    */
   @Column({
     type: DataType.DATE,
@@ -50,7 +42,7 @@ export class PlaylistEntity extends Model<PlaylistEntity> {
   declare createdAt: Date;
 
   /**
-   * The ID of the table row is an integer that is assigned by the database when the row is created
+   * The ID of the table row is an integer that is assigned by the database when the row is created.
    */
   @Column({
     type: DataType.INTEGER,
@@ -73,19 +65,20 @@ export class PlaylistEntity extends Model<PlaylistEntity> {
   declare rules?: PlaylistSmartRuleEntity[];
 
   @Column({
-    type: DataType.ENUM(...Object.values(SmartPlaylistConjugal)),
+    type: DataType.ENUM(...Object.values(SmartPlaylistConjugalEnum)),
     allowNull: true,
   })
-  declare rulesConjugal: SmartPlaylistConjugal;
+  declare rulesConjugal: SmartPlaylistConjugalEnum;
 
   @Column({
-    type: DataType.ENUM(...Object.values(PlaylistType)),
+    type: DataType.ENUM(...Object.values(PlaylistTypeEnum)),
     allowNull: false,
   })
-  declare type: PlaylistType;
+  declare type: PlaylistTypeEnum;
 
   /**
-   * This field is managed by Sequelize and tracks the most recent date and time the row was last updated.  This field should not be specified if you are inserting and updating data
+   * This field is managed by Sequelize and tracks the most recent date and time the row was last
+   * updated.  This field should not be specified if you are inserting and updating data.
    */
   @Column(DataType.DATE)
   declare updatedAt?: Date;

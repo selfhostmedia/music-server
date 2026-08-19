@@ -7,8 +7,9 @@ import { AdminIndexerConfigurationModule } from './indexer-configuration/indexer
 import { AdminListAccountsModule } from './list-accounts/list-accounts.module';
 import { AdminListIndexerLogsModule } from './list-indexer-logs/list-indexer-logs.module';
 import { AdminListRootPathsModule } from './list-root-paths/list-root-paths.module';
+// eslint-disable-next-line max-len
 import { AdminRegenerateMasterSessionKeyModule } from './regenerate-master-session-key/regenerate-master-session-key.module';
-import { AdminRegenerateUserSessionKeyModule } from './regenerate-user-sessionkey/regenerate-user-sessionkey.module';
+import { AdminRegenerateUserSessionKeyModule } from './regenerate-user-session-key/regenerate-user-session-key.module';
 import { AdminResetUserPasswordModule } from './reset-user-password/reset-user-password.module';
 import { AdminSetIndexerStatusModule } from './set-indexer-status/set-indexer-status.module';
 import { AdminUpdateRootPathModule } from './update-root-path/update-root-path.module';

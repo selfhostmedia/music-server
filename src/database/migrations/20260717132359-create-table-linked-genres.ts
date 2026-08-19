@@ -47,17 +47,8 @@ export async function up(queryInterface: QueryInterface): Promise<void> {
 }
 
 export async function down(queryInterface: QueryInterface): Promise<void> {
-  await queryInterface.removeIndex(
-    'linked_genres',
-    'idx_linked_genres_genre_id',
-  );
-  await queryInterface.removeIndex(
-    'linked_genres',
-    'idx_linked_genres_file_id',
-  );
-  await queryInterface.removeIndex(
-    'linked_genres',
-    'idx_linked_genres_genre_id_file_id',
-  );
+  await queryInterface.removeIndex('linked_genres', 'idx_linked_genres_genre_id');
+  await queryInterface.removeIndex('linked_genres', 'idx_linked_genres_file_id');
+  await queryInterface.removeIndex('linked_genres', 'idx_linked_genres_genre_id_file_id');
   await queryInterface.dropTable('linked_genres');
 }

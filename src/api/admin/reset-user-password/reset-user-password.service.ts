@@ -11,21 +11,12 @@ export class AdminResetUserPasswordService {
     private readonly accountEntity: typeof AccountEntity,
   ) {}
 
-  async resetUserPassword(
-    accountId: number,
-    newPassword: string,
-  ): Promise<void> {
+  async resetUserPassword(accountId: number, newPassword: string): Promise<void> {
     const account = await this.accountEntity.findByPk(accountId);
     if (!account) {
-      throw new NotFoundException(
-        ErrorCodes.ACCOUNT_NOT_FOUND_ERROR,
-        `Account with ID ${accountId} not found`,
-      );
+      throw new NotFoundException(ErrorCodes.ACCOUNT_NOT_FOUND_ERROR, `Account with ID ${accountId} not found`);
     }
     const passwordHash = await bcrypt.hash(newPassword, 10);
-    await this.accountEntity.update(
-      { passwordHash },
-      { where: { id: accountId } },
-    );
+    await this.accountEntity.update({ passwordHash }, { where: { id: accountId } });
   }
 }

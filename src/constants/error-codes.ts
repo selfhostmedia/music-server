@@ -1,6 +1,7 @@
 export enum ErrorCodes {
   // input validation errors
   INVALID_ACCOUNT_ERROR = 'invalid-account-error',
+  INVALID_ENABLED_ERROR = 'invalid-enabled-error',
   INVALID_ENDED_AT_ERROR = 'invalid-ended-at-error',
   INVALID_EXPIRES_AT_ERROR = 'invalid-expires-at-error',
   INVALID_EXPIRES_AT_RANGE_ERROR = 'invalid-expires-at-range-error',
@@ -32,6 +33,7 @@ export enum ErrorCodes {
   INVALID_SESSION_ID_ERROR = 'invalid-session-id-error',
   // misc
   AUTHORIZATION_ERROR = 'authorization-error',
+  FORBIDDEN_ERROR = 'forbidden-error',
   BAD_REQUEST_ERROR = 'bad-request-error',
   INTERNAL_SERVER_ERROR = 'internal-server-error',
   INDEXER_CONFIGURATION_NOT_FOUND_ERROR = 'indexer-configuration-not-found-error',

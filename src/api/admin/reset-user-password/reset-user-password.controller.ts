@@ -14,23 +14,27 @@ import {
   ApiHeader,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { Body, Controller, Patch, Query } from '@nestjs/common';
-import { UserRole } from 'src/constants/enums';
+import { Body, Controller, Post, Query } from '@nestjs/common';
+import { UserRoleEnum } from 'src/constants/enums';
 
 @Controller({
-  path: 'api/admin',
+  path: '/api/admin',
 })
 @ApiTags(ADMIN_APIS)
 export class AdminResetUserPasswordController {
-  constructor(
-    private readonly resetPasswordService: AdminResetUserPasswordService,
-  ) {}
+  constructor(private readonly resetPasswordService: AdminResetUserPasswordService) {}
 
-  // eslint-disable-next-line class-methods-use-this
-  @Patch('reset-user-password')
-  @AllowedRoles([UserRole.ADMIN])
+  @Post('reset-user-password')
+  @ApiOperation({
+    summary: 'Reset user password',
+    description:
+      // eslint-disable-next-line max-len
+      `Resets the password for a specified user account. This operation is typically used when an administrator needs to reset a user's password for security or account recovery purposes.`,
+  })
+  @AllowedRoles([UserRoleEnum.ADMIN])
   @ApiBearerAuth(JWT_TOKEN)
   @ApiHeader({
     name: 'Authorization',
@@ -49,14 +53,11 @@ export class AdminResetUserPasswordController {
     type: AdminResetUserPasswordNotFoundResponseDto,
     description: 'Account not found',
   })
-  async patch(
+  async post(
     @Query() query: AdminResetUserPasswordQueryDto,
     @Body() body: AdminResetUserPasswordBodyDto,
   ): Promise<AdminResetUserPasswordResponseDto> {
-    await this.resetPasswordService.resetUserPassword(
-      query.accountId,
-      body.newPassword,
-    );
+    await this.resetPasswordService.resetUserPassword(query.id, body.newPassword);
     return {
       success: true,
     };

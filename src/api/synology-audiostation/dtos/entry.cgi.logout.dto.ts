@@ -38,7 +38,7 @@ export class SynologyEntryLogoutBodyDto {
    * handle the routing between URL paths so this value is ignored for now but defined to
    * match the Synology API.
    *
-   * This endpoint requires a value of `logout` for the `method` value for correctness.
+   * This endpoint requires a value of `clearSessionToken` for the `method` value for correctness.
    */
   @ApiProperty({
     enum: SynologyMethodEnum,

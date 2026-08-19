@@ -7,13 +7,7 @@ import { ConfigService } from './config/config.service';
 import { CookiesModule } from './middleware/cookies';
 import { DatabaseModule } from './database/database.module';
 import { IndexerModule } from './indexer/indexer.module';
-import {
-  Inject,
-  Logger,
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-} from '@nestjs/common';
+import { Inject, Logger, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ScheduleModule } from '@nestjs/schedule';
 import { Sequelize } from 'sequelize-typescript';
@@ -65,7 +59,7 @@ export class AppModule implements NestModule {
     await this.sequelize.query('PRAGMA journal_mode=WAL;');
     // if using a :memory: sqlite database for tests then make sure the database
     // migrations and seeders are run
-    if (this.configService.get('NODE_ENV') === 'test') {
+    if (this.configService.isTesting()) {
       await this.runMigrationsAndSeeders();
     }
   }
@@ -85,9 +79,7 @@ export class AppModule implements NestModule {
     if (pendingMigrations.length > 0) {
       this.logger.log('Running database migrations...');
       await migrations.up();
-      const [rootPaths] = await this.sequelize.query(
-        'SELECT COUNT(*) AS count FROM root_paths;',
-      );
+      const [rootPaths] = await this.sequelize.query('SELECT COUNT(*) AS count FROM root_paths;');
       if ((rootPaths[0] as { count: number }).count === 0) {
         this.logger.log('Running database seeders...');
         const seeders = new Umzug({

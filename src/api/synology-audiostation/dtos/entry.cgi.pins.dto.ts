@@ -1,12 +1,8 @@
 /* eslint-disable max-classes-per-file */
 import { ApiProperty, IntersectionType, PickType } from '@nestjs/swagger';
 import { IsEnum, IsInt, IsNumber, IsString, ValidateIf } from 'class-validator';
-import { SynologyApiEnum, SynologyMethodEnum, SynologyPinType } from '../enums';
-import {
-  SynologyPaginationDto,
-  SynologyPaginationResponseDto,
-  SynologySuccessResponseDto,
-} from './synology.dto';
+import { SynologyApiEnum, SynologyMethodEnum, SynologyPinTypeEnum } from '../enums';
+import { SynologyPaginationDto, SynologyPaginationResponseDto, SynologySuccessResponseDto } from './synology.dto';
 import { Transform } from 'class-transformer';
 
 class SynologyEntryPinItemCriteriaDto {
@@ -44,17 +40,14 @@ export class SynologyEntryNewPinItemDto {
   declare name: string;
 
   @ApiProperty({
-    enum: SynologyPinType,
-    enumName: 'SynologyPinType',
+    enum: SynologyPinTypeEnum,
+    enumName: 'SynologyPinTypeEnum',
   })
-  @IsEnum(SynologyPinType)
-  declare type: SynologyPinType;
+  @IsEnum(SynologyPinTypeEnum)
+  declare type: SynologyPinTypeEnum;
 }
 
-export class SynologyEntryPinItemDto extends PickType(
-  SynologyEntryNewPinItemDto,
-  ['criteria', 'name', 'type'],
-) {
+export class SynologyEntryPinItemDto extends PickType(SynologyEntryNewPinItemDto, ['criteria', 'name', 'type']) {
   @IsString()
   declare id: string;
 }
@@ -88,10 +81,7 @@ class SynologyEntryPinRequestDto {
   declare version: number;
 }
 
-export class SynologyEntryListPinsBodyDto extends IntersectionType(
-  SynologyEntryPinRequestDto,
-  SynologyPaginationDto,
-) {
+export class SynologyEntryListPinsBodyDto extends IntersectionType(SynologyEntryPinRequestDto, SynologyPaginationDto) {
   /**
    * Synology's API uses this value to route requests appropriately but NestJS controllers
    * handle the routing between URL paths so this value is ignored for now but defined to
@@ -132,10 +122,10 @@ export class SynologyEntryCreatePinBodyDto extends SynologyEntryPinRequestDto {
     isArray: true,
   })
   @Transform(({ value }) => {
-    const parsed = JSON.parse(value);
+    const parsed = value.substring ? JSON.parse(value) : value;
     return parsed.map((item: SynologyEntryNewPinItemDto) => ({
       ...item,
-      type: item.type as SynologyPinType,
+      type: item.type as SynologyPinTypeEnum,
     }));
   })
   declare items: SynologyEntryNewPinItemDto[];
@@ -164,9 +154,7 @@ export class SynologyEntryDeletePinBodyDto extends SynologyEntryPinRequestDto {
     isArray: true,
   })
   @IsNumber(undefined, { each: true })
-  @Transform(({ value }) =>
-    JSON.parse(value).map((id: string) => Number.parseInt(id, 10)),
-  )
+  @Transform(({ value }) => JSON.parse(value).map((id: string) => Number.parseInt(id, 10)))
   declare items: number[];
 }
 

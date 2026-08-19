@@ -1,21 +1,15 @@
 import { AccountEntity } from 'src/database/entities';
 import { AuthenticationService } from 'src/authentication/authentication.service';
 import { ErrorCodes } from 'src/constants/error-codes';
-import {
-  Inject,
-  Injectable,
-  Logger,
-  SetMetadata,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Inject, Injectable, Logger, SetMetadata, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
-import { SessionRestriction } from 'src/types/enums';
-import { UserRole } from 'src/constants/enums';
+import { SessionRestrictionEnum } from 'src/types/enums';
+import { UserRoleEnum } from 'src/constants/enums';
 import type { CanActivate, ExecutionContext } from '@nestjs/common';
 
-export const AllowedRoles = (roles: UserRole[]) => SetMetadata('roles', roles);
+export const AllowedRoles = (roles: UserRoleEnum[]) => SetMetadata('roles', roles);
 export const AllowGuest = () => SetMetadata('allowGuest', true);
 
 @Injectable()
@@ -44,94 +38,60 @@ export class RoleGuard implements CanActivate {
           tokenHash: string;
         } = await this.jwtService.verifyAsync(token);
         if (payload) {
-          const user = await this.authenticationService.getAccount(
-            payload.accountId,
-          );
+          const user = await this.authenticationService.getAccount(payload.accountId);
           if (!user) {
-            throw new UnauthorizedException(
-              ErrorCodes.AUTHORIZATION_ERROR,
-              'session-error-1',
-            );
+            throw new UnauthorizedException(ErrorCodes.AUTHORIZATION_ERROR);
           }
-          const session = await this.authenticationService.getSession(
-            payload.sessionId,
+          const session = await this.authenticationService.getSession(payload.sessionId);
+          if (!session || session.expiresAt.getTime() < new Date().getTime() || session.endedAt !== null) {
+            throw new UnauthorizedException(ErrorCodes.AUTHORIZATION_ERROR);
+          }
+          const validSessionToken = await this.authenticationService.verifySessionToken(
+            user,
+            session,
+            payload.tokenHash,
           );
-          if (
-            !session ||
-            session.expiresAt.getTime() < new Date().getTime() ||
-            session.endedAt !== null
-          ) {
-            throw new UnauthorizedException(
-              ErrorCodes.AUTHORIZATION_ERROR,
-              'session-error-2',
-            );
-          }
-          const validSessionToken =
-            await this.authenticationService.verifySessionToken(
-              user,
-              session,
-              payload.tokenHash,
-            );
           if (!validSessionToken) {
-            throw new UnauthorizedException(
-              ErrorCodes.AUTHORIZATION_ERROR,
-              'session-error-3',
-            );
+            throw new UnauthorizedException(ErrorCodes.AUTHORIZATION_ERROR);
           }
           // prevent a session from accessing APIs beyond the context it was created for
           // eg the synology ds audio apps cannot APIs for other apps or the web UI
           if (session.restrictSession) {
             // Synology APIs
             if (
-              session.restrictSession ===
-                SessionRestriction.SYNOLOGY_AUDIOSTATION &&
+              session.restrictSession === SessionRestrictionEnum.SYNOLOGY_AUDIOSTATION &&
               !request.url.startsWith('/webapi/')
             ) {
-              throw new UnauthorizedException(
-                ErrorCodes.AUTHORIZATION_ERROR,
-                'session-error-5',
-              );
+              throw new UnauthorizedException(ErrorCodes.AUTHORIZATION_ERROR);
             }
             // Web UI APIs
-            if (
-              session.restrictSession === SessionRestriction.WEB_UI &&
-              !request.url.startsWith('/api/')
-            ) {
-              throw new UnauthorizedException(
-                ErrorCodes.AUTHORIZATION_ERROR,
-                'session-error-5',
-              );
+            if (session.restrictSession === SessionRestrictionEnum.WEB_UI && !request.url.startsWith('/api/')) {
+              throw new UnauthorizedException(ErrorCodes.AUTHORIZATION_ERROR);
             }
           }
           request.user = user;
           request.session = session;
         }
       } catch (error) {
-        this.logger.error(
-          'Error verifying JWT token:',
-          error instanceof Error ? error.message : error,
-        );
-        throw new UnauthorizedException(
-          ErrorCodes.AUTHORIZATION_ERROR,
-          'session-error-4',
-        );
+        this.logger.error('Error verifying JWT token:', error instanceof Error ? error.message : error);
+        throw new UnauthorizedException(ErrorCodes.AUTHORIZATION_ERROR);
       }
     }
     if (allowGuest) {
       return true;
     }
     // check for role eligibility
-    const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(
-      'roles',
-      [context.getHandler(), context.getClass()],
-    );
+    const requiredRoles = this.reflector.getAllAndOverride<UserRoleEnum[]>('roles', [
+      context.getHandler(),
+      context.getClass(),
+    ]);
     if (!requiredRoles?.length) {
       // no roles are required for public route
       return true;
     }
     // enforce the role requirement for protected route
     if (request.url.startsWith('/api/admin/')) {
-      if (!requiredRoles.includes(UserRole.ADMIN)) {
+      if (!requiredRoles.includes(UserRoleEnum.ADMIN)) {
         throw new UnauthorizedException(
           ErrorCodes.AUTHORIZATION_ERROR,
           'Administration routes must require the ADMIN role',
@@ -147,10 +107,7 @@ export class RoleGuard implements CanActivate {
       // user satisfies role requirement
       return true;
     }
-    throw new UnauthorizedException(
-      ErrorCodes.AUTHORIZATION_ERROR,
-      'session-error-6',
-    );
+    throw new UnauthorizedException(ErrorCodes.AUTHORIZATION_ERROR);
   }
 
   // eslint-disable-next-line class-methods-use-this

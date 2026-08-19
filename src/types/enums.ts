@@ -1,37 +1,37 @@
-export enum SessionRestriction {
+export enum SessionRestrictionEnum {
   SYNOLOGY_AUDIOSTATION = 'synology-audiostation',
   WEB_UI = 'web-ui',
 }
 
-export enum FileType {
+export enum FileTypeEnum {
   FLAC = 'flac',
   M4A = 'm4a',
   MP3 = 'mp3',
   OGG = 'ogg',
 }
 
-export enum ContentType {
+export enum ContentTypeEnum {
   FILE = 'file',
   FOLDER = 'folder',
   REMOTE = 'remote',
 }
 
-export enum ShoutcastItemType {
+export enum ShoutcastItemTypeEnum {
   CONTAINER = 'container',
   STATION = 'station',
 }
 
-export enum PlaylistType {
+export enum PlaylistTypeEnum {
   NORMAL = 'normal',
   SMART = 'smart',
 }
 
-export enum SmartPlaylistConjugal {
+export enum SmartPlaylistConjugalEnum {
   AND = 'and',
   OR = 'or',
 }
 
-export enum SmartPlaylistOperation {
+export enum SmartPlaylistOperationEnum {
   /**
    * A field date value is after a rule value.
    */
@@ -74,7 +74,7 @@ export enum SmartPlaylistOperation {
   NOT_IN_THE_LAST = 'not_in_the_last',
 }
 
-export enum SmartPlaylistIntervalTag {
+export enum SmartPlaylistIntervalTagEnum {
   /**
    * A field date value is in or not in the last <rule value> days.
    */
@@ -89,7 +89,7 @@ export enum SmartPlaylistIntervalTag {
   MONTHS = 'months',
 }
 
-export enum SmartPlaylistField {
+export enum SmartPlaylistFieldEnum {
   ARTIST = 'artist',
   ALBUM = 'album',
   ALBUM_ARTIST = 'album_artist',

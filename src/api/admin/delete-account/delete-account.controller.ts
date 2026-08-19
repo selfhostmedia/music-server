@@ -14,24 +14,28 @@ import {
   ApiHeader,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
 import { Controller, Delete, Query } from '@nestjs/common';
 import { User } from 'src/api/user.decorator';
-import { UserRole } from 'src/constants/enums';
+import { UserRoleEnum } from 'src/constants/enums';
 
 @Controller({
   path: 'api/admin',
 })
 @ApiTags(ADMIN_APIS)
 export class AdminDeleteAccountController {
-  constructor(
-    private readonly deleteAccountService: AdminDeleteAccountService,
-  ) {}
+  constructor(private readonly deleteAccountService: AdminDeleteAccountService) {}
 
-  // eslint-disable-next-line class-methods-use-this
   @Delete('delete-account')
-  @AllowedRoles([UserRole.ADMIN])
+  @ApiOperation({
+    summary: 'Delete an account',
+    // eslint-disable-next-line max-len
+    description:
+      'Deletes the specified account.  If it is the only admin account a new one account must be created first.',
+  })
+  @AllowedRoles([UserRoleEnum.ADMIN])
   @ApiBearerAuth(JWT_TOKEN)
   @ApiHeader({
     name: 'Authorization',

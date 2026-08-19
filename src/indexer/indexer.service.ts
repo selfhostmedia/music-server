@@ -1,12 +1,8 @@
+import { ConfigService } from 'src/config/config.service';
 import { Cron, CronExpression, Interval, Timeout } from '@nestjs/schedule';
 import { ErrorCodes } from 'src/constants/error-codes';
 import { FSWatcher, readdir, stat, watch } from 'node:fs';
-import {
-  FileEntity,
-  FolderEntity,
-  IndexerConfigurationEntity,
-  RootPathEntity,
-} from 'src/database/entities';
+import { FileEntity, FolderEntity, IndexerConfigurationEntity, RootPathEntity } from 'src/database/entities';
 import { IAudioMetadata, IOptions } from 'src/types/music-metadata';
 import { IndexAlbumService } from './index-album.service';
 import { IndexArtistService } from './index-artist.service';
@@ -54,12 +50,10 @@ export class IndexerService {
 
   private logSizeLimit: number = 1000;
 
-  private parseMetaData!: (
-    filePath: string,
-    options?: IOptions,
-  ) => Promise<IAudioMetadata>;
+  private parseMetaData!: (filePath: string, options?: IOptions) => Promise<IAudioMetadata>;
 
   constructor(
+    private readonly configService: ConfigService,
     private readonly indexAlbumService: IndexAlbumService,
     private readonly indexArtistService: IndexArtistService,
     private readonly indexComposerService: IndexComposerService,
@@ -82,6 +76,13 @@ export class IndexerService {
     this.addLogEntry(0, 0, 'Queueing root paths (manualStart)');
     await this.refreshFileWatchers();
     await this.scanQueuedPaths();
+  }
+
+  @Timeout(1)
+  async testingStart() {
+    if (this.configService.isTesting()) {
+      this.manualStart();
+    }
   }
 
   /**
@@ -109,6 +110,15 @@ export class IndexerService {
   }
 
   /**
+   * Periodically do a SQLite vacuum to clean up
+   */
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async vacuumDatabase() {
+    this.addLogEntry(0, 0, 'Vacuuming database');
+    await this.fileEntity.sequelize?.query('VACUUM');
+  }
+
+  /**
    * Periodically checks for deletions and additions to the root paths and sets up or
    * destroys their filesystem watcher.
    */
@@ -117,29 +127,22 @@ export class IndexerService {
     const rootPaths = await this.rootPathEntity.findAll({
       attributes: ['id', 'rootPath'],
     });
-    // set up any new root paths
+    // set file watchers on any new root paths
     for (let i = 0, len = rootPaths.length; i < len; i += 1) {
       const rootPath = rootPaths[i];
       if (rootPath) {
         if (!this.watchedFolders[rootPath.id]) {
-          this.addLogEntry(
-            0,
-            0,
-            `Setting up watcher for root path: ${rootPath.rootPath}`,
-          );
-          const watcher = watch(
-            rootPath.rootPath,
-            async (eventType, filename) => {
-              this.addLogEntry(
-                0,
-                0,
-                `File system event detected: ${eventType} - ${filename} (root path: ${rootPath.rootPath})`,
-              );
-              if (this.scannerQueue.indexOf(rootPath.id) === -1) {
-                this.scannerQueue.push(rootPath.id);
-              }
-            },
-          );
+          this.addLogEntry(0, 0, `Setting up watcher for root path: ${rootPath.rootPath}`);
+          const watcher = watch(rootPath.rootPath, async (eventType, filename) => {
+            this.addLogEntry(
+              0,
+              0,
+              `File system event detected: ${eventType} - ${filename} (root path: ${rootPath.rootPath})`,
+            );
+            if (this.scannerQueue.indexOf(rootPath.id) === -1) {
+              this.scannerQueue.push(rootPath.id);
+            }
+          });
           this.watchedFolders[rootPath.id] = watcher;
           this.scannerQueue.push(rootPath.id);
         }
@@ -147,9 +150,7 @@ export class IndexerService {
     }
     // delete obsolete watchers
     const currentIndexedRootPathIds = rootPaths.map((rootPath) => rootPath.id);
-    const watchingRootPathIds = Object.keys(this.watchedFolders).map((id) =>
-      parseInt(id, 10),
-    );
+    const watchingRootPathIds = Object.keys(this.watchedFolders).map((id) => parseInt(id, 10));
     for (let i = 0, len = watchingRootPathIds.length; i < len; i += 1) {
       const watchingRootPathId = watchingRootPathIds[i];
       if (watchingRootPathId) {
@@ -160,10 +161,7 @@ export class IndexerService {
             delete this.watchedFolders[watchingRootPathId];
           }
           if (this.scannerQueue.indexOf(watchingRootPathId) !== -1) {
-            this.scannerQueue.splice(
-              this.scannerQueue.indexOf(watchingRootPathId),
-              1,
-            );
+            this.scannerQueue.splice(this.scannerQueue.indexOf(watchingRootPathId), 1);
           }
         }
       }
@@ -178,26 +176,14 @@ export class IndexerService {
     const config = await this.getSystemConfiguration();
     this.logSizeLimit = config.indexerLogSize;
     if (this.isIndexing) {
-      this.addLogEntry(
-        0,
-        0,
-        `indexing in progress, queue will be processed later (${this.scannerQueue.length})`,
-      );
+      this.addLogEntry(0, 0, `indexing in progress, queue will be processed later (${this.scannerQueue.length})`);
       return;
     }
     if (await this.isDisabled()) {
-      this.addLogEntry(
-        0,
-        0,
-        `scanner is disabled, queue will be processed later (${this.scannerQueue.length})`,
-      );
+      this.addLogEntry(0, 0, `scanner is disabled, queue will be processed later (${this.scannerQueue.length})`);
       return;
     }
-    this.addLogEntry(
-      0,
-      0,
-      `checking for queued root paths to scan (${this.scannerQueue.length})`,
-    );
+    this.addLogEntry(0, 0, `checking for queued root paths to scan (${this.scannerQueue.length})`);
     this.isIndexing = true;
     const nextRootPathToScan = this.scannerQueue.shift();
     if (nextRootPathToScan) {
@@ -216,9 +202,7 @@ export class IndexerService {
       message,
       date: new Date(),
     };
-    this.logger.log(
-      `[accountId: ${accountId} rootPathId: ${rootPathId}] ${message}`,
-    );
+    this.logger.log(`[accountId: ${accountId} rootPathId: ${rootPathId}] ${message}`);
     this.logs.push(logEntry);
     while (this.logs.length > this.logSizeLimit) {
       this.logs.shift();
@@ -263,28 +247,15 @@ export class IndexerService {
    */
   async scanRootPath(rootPath: RootPathEntity): Promise<void> {
     if (await this.isDisabled()) {
-      await this.addLogEntry(
-        rootPath.accountId,
-        rootPath.id,
-        'scanner is disabled, skipping scan',
-      );
+      await this.addLogEntry(rootPath.accountId, rootPath.id, 'scanner is disabled, skipping scan');
       return;
     }
-    await this.addLogEntry(
-      rootPath.accountId,
-      rootPath.id,
-      `scanning root path `,
-    );
+    await this.addLogEntry(rootPath.accountId, rootPath.id, `scanning root path `);
     const filesToScan: FileItem[] = [];
     const filesToUpdate: FileUpdateItem[] = [];
     const uniqueFolderPaths: string[] = [rootPath.rootPath];
     // start the path scanning to recursively identify all the files within the root path
-    await this.scanFolderContents(
-      rootPath,
-      [rootPath.rootPath],
-      filesToScan,
-      uniqueFolderPaths,
-    );
+    await this.scanFolderContents(rootPath, [rootPath.rootPath], filesToScan, uniqueFolderPaths);
     await this.addLogEntry(
       rootPath.accountId,
       rootPath.id,
@@ -312,9 +283,7 @@ export class IndexerService {
         accountId: rootPath.accountId,
         rootPathId: rootPath.id,
         filePath: {
-          [Op.notIn]: filesToScan.map((file) =>
-            file.path.substring(rootPath.rootPath.length),
-          ),
+          [Op.notIn]: filesToScan.map((file) => file.path.substring(rootPath.rootPath.length)),
         },
       },
     });
@@ -348,11 +317,7 @@ export class IndexerService {
     uniqueFolderPaths: string[],
   ): Promise<void> {
     if (await this.isDisabled()) {
-      await this.addLogEntry(
-        rootPath.accountId,
-        rootPath.id,
-        'scanner is disabled, skipping scan',
-      );
+      await this.addLogEntry(rootPath.accountId, rootPath.id, 'scanner is disabled, skipping scan');
       return;
     }
     if (!foldersToScan.length) {
@@ -386,12 +351,7 @@ export class IndexerService {
         }
       }
     }
-    await this.scanFolderContents(
-      rootPath,
-      foldersToScan,
-      filesToScan,
-      uniqueFolderPaths,
-    );
+    await this.scanFolderContents(rootPath, foldersToScan, filesToScan, uniqueFolderPaths);
   }
 
   /**
@@ -401,17 +361,9 @@ export class IndexerService {
    * @param {FileUpdateItem[]} filesToUpdate Array of files that have been added or modified
    * @returns {Promise<void>}
    */
-  async checkFile(
-    rootPath: RootPathEntity,
-    filesToScan: FileItem[],
-    filesToUpdate: FileUpdateItem[],
-  ): Promise<void> {
+  async checkFile(rootPath: RootPathEntity, filesToScan: FileItem[], filesToUpdate: FileUpdateItem[]): Promise<void> {
     if (await this.isDisabled()) {
-      await this.addLogEntry(
-        rootPath.accountId,
-        rootPath.id,
-        'scanner is disabled, skipping scan',
-      );
+      await this.addLogEntry(rootPath.accountId, rootPath.id, 'scanner is disabled, skipping scan');
       return;
     }
     if (!filesToScan.length) {
@@ -425,11 +377,7 @@ export class IndexerService {
     const relativePath = filePath.substring(rootPath.rootPath.length);
     // get the album for the file
     const fileName = basename(filePath);
-    const albumPath = filePath
-      .replace(rootPath.rootPath, '')
-      .split(sep)
-      .slice(0, 3)
-      .join(sep);
+    const albumPath = filePath.replace(rootPath.rootPath, '').split(sep).slice(0, 3).join(sep);
     // check if the file exists in the database and is up to date
     const existingFile = await this.fileEntity.findOne({
       attributes: ['id', 'fileMtime'],
@@ -438,10 +386,7 @@ export class IndexerService {
         accountId: rootPath.accountId,
       },
     });
-    if (
-      !existingFile ||
-      existingFile.fileMtime.getTime() !== lastModified.getTime()
-    ) {
+    if (!existingFile || existingFile.fileMtime.getTime() !== lastModified.getTime()) {
       // get the idv3 information from the file
       let embeddedData: IAudioMetadata;
       try {
@@ -452,23 +397,10 @@ export class IndexerService {
       }
       if (!existingFile) {
         // add new track
-        await this.addLogEntry(
-          rootPath.accountId,
-          rootPath.id,
-          `found new track ${filePath}`,
-        );
-        const album = await this.indexAlbumService.updateAlbum(
-          rootPath,
-          embeddedData,
-          albumPath,
-          rootPath.accountId,
-        );
+        await this.addLogEntry(rootPath.accountId, rootPath.id, `found new track ${filePath}`);
+        const album = await this.indexAlbumService.updateAlbum(rootPath, embeddedData, albumPath, rootPath.accountId);
         if (!album) {
-          await this.addLogEntry(
-            rootPath.accountId,
-            rootPath.id,
-            `album not found for file ${filePath}`,
-          );
+          await this.addLogEntry(rootPath.accountId, rootPath.id, `album not found for file ${filePath}`);
           return;
         }
         // if it doesn't exist add it to the database
@@ -489,11 +421,7 @@ export class IndexerService {
           size: fileItem.size,
         });
       } else if (existingFile.fileMtime.getTime() !== lastModified.getTime()) {
-        await this.addLogEntry(
-          rootPath.accountId,
-          rootPath.id,
-          `found modified track ${relativePath}`,
-        );
+        await this.addLogEntry(rootPath.accountId, rootPath.id, `found modified track ${relativePath}`);
         // if it exists but the last-modified is different update it
         filesToUpdate.push({
           embeddedData,
@@ -514,16 +442,9 @@ export class IndexerService {
    * @param {FileUpdateItem[]} filesToUpdate Array of files that have been added or modified
    * @returns {Promise<void>}
    */
-  async updateFile(
-    rootPath: RootPathEntity,
-    filesToUpdate: FileUpdateItem[],
-  ): Promise<void> {
+  async updateFile(rootPath: RootPathEntity, filesToUpdate: FileUpdateItem[]): Promise<void> {
     if (await this.isDisabled()) {
-      await this.addLogEntry(
-        rootPath.accountId,
-        rootPath.id,
-        'scanner is disabled, skipping scan',
-      );
+      await this.addLogEntry(rootPath.accountId, rootPath.id, 'scanner is disabled, skipping scan');
       return;
     }
     if (!filesToUpdate.length) {
@@ -564,45 +485,19 @@ export class IndexerService {
     fileMtime: Date,
   ) {
     if (await this.isDisabled()) {
-      await this.addLogEntry(
-        rootPath.accountId,
-        rootPath.id,
-        'scanner is disabled, skipping scan',
-      );
+      await this.addLogEntry(rootPath.accountId, rootPath.id, 'scanner is disabled, skipping scan');
       return;
     }
-    await this.addLogEntry(
-      rootPath.accountId,
-      rootPath.id,
-      `saving track ${relativePath}`,
-    );
+    await this.addLogEntry(rootPath.accountId, rootPath.id, `saving track ${relativePath}`);
     const transaction = await this.fileEntity.sequelize?.transaction();
     if (!transaction) {
       this.logger.error('transaction not available synchronizing file');
       return;
     }
-    const fileDetail = await this.indexFileService.updateFile(
-      embeddedData,
-      fileId,
-      rootPath.accountId,
-      transaction,
-    );
-    await this.indexArtistService.updateArtists(
-      embeddedData,
-      fileDetail,
-      transaction,
-    );
-    await this.indexComposerService.updateComposers(
-      embeddedData,
-      fileDetail,
-      transaction,
-    );
-    await this.indexGenreService.updateGenres(
-      embeddedData,
-      rootPath.accountId,
-      fileDetail,
-      transaction,
-    );
+    const fileDetail = await this.indexFileService.updateFile(embeddedData, fileId, rootPath.accountId, transaction);
+    await this.indexArtistService.updateArtists(embeddedData, fileDetail, transaction);
+    await this.indexComposerService.updateComposers(embeddedData, fileDetail, transaction);
+    await this.indexGenreService.updateGenres(embeddedData, rootPath.accountId, fileDetail, transaction);
     await this.fileEntity.update(
       {
         fileMtime,
@@ -620,25 +515,14 @@ export class IndexerService {
       await transaction.commit();
     } catch (error) {
       this.logger.error('transaction error synchronizing file', error);
-      this.addLogEntry(
-        rootPath.accountId,
-        rootPath.id,
-        `error synchronizing file ${error}`,
-      );
+      this.addLogEntry(rootPath.accountId, rootPath.id, `error synchronizing file ${error}`);
       await transaction.rollback();
     }
   }
 
-  async updateFolders(
-    rootPath: RootPathEntity,
-    uniqueFolderPaths: string[],
-  ): Promise<void> {
+  async updateFolders(rootPath: RootPathEntity, uniqueFolderPaths: string[]): Promise<void> {
     if (await this.isDisabled()) {
-      await this.addLogEntry(
-        rootPath.accountId,
-        rootPath.id,
-        'scanner is disabled, skipping scan',
-      );
+      await this.addLogEntry(rootPath.accountId, rootPath.id, 'scanner is disabled, skipping scan');
       return;
     }
     if (!uniqueFolderPaths.length) {
@@ -652,16 +536,9 @@ export class IndexerService {
     await this.updateFolders(rootPath, uniqueFolderPaths);
   }
 
-  async synchronizeFolder(
-    rootPath: RootPathEntity,
-    folderPath: string,
-  ): Promise<void> {
+  async synchronizeFolder(rootPath: RootPathEntity, folderPath: string): Promise<void> {
     if (await this.isDisabled()) {
-      await this.addLogEntry(
-        rootPath.accountId,
-        rootPath.id,
-        'scanner is disabled, skipping scan',
-      );
+      await this.addLogEntry(rootPath.accountId, rootPath.id, 'scanner is disabled, skipping scan');
       return;
     }
     const existing = await this.folderEntity.findOne({
@@ -671,11 +548,7 @@ export class IndexerService {
       },
     });
     if (!existing) {
-      await this.addLogEntry(
-        rootPath.accountId,
-        rootPath.id,
-        `adding folder ${folderPath}`,
-      );
+      await this.addLogEntry(rootPath.accountId, rootPath.id, `adding folder ${folderPath}`);
       await this.folderEntity.create({
         accountId: rootPath.accountId,
         folderPath,

@@ -13,23 +13,27 @@ import {
   ApiHeader,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
 import { Controller, Get, Query } from '@nestjs/common';
-import { UserRole } from 'src/constants/enums';
+import { UserRoleEnum } from 'src/constants/enums';
 
 @Controller({
   path: 'api/admin',
 })
 @ApiTags(ADMIN_APIS)
 export class AdminListIndexerLogsController {
-  constructor(
-    private readonly listIndexerLogsService: AdminListIndexerLogsService,
-  ) {}
+  constructor(private readonly listIndexerLogsService: AdminListIndexerLogsService) {}
 
-  // eslint-disable-next-line class-methods-use-this
   @Get('list-indexer-logs')
-  @AllowedRoles([UserRole.ADMIN])
+  @ApiOperation({
+    summary: 'List indexer logs',
+    description:
+      // eslint-disable-next-line max-len
+      'Retrieves a list of indexer logs based on the provided query parameters which may filter by user or root path or search term.  The logs are only held in memory and will disappear when the server restarts or to stay within the log size specified in the `system_configurations` table.',
+  })
+  @AllowedRoles([UserRoleEnum.ADMIN])
   @ApiBearerAuth(JWT_TOKEN)
   @ApiHeader({
     name: 'Authorization',
@@ -45,14 +49,8 @@ export class AdminListIndexerLogsController {
   @ApiNotFoundResponse({
     type: AdminListIndexerLogsNotFoundResponseDto,
   })
-  async get(
-    @Query() query: AdminListIndexerLogsQueryDto,
-  ): Promise<AdminListIndexerLogsResponseDto> {
-    const logs = await this.listIndexerLogsService.list(
-      query.accountId,
-      query.rootPathId,
-      query.search,
-    );
+  async get(@Query() query: AdminListIndexerLogsQueryDto): Promise<AdminListIndexerLogsResponseDto> {
+    const logs = await this.listIndexerLogsService.list(query.accountId, query.rootPathId, query.search);
     return {
       logs,
       success: true,

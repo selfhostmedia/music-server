@@ -1,3 +1,3 @@
-import { SuccessResponse } from 'src/api/response.dto';
+import { SuccessResponseDto } from 'src/api/response.dto';
 
-export class AdminRegenerateMasterSessionKeyResponseDto extends SuccessResponse {}
+export class AdminRegenerateMasterSessionKeyResponseDto extends SuccessResponseDto {}

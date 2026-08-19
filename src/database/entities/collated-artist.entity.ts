@@ -1,13 +1,6 @@
 import { AccountEntity } from './account.entity';
 import { ArtistEntity } from './artist.entity';
-import {
-  BelongsTo,
-  Column,
-  DataType,
-  ForeignKey,
-  Model,
-  Table,
-} from 'sequelize-typescript';
+import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript';
 
 /**
  * The CollatedArtistEntity selects data from a view that collates artist information
@@ -22,7 +15,7 @@ import {
 })
 export class CollatedArtistEntity extends Model<CollatedArtistEntity> {
   /**
-   * The account ID the root path belongs to
+   * The account ID the root path belongs to.
    */
   @Column({
     type: DataType.INTEGER,

@@ -43,9 +43,9 @@ EOF
 cat <<EOF > $FILE_PATH/${SERVICE_FILE}.dto.ts
 /* eslint-disable max-classes-per-file */
 import {
-  BadRequestResponse,
-  NotFoundResponse,
-  SuccessResponse,
+  BadRequestResponseDto,
+  NotFoundResponseDto,
+  SuccessResponseDto,
 } from 'src/api/response.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { ErrorCodes } from 'src/constants/error-codes';
@@ -58,11 +58,11 @@ export class ${SERVICE_CLASS}BodyDto {
   // Define your DTO properties here
 }
 
-import { SuccessResponse } from 'src/api/response.dto';
+import { SuccessResponseDto } from 'src/api/response.dto';
 
-export class ${SERVICE_CLASS}ResponseDto extends SuccessResponse {}
+export class ${SERVICE_CLASS}ResponseDto extends SuccessResponseDto {}
 
-export class ${SERVICE_CLASS}NotFoundResponseDto extends NotFoundResponse {
+export class ${SERVICE_CLASS}NotFoundResponseDto extends NotFoundResponseDto {
   /**
    * The error message(s) that occurred during the validation of the request data or additional requirements
    * applied during the execution of the request
@@ -76,7 +76,7 @@ export class ${SERVICE_CLASS}NotFoundResponseDto extends NotFoundResponse {
   declare message: ErrorCodes[];
 }
 
-export class ${SERVICE_CLASS}BadRequestResponseDto extends BadRequestResponse {
+export class ${SERVICE_CLASS}BadRequestResponseDto extends BadRequestResponseDto {
   /**
    * The error message(s) that occurred during the validation of the request data or additional requirements
    * applied during the execution of the request
@@ -105,7 +105,7 @@ EOF
 # The Controller file
 DECORATORS=""
 if [ "$API_PATH" == "api/admin" ]; then
-  DECORATORS="@AllowedRoles([UserRole.ADMIN])
+  DECORATORS="@AllowedRoles([UserRoleEnum.ADMIN])
 @ApiBearerAuth(JWT_TOKEN)
 @ApiHeader({
   name: 'Authorization',
@@ -123,13 +123,13 @@ cat <<EOF > $FILE_PATH/${SERVICE_FILE}.controller.ts
 import { ${API_TAGS}, JWT_TOKEN } from 'src/constants/swagger';
 import {
   ApiBearerAuth,
-  ApiHeader,
+  ApiCookieAuth, ApiHeader,
   ApiTags,
 } from '@nestjs/swagger';
 import { ${METHOD}, Controller } from '@nestjs/common';
 import { ${SERVICE_CLASS}Service } from './${SERVICE_FILE}.service';
 import { AllowedRoles } from 'src/api/role.guard';
-import { UserRole } from 'src/constants/enums';
+import { UserRoleEnum } from 'src/constants/enums';
 
 @Controller({
   path: '/${API_PATH}',

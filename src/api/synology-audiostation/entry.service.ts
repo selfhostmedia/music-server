@@ -19,16 +19,11 @@ import {
   SessionEntity,
 } from 'src/database/entities';
 import { AuthenticationService } from 'src/authentication/authentication.service';
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from 'src/config/config.service';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
-import { SessionRestriction } from 'src/types/enums';
+import { SessionRestrictionEnum } from 'src/types/enums';
 import {
   SynologyEntryCertificateDataDto,
   SynologyEntryNewPinItemDto,
@@ -37,7 +32,7 @@ import {
   SynologyEntrySignInBodyDto,
   SynologyEntrySignInDataDto,
 } from './dtos';
-import { SynologyPinType } from './enums';
+import { SynologyPinTypeEnum } from './enums';
 import { normalizeString, replaceDoubleQuotes } from 'src/utils/strings';
 import { readFileSync } from 'node:fs';
 import { sep } from 'node:path';
@@ -48,9 +43,7 @@ function pinnedItemToRow(item: FavoriteItemEntity): SynologyEntryPinItemDto {
     id: item.id.toString(),
     criteria: {
       album: item.album?.title,
-      album_artist: item.album?.albumArtists
-        ?.map((linkedArtist) => linkedArtist.artist?.name)
-        .join(', '),
+      album_artist: item.album?.albumArtists?.map((linkedArtist) => linkedArtist.artist?.name).join(', '),
       artist: item.artist?.name,
       composer: item.composer?.name,
       genre: item.genre?.name,
@@ -69,16 +62,16 @@ function pinnedItemToRow(item: FavoriteItemEntity): SynologyEntryPinItemDto {
       (item.recentlyAdded ? 'Recently added' : undefined) ||
       'Unknown',
     type:
-      (item.albumId ? SynologyPinType.ALBUM : '') ||
-      (item.artistId ? SynologyPinType.ARTIST : '') ||
-      (item.composerId ? SynologyPinType.COMPOSER : '') ||
-      (item.genreId ? SynologyPinType.GENRE : '') ||
-      (item.folderId ? SynologyPinType.FOLDER : '') ||
-      (item.playlistId ? SynologyPinType.PLAYLIST : '') ||
-      (item.allSongs ? SynologyPinType.ALBUM : '') ||
-      (item.randomHundred ? SynologyPinType.RANDOM_100 : '') ||
-      (item.recentlyAdded ? SynologyPinType.RECENTLY_ADDED : '') ||
-      SynologyPinType.ALBUM, // default to album if no type is found
+      (item.albumId ? SynologyPinTypeEnum.ALBUM : '') ||
+      (item.artistId ? SynologyPinTypeEnum.ARTIST : '') ||
+      (item.composerId ? SynologyPinTypeEnum.COMPOSER : '') ||
+      (item.genreId ? SynologyPinTypeEnum.GENRE : '') ||
+      (item.folderId ? SynologyPinTypeEnum.FOLDER : '') ||
+      (item.playlistId ? SynologyPinTypeEnum.PLAYLIST : '') ||
+      (item.allSongs ? SynologyPinTypeEnum.ALBUM : '') ||
+      (item.randomHundred ? SynologyPinTypeEnum.RANDOM_100 : '') ||
+      (item.recentlyAdded ? SynologyPinTypeEnum.RECENTLY_ADDED : '') ||
+      SynologyPinTypeEnum.ALBUM, // default to album if no type is found
   };
 }
 
@@ -125,20 +118,12 @@ export class SynologyEntryService {
     @InjectModel(SessionEntity)
     private readonly sessionEntity: typeof SessionEntity,
   ) {
-    const publicKey = readFileSync(
-      this.configService.get('PUBLIC_KEY_PATH'),
-    ).toString('utf8');
+    const publicKey = readFileSync(this.configService.get('PUBLIC_KEY_PATH')).toString('utf8');
     this.publicKey = publicKey
       .split('\n')
-      .filter(
-        (line) =>
-          !line.includes('BEGIN PUBLIC KEY') &&
-          !line.includes('END PUBLIC KEY'),
-      )
+      .filter((line) => !line.includes('BEGIN PUBLIC KEY') && !line.includes('END PUBLIC KEY'))
       .join('');
-    const privateKeyData = readFileSync(
-      this.configService.get('PRIVATE_KEY_PATH'),
-    ).toString('utf8');
+    const privateKeyData = readFileSync(this.configService.get('PRIVATE_KEY_PATH')).toString('utf8');
     this.privateKey = crypto.createPrivateKey({
       key: privateKeyData,
       format: 'pem',
@@ -146,10 +131,7 @@ export class SynologyEntryService {
     });
   }
 
-  async authenticate(
-    userAgent: string,
-    body: SynologyEntrySignInBodyDto,
-  ): Promise<SynologyEntrySignInDataDto> {
+  async authenticate(userAgent: string, body: SynologyEntrySignInBodyDto): Promise<SynologyEntrySignInDataDto> {
     const decrypted = crypto.privateDecrypt(
       {
         key: this.privateKey,
@@ -173,13 +155,10 @@ export class SynologyEntryService {
       username,
       password,
       userAgent,
-      SessionRestriction.SYNOLOGY_AUDIOSTATION,
+      SessionRestrictionEnum.SYNOLOGY_AUDIOSTATION,
       3650,
     );
-    const userAgentHash = await this.authenticationService.generateDeviceHash(
-      username,
-      userAgent,
-    );
+    const userAgentHash = await this.authenticationService.generateDeviceHash(username, userAgent);
     return {
       did: userAgentHash,
       sid: jwtToken,
@@ -196,7 +175,7 @@ export class SynologyEntryService {
     };
   }
 
-  async logout(accountId: number, sessionId: number): Promise<unknown> {
+  async clearSessionToken(accountId: number, sessionId: number): Promise<unknown> {
     const session = await this.sessionEntity.findByPk(sessionId);
     if (!session || session.accountId !== accountId) {
       throw new BadRequestException({
@@ -211,11 +190,7 @@ export class SynologyEntryService {
     };
   }
 
-  async listPinnedItems(
-    accountId: number,
-    offset: number,
-    limit: number,
-  ): Promise<SynologyEntryPinsDataDto> {
+  async listPinnedItems(accountId: number, offset: number, limit: number): Promise<SynologyEntryPinsDataDto> {
     const items = await this.favoriteItemEntity.findAll({
       where: {
         accountId,
@@ -273,10 +248,7 @@ export class SynologyEntryService {
     };
   }
 
-  async createPinnedItem(
-    accountId: number,
-    items: SynologyEntryNewPinItemDto[],
-  ): Promise<SynologyEntryPinsDataDto> {
+  async createPinnedItem(accountId: number, items: SynologyEntryNewPinItemDto[]): Promise<SynologyEntryPinsDataDto> {
     for (let i = 0, len = items.length; i < len; i += 1) {
       const item = items[i];
       if (item) {
@@ -406,18 +378,15 @@ export class SynologyEntryService {
           genreId,
           folderId,
           playlistId,
-          randomHundred: item.type === SynologyPinType.RANDOM_100,
-          recentlyAdded: item.type === SynologyPinType.RECENTLY_ADDED,
+          randomHundred: item.type === SynologyPinTypeEnum.RANDOM_100,
+          recentlyAdded: item.type === SynologyPinTypeEnum.RECENTLY_ADDED,
         } as FavoriteItemEntity);
       }
     }
     return this.listPinnedItems(accountId, 0, 100000);
   }
 
-  async deletePinnedItem(
-    accountId: number,
-    itemIds: number[],
-  ): Promise<SynologyEntryPinsDataDto> {
+  async deletePinnedItem(accountId: number, itemIds: number[]): Promise<SynologyEntryPinsDataDto> {
     await this.favoriteItemEntity.destroy({
       where: {
         accountId,
@@ -442,11 +411,7 @@ export class SynologyEntryService {
     return playlist;
   }
 
-  async getAlbumByTitleAndArtist(
-    accountId: number,
-    albumTitle: string,
-    albumArtist: string,
-  ): Promise<AlbumEntity> {
+  async getAlbumByTitleAndArtist(accountId: number, albumTitle: string, albumArtist: string): Promise<AlbumEntity> {
     const album = await this.albumEntity.findOne({
       attributes: ['id'],
       where: {
@@ -470,25 +435,14 @@ export class SynologyEntryService {
       ],
     });
     if (!album) {
-      throw new NotFoundException(
-        `Album not found for title: ${albumTitle} and artist: ${albumArtist}`,
-      );
+      throw new NotFoundException(`Album not found for title: ${albumTitle} and artist: ${albumArtist}`);
     }
     return album;
   }
 
-  async addAlbumToPlaylist(
-    accountId: number,
-    playlistId: string,
-    albumTitle: string,
-    albumArtist: string,
-  ) {
+  async addAlbumToPlaylist(accountId: number, playlistId: string, albumTitle: string, albumArtist: string) {
     const playlist = await this.getPlaylist(accountId, playlistId);
-    const album = await this.getAlbumByTitleAndArtist(
-      accountId,
-      albumTitle,
-      albumArtist,
-    );
+    const album = await this.getAlbumByTitleAndArtist(accountId, albumTitle, albumArtist);
     const tracks = await this.collatedTrackEntity.findAll({
       where: {
         accountId,
@@ -504,9 +458,7 @@ export class SynologyEntryService {
       },
     });
     const existingFileIds = new Set(existingItems.map((item) => item.fileId));
-    const newTracks = tracks.filter(
-      (track) => !existingFileIds.has(track.fileId),
-    );
+    const newTracks = tracks.filter((track) => !existingFileIds.has(track.fileId));
     if (newTracks.length) {
       await this.playlistItemEntity.bulkCreate(
         newTracks.map(
@@ -521,11 +473,7 @@ export class SynologyEntryService {
     }
   }
 
-  async addArtistToPlaylist(
-    accountId: number,
-    playlistId: string,
-    artistName: string,
-  ) {
+  async addArtistToPlaylist(accountId: number, playlistId: string, artistName: string) {
     const playlist = await this.getPlaylist(accountId, playlistId);
     const artist = await this.collatedArtistEntity.findOne({
       where: {
@@ -551,9 +499,7 @@ export class SynologyEntryService {
       },
     });
     const existingFileIds = new Set(existingItems.map((item) => item.fileId));
-    const newTracks = tracks.filter(
-      (track) => !existingFileIds.has(track.fileId),
-    );
+    const newTracks = tracks.filter((track) => !existingFileIds.has(track.fileId));
     if (newTracks.length) {
       await this.playlistItemEntity.bulkCreate(
         newTracks.map(
@@ -568,11 +514,7 @@ export class SynologyEntryService {
     }
   }
 
-  async addComposerToPlaylist(
-    accountId: number,
-    playlistId: string,
-    composerName: string,
-  ) {
+  async addComposerToPlaylist(accountId: number, playlistId: string, composerName: string) {
     const playlist = await this.getPlaylist(accountId, playlistId);
     const composer = await this.composerEntity.findOne({
       where: {
@@ -580,9 +522,7 @@ export class SynologyEntryService {
       },
     });
     if (!composer) {
-      throw new NotFoundException(
-        `Composer not found for name: ${composerName}`,
-      );
+      throw new NotFoundException(`Composer not found for name: ${composerName}`);
     }
     const tracks = await this.collatedComposerTrackEntity.findAll({
       where: {
@@ -599,9 +539,7 @@ export class SynologyEntryService {
       },
     });
     const existingFileIds = new Set(existingItems.map((item) => item.fileId));
-    const newTracks = tracks.filter(
-      (track) => !existingFileIds.has(track.fileId),
-    );
+    const newTracks = tracks.filter((track) => !existingFileIds.has(track.fileId));
     if (newTracks.length) {
       await this.playlistItemEntity.bulkCreate(
         newTracks.map(
@@ -616,11 +554,7 @@ export class SynologyEntryService {
     }
   }
 
-  async addGenreToPlaylist(
-    accountId: number,
-    playlistId: string,
-    genreName: string,
-  ) {
+  async addGenreToPlaylist(accountId: number, playlistId: string, genreName: string) {
     const playlist = await this.getPlaylist(accountId, playlistId);
     const genre = await this.genreEntity.findOne({
       where: {
@@ -646,9 +580,7 @@ export class SynologyEntryService {
       },
     });
     const existingFileIds = new Set(existingItems.map((item) => item.fileId));
-    const newTracks = tracks.filter(
-      (track) => !existingFileIds.has(track.fileId),
-    );
+    const newTracks = tracks.filter((track) => !existingFileIds.has(track.fileId));
     if (newTracks.length) {
       await this.playlistItemEntity.bulkCreate(
         newTracks.map(

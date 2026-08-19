@@ -8,7 +8,7 @@ import {
   CollatedTrackEntity,
   GenreEntity,
 } from 'src/database/entities';
-import { ContentType } from 'src/types/enums';
+import { ContentTypeEnum } from 'src/types/enums';
 import { InjectModel } from '@nestjs/sequelize';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Op } from 'sequelize';
@@ -17,11 +17,7 @@ import { SynologySongDataDto, SynologySongDto } from './dtos';
 import { normalizeString, replaceDoubleQuotes } from 'src/utils/strings';
 
 function songToRow(
-  track:
-    | CollatedArtistTrackEntity
-    | CollatedComposerTrackEntity
-    | CollatedGenreTrackEntity
-    | CollatedTrackEntity,
+  track: CollatedArtistTrackEntity | CollatedComposerTrackEntity | CollatedGenreTrackEntity | CollatedTrackEntity,
 ): SynologySongDto {
   return {
     additional: {
@@ -39,9 +35,7 @@ function songToRow(
       },
       song_tag: {
         album: replaceDoubleQuotes(track.albumTitle || ''),
-        album_artist: replaceDoubleQuotes(
-          replaceDoubleQuotes(track.albumArtists.join(', ')),
-        ),
+        album_artist: replaceDoubleQuotes(replaceDoubleQuotes(track.albumArtists.join(', '))),
         artist: replaceDoubleQuotes(track.trackArtists.join(', ')),
         comment: replaceDoubleQuotes(track.trackComment || ''),
         composer: '',
@@ -54,7 +48,7 @@ function songToRow(
     id: `music_${track.fileId}`,
     path: track.filePath,
     title: replaceDoubleQuotes(track.trackTitle),
-    type: ContentType.FILE,
+    type: ContentTypeEnum.FILE,
   };
 }
 
@@ -75,11 +69,7 @@ export class SynologySongService {
     private readonly genreEntity: typeof GenreEntity,
   ) {}
 
-  async getAlbumByTitleAndArtist(
-    accountId: number,
-    albumTitle: string,
-    albumArtist: string,
-  ): Promise<AlbumEntity> {
+  async getAlbumByTitleAndArtist(accountId: number, albumTitle: string, albumArtist: string): Promise<AlbumEntity> {
     const album = await this.albumEntity.findOne({
       attributes: ['id'],
       where: {
@@ -103,9 +93,7 @@ export class SynologySongService {
       ],
     });
     if (!album) {
-      throw new NotFoundException(
-        `Album not found for title: ${albumTitle} and artist: ${albumArtist}`,
-      );
+      throw new NotFoundException(`Album not found for title: ${albumTitle} and artist: ${albumArtist}`);
     }
     return album;
   }
@@ -133,10 +121,7 @@ export class SynologySongService {
       where: {
         [Op.and]: [
           { accountId },
-          Sequelize.where(
-            Sequelize.fn('LOWER', Sequelize.col('album_artists')),
-            artistName.toLocaleLowerCase(),
-          ),
+          Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('album_artists')), artistName.toLocaleLowerCase()),
         ],
       },
       limit,
@@ -151,10 +136,7 @@ export class SynologySongService {
       where: {
         [Op.and]: [
           { accountId },
-          Sequelize.where(
-            Sequelize.fn('LOWER', Sequelize.col('album_artists')),
-            artistName.toLocaleLowerCase(),
-          ),
+          Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('album_artists')), artistName.toLocaleLowerCase()),
         ],
       },
     });
@@ -181,10 +163,7 @@ export class SynologySongService {
         [Op.and]: [
           { accountId },
           { albumTitle: albumName },
-          Sequelize.where(
-            Sequelize.fn('LOWER', Sequelize.col('album_artists')),
-            artistName.toLocaleLowerCase(),
-          ),
+          Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('album_artists')), artistName.toLocaleLowerCase()),
         ],
       },
       limit,
@@ -200,10 +179,7 @@ export class SynologySongService {
         [Op.and]: [
           { accountId },
           { albumTitle: albumName },
-          Sequelize.where(
-            Sequelize.fn('LOWER', Sequelize.col('album_artists')),
-            artistName.toLocaleLowerCase(),
-          ),
+          Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('album_artists')), artistName.toLocaleLowerCase()),
         ],
       },
     });
@@ -224,10 +200,7 @@ export class SynologySongService {
       where: {
         [Op.and]: [
           { accountId },
-          Sequelize.where(
-            Sequelize.fn('LOWER', Sequelize.col('track_composers')),
-            composerName.toLocaleLowerCase(),
-          ),
+          Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('track_composers')), composerName.toLocaleLowerCase()),
         ],
       },
       limit,
@@ -242,10 +215,7 @@ export class SynologySongService {
       where: {
         [Op.and]: [
           { accountId },
-          Sequelize.where(
-            Sequelize.fn('LOWER', Sequelize.col('track_composers')),
-            composerName.toLocaleLowerCase(),
-          ),
+          Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('track_composers')), composerName.toLocaleLowerCase()),
         ],
       },
     });
@@ -264,20 +234,13 @@ export class SynologySongService {
     offset: number,
     limit: number,
   ): Promise<SynologySongDataDto> {
-    const album = await this.getAlbumByTitleAndArtist(
-      accountId,
-      albumName,
-      albumArtist,
-    );
+    const album = await this.getAlbumByTitleAndArtist(accountId, albumName, albumArtist);
     const tracks = await this.collatedTrackEntity.findAll({
       where: {
         [Op.and]: [
           { accountId },
           { albumId: album.id },
-          Sequelize.where(
-            Sequelize.fn('LOWER', Sequelize.col('track_composers')),
-            composerName.toLocaleLowerCase(),
-          ),
+          Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('track_composers')), composerName.toLocaleLowerCase()),
         ],
       },
       limit,
@@ -293,10 +256,7 @@ export class SynologySongService {
         [Op.and]: [
           { accountId },
           { albumId: album.id },
-          Sequelize.where(
-            Sequelize.fn('LOWER', Sequelize.col('track_composers')),
-            composerName.toLocaleLowerCase(),
-          ),
+          Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('track_composers')), composerName.toLocaleLowerCase()),
         ],
       },
     });
@@ -327,18 +287,11 @@ export class SynologySongService {
     if (!genres?.length) {
       throw new NotFoundException(`Genre not found: ${genreName}`);
     }
-    const album = await this.getAlbumByTitleAndArtist(
-      accountId,
-      albumName,
-      albumArtist,
-    );
+    const album = await this.getAlbumByTitleAndArtist(accountId, albumName, albumArtist);
+    const genreIds = genres.map((genre) => genre.id);
     const tracks = await this.collatedGenreTrackEntity.findAll({
       where: {
-        [Op.and]: [
-          { accountId },
-          { albumId: album.id },
-          { genreId: { [Op.in]: genres.map((genre) => genre.id) } },
-        ],
+        [Op.and]: [{ accountId }, { albumId: album.id }, { genreId: { [Op.in]: genreIds } }],
       },
       limit: limit || 100000,
       offset,
@@ -349,11 +302,7 @@ export class SynologySongService {
     });
     const total = await this.collatedGenreTrackEntity.count({
       where: {
-        [Op.and]: [
-          { accountId },
-          { albumId: album.id },
-          { genreId: { [Op.in]: genres.map((genre) => genre.id) } },
-        ],
+        [Op.and]: [{ accountId }, { albumId: album.id }, { genreId: { [Op.in]: genreIds } }],
       },
     });
     return {
@@ -383,10 +332,7 @@ export class SynologySongService {
     }
     const tracks = await this.collatedGenreTrackEntity.findAll({
       where: {
-        [Op.and]: [
-          { accountId },
-          { genreId: { [Op.in]: genres.map((genre) => genre.id) } },
-        ],
+        [Op.and]: [{ accountId }, { genreId: { [Op.in]: genres.map((genre) => genre.id) } }],
       },
       limit: limit || 100000,
       offset,
@@ -397,10 +343,7 @@ export class SynologySongService {
     });
     const total = await this.collatedGenreTrackEntity.count({
       where: {
-        [Op.and]: [
-          { accountId },
-          { genreId: { [Op.in]: genres.map((genre) => genre.id) } },
-        ],
+        [Op.and]: [{ accountId }, { genreId: { [Op.in]: genres.map((genre) => genre.id) } }],
       },
     });
     return {
@@ -417,11 +360,7 @@ export class SynologySongService {
     offset: number,
     limit: number,
   ): Promise<SynologySongDataDto> {
-    const album = await this.getAlbumByTitleAndArtist(
-      accountId,
-      albumTitle,
-      albumArtist,
-    );
+    const album = await this.getAlbumByTitleAndArtist(accountId, albumTitle, albumArtist);
     const tracks = await this.collatedTrackEntity.findAll({
       where: {
         accountId,
@@ -448,11 +387,7 @@ export class SynologySongService {
     };
   }
 
-  async listTracks(
-    accountId: number,
-    offset: number,
-    limit: number,
-  ): Promise<SynologySongDataDto> {
+  async listTracks(accountId: number, offset: number, limit: number): Promise<SynologySongDataDto> {
     const tracks = await this.collatedTrackEntity.findAll({
       where: {
         accountId,

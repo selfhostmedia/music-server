@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ErrorCodes } from 'src/constants/error-codes';
 import { InjectModel } from '@nestjs/sequelize/dist/common/sequelize.decorators';
 import { RootPathEntity } from 'src/database/entities';
@@ -28,9 +24,6 @@ export class AdminUpdateRootPathService {
     if (!existsSync(newPath)) {
       throw new BadRequestException(ErrorCodes.ROOT_PATH_DOES_NOT_EXIST_ERROR);
     }
-    await this.rootPathEntity.update(
-      { rootPath: newPath },
-      { where: { id: rootPathId } },
-    );
+    await this.rootPathEntity.update({ rootPath: newPath }, { where: { id: rootPathId } });
   }
 }

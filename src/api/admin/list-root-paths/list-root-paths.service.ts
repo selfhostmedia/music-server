@@ -35,9 +35,7 @@ export class AdminListRootPathsService {
         'createdAt',
         'updatedAt',
         [
-          Sequelize.literal(
-            `(SELECT COUNT(*) FROM "files" WHERE "files"."root_path_id" = "RootPathEntity"."id")`,
-          ),
+          Sequelize.literal(`(SELECT COUNT(*) FROM "files" WHERE "files"."root_path_id" = "RootPathEntity"."id")`),
           'fileCount',
         ],
         [
@@ -54,8 +52,6 @@ export class AdminListRootPathsService {
         },
       ],
     });
-    return rootPaths.map((rootPath) =>
-      pathToRow(rootPath.get({ plain: true }) as PathWithCounts),
-    );
+    return rootPaths.map((rootPath) => pathToRow(rootPath.get({ plain: true }) as PathWithCounts));
   }
 }

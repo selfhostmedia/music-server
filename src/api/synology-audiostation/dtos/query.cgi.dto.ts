@@ -1,10 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsInt, IsOptional } from 'class-validator';
-import {
-  SynologyApiEnum,
-  SynologyMethodEnum,
-  SynologyQueryEnum,
-} from '../enums';
+import { SynologyApiEnum, SynologyMethodEnum, SynologyQueryEnum } from '../enums';
 import { Transform } from 'class-transformer';
 
 export class QueryCgiBodyDto {

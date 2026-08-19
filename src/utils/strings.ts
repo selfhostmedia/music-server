@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/quotes */
 const splitDelimiters: string[] = [',', ';', '/', ' & '];
 
 /**
@@ -44,8 +45,11 @@ export function splitArray(items: string[]): string[] {
  * @returns {string} The sanitized string
  */
 export function sanitizeString(value: string): string {
-  // eslint-disable-next-line prettier/prettier
-  return value.trim().split('\'').join('\' p\'').replace(/[^\p{L}\p{N}\p{P}\p{P} ]/gu, '');
+  return value
+    .trim()
+    .split("'")
+    .join("' p'")
+    .replace(/[^\p{L}\p{N}\p{P}\p{P} ]/gu, '');
 }
 
 /**

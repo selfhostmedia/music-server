@@ -1,9 +1,5 @@
 /* eslint-disable no-await-in-loop */
-import {
-  ArtistEntity,
-  FileEntity,
-  LinkedArtistEntity,
-} from 'src/database/entities';
+import { ArtistEntity, FileEntity, LinkedArtistEntity } from 'src/database/entities';
 import { IAudioMetadata } from 'src/types/music-metadata';
 import { InjectModel } from '@nestjs/sequelize';
 import { Injectable, Logger } from '@nestjs/common';
@@ -21,10 +17,7 @@ export class IndexArtistService {
     private readonly linkedArtistEntity: typeof LinkedArtistEntity,
   ) {}
 
-  async insertOrRetrieveArtist(
-    name: string,
-    transaction?: Transaction,
-  ): Promise<number> {
+  async insertOrRetrieveArtist(name: string, transaction?: Transaction): Promise<number> {
     const nameNormalized = normalizeString(name);
     const existing = await this.artistEntity.findOne({
       where: {
@@ -47,16 +40,9 @@ export class IndexArtistService {
     return artist.id;
   }
 
-  async updateArtists(
-    embeddedData: IAudioMetadata,
-    fileDetail: FileEntity,
-    transaction?: Transaction,
-  ) {
+  async updateArtists(embeddedData: IAudioMetadata, fileDetail: FileEntity, transaction?: Transaction) {
     const artists =
-      embeddedData?.common.artists ||
-      splitArray(
-        embeddedData?.common.artist ? [embeddedData?.common.artist] : [],
-      );
+      embeddedData?.common.artists || splitArray(embeddedData?.common.artist ? [embeddedData?.common.artist] : []);
     for (let i = 0; i < artists.length; i += 1) {
       const name = artists[i]?.trim();
       if (name) {

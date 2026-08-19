@@ -20,4 +20,8 @@ export class ConfigService extends BaseConfigService<Environment, true> {
   isProduction(): boolean {
     return this.get('NODE_ENV') === 'production';
   }
+
+  isTesting(): boolean {
+    return this.get('NODE_ENV') === 'test';
+  }
 }

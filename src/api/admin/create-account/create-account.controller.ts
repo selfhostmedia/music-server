@@ -11,26 +11,25 @@ import {
   ApiBearerAuth,
   ApiCreatedResponse,
   ApiHeader,
+  ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
 import { Body, Controller, Post } from '@nestjs/common';
-import { UserRole } from 'src/constants/enums';
+import { UserRoleEnum } from 'src/constants/enums';
 
 @Controller({
   path: '/api/admin',
 })
 @ApiTags(ADMIN_APIS)
 export class AdminCreateAccountController {
-  constructor(
-    private readonly createAccountService: AdminCreateAccountService,
-  ) {}
+  constructor(private readonly createAccountService: AdminCreateAccountService) {}
 
-  /**
-   * Creates a user account granting them access to the music server. This endpoint is only
-   * accessible to users with the ADMIN role.
-   */
   @Post('create-account')
-  @AllowedRoles([UserRole.ADMIN])
+  @ApiOperation({
+    summary: 'Create a new account',
+    description: 'Creates a new account with the specified roles.',
+  })
+  @AllowedRoles([UserRoleEnum.ADMIN])
   @ApiBearerAuth(JWT_TOKEN)
   @ApiHeader({
     name: 'Authorization',
@@ -44,10 +43,8 @@ export class AdminCreateAccountController {
     type: AdminCreateAccountBadRequestResponseDto,
   })
   @ApiBadRequestResponse({ type: AdminCreateAccountBadRequestResponseDto })
-  async post(
-    @Body() body: AdminCreateAccountBodyDto,
-  ): Promise<AdminCreateAccountResponseDto> {
-    await this.createAccountService.post(body);
+  async post(@Body() body: AdminCreateAccountBodyDto): Promise<AdminCreateAccountResponseDto> {
+    await this.createAccountService.post(body.username, body.password, body.roles);
     return {
       success: true,
     };

@@ -41,27 +41,14 @@ export async function up(queryInterface: QueryInterface): Promise<void> {
   await queryInterface.addIndex('linked_composers', ['file_id'], {
     name: 'idx_linked_composers_file_id',
   });
-  await queryInterface.addIndex(
-    'linked_composers',
-    ['composer_id', 'file_id'],
-    {
-      name: 'idx_linked_composers_composer_id_file_id',
-    },
-  );
+  await queryInterface.addIndex('linked_composers', ['composer_id', 'file_id'], {
+    name: 'idx_linked_composers_composer_id_file_id',
+  });
 }
 
 export async function down(queryInterface: QueryInterface): Promise<void> {
-  await queryInterface.removeIndex(
-    'linked_composers',
-    'idx_linked_composers_composer_id',
-  );
-  await queryInterface.removeIndex(
-    'linked_composers',
-    'idx_linked_composers_file_id',
-  );
-  await queryInterface.removeIndex(
-    'linked_composers',
-    'idx_linked_composers_composer_id_file_id',
-  );
+  await queryInterface.removeIndex('linked_composers', 'idx_linked_composers_composer_id');
+  await queryInterface.removeIndex('linked_composers', 'idx_linked_composers_file_id');
+  await queryInterface.removeIndex('linked_composers', 'idx_linked_composers_composer_id_file_id');
   await queryInterface.dropTable('linked_composers');
 }

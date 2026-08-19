@@ -1,6 +1,7 @@
 /* eslint-disable max-classes-per-file */
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDate, IsNumber, IsOptional, IsString } from 'class-validator';
+import { SuccessResponseDto } from 'src/api/response.dto';
 
 export class AdminRootPathDto {
   /**
@@ -41,7 +42,8 @@ export class AdminRootPathDto {
   declare totalSize: number;
 
   /**
-   * The date and time the row was last updated, this field is optional and may not be present if the row has never been updated
+   * The date and time the row was last updated, this field is optional and may not be present
+   * if the row has never been updated
    */
   @IsDate()
   @IsOptional()
@@ -54,7 +56,7 @@ export class AdminRootPathDto {
   declare username: string;
 }
 
-export class AdminListRootPathsResponseDto {
+export class AdminListRootPathsResponseDto extends SuccessResponseDto {
   /**
    * The list of root paths with associated account owner information
    */

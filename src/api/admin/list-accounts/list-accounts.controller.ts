@@ -1,19 +1,24 @@
+import { ADMIN_APIS, JWT_TOKEN } from 'src/constants/swagger';
 import { AdminListAccountsResponseDto } from './list-accounts.dto';
 import { AdminListAccountsService } from './list-accounts.service';
 import { AllowedRoles } from 'src/api/role.guard';
-import { ApiBearerAuth, ApiHeader, ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiHeader, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Controller, Get } from '@nestjs/common';
-import { JWT_TOKEN } from 'src/constants/swagger';
-import { UserRole } from 'src/constants/enums';
+import { UserRoleEnum } from 'src/constants/enums';
 
 @Controller({
   path: '/api/admin',
 })
+@ApiTags(ADMIN_APIS)
 export class AdminListAccountsController {
   constructor(private readonly listAccountsService: AdminListAccountsService) {}
 
   @Get('list-accounts')
-  @AllowedRoles([UserRole.ADMIN])
+  @ApiOperation({
+    summary: 'List all accounts',
+    description: 'Retrieves a list of all accounts in the system.',
+  })
+  @AllowedRoles([UserRoleEnum.ADMIN])
   @ApiBearerAuth(JWT_TOKEN)
   @ApiHeader({
     name: 'Authorization',

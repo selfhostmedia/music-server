@@ -1,18 +1,11 @@
 import * as http from 'http';
 import * as https from 'https';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
-import {
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Response } from 'express';
-import {
-  ShoutcastContainerEntity,
-  ShoutcastItemEntity,
-} from 'src/database/entities';
-import { ShoutcastItemType } from 'src/types/enums';
+import { ShoutcastContainerEntity, ShoutcastItemEntity } from 'src/database/entities';
+import { ShoutcastItemTypeEnum } from 'src/types/enums';
 import { promisify } from 'util';
 
 type StreamEntry = {
@@ -21,39 +14,34 @@ type StreamEntry = {
   stream: http.IncomingMessage;
 };
 
-const startStream = promisify(
-  (
-    url: string,
-    callback: (error: Error | null, stream?: http.IncomingMessage) => void,
-  ) => {
-    const protocol = url.startsWith('https') ? https : http;
-    return protocol.get(url, (response) => {
-      response.on('error', (error) => {
-        return callback(error);
-      });
-      response.on('data', (data) => {
-        const playlist = data.toString().split('\n');
-        const newUrlLine = playlist.find((line) => line.startsWith('File'));
-        if (!newUrlLine) {
-          return callback(new Error('No stream URL found in playlist'));
-        }
-        const newUrl = newUrlLine.substring(newUrlLine.indexOf('=') + 1).trim();
-        if (!newUrl) {
-          return callback(new Error('No stream URL found in playlist'));
-        }
-        const newProtocol = newUrl.startsWith('https') ? https : http;
-        return newProtocol
-          .get(newUrl, (stream) => {
-            return callback(null, stream);
-          })
-          .on('error', (error) => {
-            return callback(error);
-          })
-          .end();
-      });
+const startStream = promisify((url: string, callback: (error: Error | null, stream?: http.IncomingMessage) => void) => {
+  const protocol = url.startsWith('https') ? https : http;
+  return protocol.get(url, (response) => {
+    response.on('error', (error) => {
+      return callback(error);
     });
-  },
-);
+    response.on('data', (data) => {
+      const playlist = data.toString().split('\n');
+      const newUrlLine = playlist.find((line) => line.startsWith('File'));
+      if (!newUrlLine) {
+        return callback(new Error('No stream URL found in playlist'));
+      }
+      const newUrl = newUrlLine.substring(newUrlLine.indexOf('=') + 1).trim();
+      if (!newUrl) {
+        return callback(new Error('No stream URL found in playlist'));
+      }
+      const newProtocol = newUrl.startsWith('https') ? https : http;
+      return newProtocol
+        .get(newUrl, (stream) => {
+          return callback(null, stream);
+        })
+        .on('error', (error) => {
+          return callback(error);
+        })
+        .end();
+    });
+  });
+});
 
 @Injectable()
 export class SynologyProxyService {
@@ -89,7 +77,7 @@ export class SynologyProxyService {
     const favorite = await this.shoutcastItemEntity.findOne({
       where: {
         title: favoriteTitle,
-        type: ShoutcastItemType.STATION,
+        type: ShoutcastItemTypeEnum.STATION,
       },
     });
     if (!favorite || !favorite.url) {
@@ -133,26 +121,22 @@ export class SynologyProxyService {
     }
     // retrieve the current song information
     const currentTrackKey = `currentTrack-${stationId}`;
-    const cachedCurrentTrack =
-      await this.cacheManager.get<string>(currentTrackKey);
+    const cachedCurrentTrack = await this.cacheManager.get<string>(currentTrackKey);
     if (cachedCurrentTrack) {
       return {
         title: cachedCurrentTrack,
       };
     }
     const body = `stationID=${stationId}`;
-    const request = await fetch(
-      'https://directory.shoutcast.com/Player/GetCurrentTrack',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-          'Content-Length': body.length.toString(),
-          Referer: 'https://directory.shoutcast.com/',
-        },
-        body,
+    const request = await fetch('https://directory.shoutcast.com/Player/GetCurrentTrack', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'Content-Length': body.length.toString(),
+        Referer: 'https://directory.shoutcast.com/',
       },
-    );
+      body,
+    });
     const response = await request.json();
     this.cacheManager.set(currentTrackKey, response.CurrentTrack, 30);
     return {

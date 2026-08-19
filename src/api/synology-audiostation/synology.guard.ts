@@ -1,11 +1,6 @@
 import { AuthenticationService } from 'src/authentication/authentication.service';
 import { ErrorCodes } from 'src/constants/error-codes';
-import {
-  Inject,
-  Injectable,
-  Logger,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
@@ -44,66 +39,38 @@ export class SynologyGuard implements CanActivate {
         } = await this.jwtService.verifyAsync(tokens.sessionToken);
         if (payload) {
           // verify the device token
-          const isDeviceTokenValid =
-            await this.authenticationService.verifyDeviceToken(
-              payload.accountId,
-              tokens.userAgent,
-              tokens.deviceToken,
-            );
-          if (!isDeviceTokenValid) {
-            throw new UnauthorizedException(
-              ErrorCodes.AUTHORIZATION_ERROR,
-              'session-error-6',
-            );
-          }
-          const user = await this.authenticationService.getAccount(
+          const isDeviceTokenValid = await this.authenticationService.verifyDeviceToken(
             payload.accountId,
+            tokens.userAgent,
+            tokens.deviceToken,
           );
+          if (!isDeviceTokenValid) {
+            throw new UnauthorizedException(ErrorCodes.AUTHORIZATION_ERROR, 'session-error-6');
+          }
+          const user = await this.authenticationService.getAccount(payload.accountId);
           if (!user) {
-            throw new UnauthorizedException(
-              ErrorCodes.AUTHORIZATION_ERROR,
-              'session-error-1',
-            );
+            throw new UnauthorizedException(ErrorCodes.AUTHORIZATION_ERROR, 'session-error-1');
           }
           // verify the session is still valid
-          const session = await this.authenticationService.getSession(
-            payload.sessionId,
-          );
-          if (
-            !session ||
-            session.expiresAt.getTime() < new Date().getTime() ||
-            session.endedAt !== null
-          ) {
-            throw new UnauthorizedException(
-              ErrorCodes.AUTHORIZATION_ERROR,
-              'session-error-2',
-            );
+          const session = await this.authenticationService.getSession(payload.sessionId);
+          if (!session || session.expiresAt.getTime() < new Date().getTime() || session.endedAt !== null) {
+            throw new UnauthorizedException(ErrorCodes.AUTHORIZATION_ERROR, 'session-error-2');
           }
-          const validSessionToken =
-            await this.authenticationService.verifySessionToken(
-              user,
-              session,
-              payload.tokenHash,
-            );
+          const validSessionToken = await this.authenticationService.verifySessionToken(
+            user,
+            session,
+            payload.tokenHash,
+          );
           if (!validSessionToken) {
-            throw new UnauthorizedException(
-              ErrorCodes.AUTHORIZATION_ERROR,
-              'session-error-3',
-            );
+            throw new UnauthorizedException(ErrorCodes.AUTHORIZATION_ERROR, 'session-error-3');
           }
           request.user = user;
           request.session = session;
         }
       } catch (error) {
-        this.logger.error(
-          'Error verifying JWT token:',
-          error instanceof Error ? error.message : error,
-        );
+        this.logger.error('Error verifying JWT token:', error instanceof Error ? error.message : error);
         if (!allowGuest) {
-          throw new UnauthorizedException(
-            ErrorCodes.AUTHORIZATION_ERROR,
-            'session-error-4',
-          );
+          throw new UnauthorizedException(ErrorCodes.AUTHORIZATION_ERROR, 'session-error-4');
         }
       }
     }
@@ -111,9 +78,7 @@ export class SynologyGuard implements CanActivate {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  private extractPayloadFromHeader(
-    request: Request,
-  ): HeaderPayload | undefined {
+  private extractPayloadFromHeader(request: Request): HeaderPayload | undefined {
     if (!request.headers.cookie) {
       return undefined;
     }

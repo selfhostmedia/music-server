@@ -1,17 +1,9 @@
 /* eslint-disable max-classes-per-file */
 import { ApiProperty, getSchemaPath } from '@nestjs/swagger';
-import { ContentType } from 'src/types/enums';
+import { ContentTypeEnum } from 'src/types/enums';
 import { IsBoolean, IsEnum, IsInt, IsString } from 'class-validator';
-import {
-  SynologyApiEnum,
-  SynologyLibraryEnum,
-  SynologyMethodEnum,
-} from '../enums';
-import {
-  SynologyPaginationDto,
-  SynologyPaginationResponseDto,
-  SynologySuccessResponseDto,
-} from './synology.dto';
+import { SynologyApiEnum, SynologyLibraryEnum, SynologyMethodEnum } from '../enums';
+import { SynologyPaginationDto, SynologyPaginationResponseDto, SynologySuccessResponseDto } from './synology.dto';
 import { SynologySongDto } from './song.cgi.dto';
 import { Transform } from 'class-transformer';
 
@@ -121,11 +113,11 @@ export class SynologyFolderDto {
    * The content type, folder or file
    */
   @ApiProperty({
-    enum: ContentType,
-    enumName: 'ContentType',
+    enum: ContentTypeEnum,
+    enumName: 'ContentTypeEnum',
   })
-  @IsEnum(ContentType)
-  declare type: ContentType;
+  @IsEnum(ContentTypeEnum)
+  declare type: ContentTypeEnum;
 }
 
 export class SynologyFolderDataDto extends SynologyPaginationResponseDto {
@@ -147,10 +139,7 @@ export class SynologyFolderDataDto extends SynologyPaginationResponseDto {
     isArray: true,
     type: 'array',
     items: {
-      oneOf: [
-        { $ref: getSchemaPath(SynologyFolderDto) },
-        { $ref: getSchemaPath(SynologySongDto) },
-      ],
+      oneOf: [{ $ref: getSchemaPath(SynologyFolderDto) }, { $ref: getSchemaPath(SynologySongDto) }],
     },
   })
   declare items: (SynologyFolderDto | SynologySongDto)[];

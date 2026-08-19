@@ -15,24 +15,28 @@ import {
   ApiHeader,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
 import { Body, Controller, Patch, Query } from '@nestjs/common';
 import { User } from 'src/api/user.decorator';
-import { UserRole } from 'src/constants/enums';
+import { UserRoleEnum } from 'src/constants/enums';
 
 @Controller({
   path: 'api/admin',
 })
 @ApiTags(ADMIN_APIS)
 export class AdminUpdateUserRolesController {
-  constructor(
-    private readonly updateRolesService: AdminUpdateUserRolesService,
-  ) {}
+  constructor(private readonly updateRolesService: AdminUpdateUserRolesService) {}
 
-  // eslint-disable-next-line class-methods-use-this
   @Patch('update-user-roles')
-  @AllowedRoles([UserRole.ADMIN])
+  @ApiOperation({
+    summary: 'Update user roles',
+    description:
+      // eslint-disable-next-line max-len
+      'Updates the roles of a specified user account.  There must be at least one administrator account so if the last administrator account is having the `admin` role removed a new administrator account must be created first.',
+  })
+  @AllowedRoles([UserRoleEnum.ADMIN])
   @ApiBearerAuth(JWT_TOKEN)
   @ApiHeader({
     name: 'Authorization',
@@ -55,11 +59,7 @@ export class AdminUpdateUserRolesController {
     @Query() query: AdminUpdateUserRolesQueryDto,
     @Body() body: AdminUpdateUserRolesBodyDto,
   ): Promise<AdminUpdateUserRolesResponseDto> {
-    await this.updateRolesService.updateUserRoles(
-      user.id,
-      query.accountId,
-      body.roles,
-    );
+    await this.updateRolesService.updateUserRoles(user.id, query.accountId, body.roles);
     return {
       success: true,
     };

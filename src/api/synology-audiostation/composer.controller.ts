@@ -1,22 +1,14 @@
+import { AUTHENTICATED_REQUEST_DESCRIPTION, PAGINATED_DATA_DESCRIPTION } from './consts';
 import { AccountEntity } from 'src/database/entities';
-import { ApiHeader, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import {
-  Body,
-  Controller,
-  HttpCode,
-  HttpStatus,
-  Logger,
-  Post,
-} from '@nestjs/common';
-import {
-  SynologyComposerBodyDto,
-  SynologyComposerResponseDto,
-} from './dtos/composer.cgi.dto';
+import { ApiHeader, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, HttpCode, HttpStatus, Logger, Post } from '@nestjs/common';
+import { SYNOLOGY_AUDIOSTATION_APIS } from 'src/constants/swagger';
+import { SynologyComposerBodyDto, SynologyComposerResponseDto } from './dtos/composer.cgi.dto';
 import { SynologyComposerService } from './composer.service';
 import { User } from '../user.decorator';
 
 @Controller()
-@ApiTags('Synology AudioStation APIs')
+@ApiTags(SYNOLOGY_AUDIOSTATION_APIS)
 export class SynologyComposerController {
   private readonly logger: Logger = new Logger(SynologyComposerController.name);
 
@@ -24,26 +16,31 @@ export class SynologyComposerController {
 
   @Post('/webapi/AudioStation/composer.cgi')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Lists composers in the music library',
+    description: [
+      // eslint-disable-next-line max-len
+      `Lists composers found in the music library.  These are extracted from song metadata and are not necessarily the same as the artists.  This field can be problematic due to inconsistent structure for multiple composers, such as "Composer 1, Composer 2" vs "Composer 1; Composer 2" vs "Composer 1 & Composer 2".`,
+      // eslint-disable-next-line max-len
+      `When a track is recognized as having multiple composers, each composer is counted as a separate composer.  For  instance, a track with the composer "Composer 1, Composer 2" will be counted as both "Composer 1" and "Composer 2".`,
+      PAGINATED_DATA_DESCRIPTION,
+      AUTHENTICATED_REQUEST_DESCRIPTION,
+    ].join('\n\n'),
+  })
   @ApiHeader({
     name: 'cookie',
-    description:
-      'The session ID and device ID tokens for the authenticated user',
-    required: true,
+    description: 'The session ID and device ID cookies for the user `id={sessionId}; did={deviceId}`',
   })
   @ApiOkResponse({
     description: 'Returns a list of composers',
     type: SynologyComposerResponseDto,
   })
-  async routeComposerCgi(
+  async route(
     @User() user: AccountEntity,
     @Body() body: SynologyComposerBodyDto,
   ): Promise<SynologyComposerResponseDto> {
     // Route #1:  list composers
-    const data = await this.composerService.listComposers(
-      user.id,
-      body.offset,
-      body.limit,
-    );
+    const data = await this.composerService.listComposers(user.id, body.offset, body.limit);
     return {
       data,
       success: true,

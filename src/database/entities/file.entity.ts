@@ -1,16 +1,7 @@
 import { AccountEntity } from './account.entity';
 import { AlbumEntity } from './album.entity';
-import {
-  BelongsTo,
-  Column,
-  DataType,
-  ForeignKey,
-  HasMany,
-  Model,
-  Sequelize,
-  Table,
-} from 'sequelize-typescript';
-import { FileType } from 'src/types/enums';
+import { BelongsTo, Column, DataType, ForeignKey, HasMany, Model, Sequelize, Table } from 'sequelize-typescript';
+import { FileTypeEnum } from 'src/types/enums';
 import { LinkedArtistEntity } from './linked-artist.entity';
 import { LinkedComposerEntity } from './linked-composer.entity';
 import { LinkedGenreEntity } from './linked-genre.entity';
@@ -28,7 +19,7 @@ import { RootPathEntity } from './root-path.entity';
 })
 export class FileEntity extends Model<FileEntity> {
   /**
-   * The account ID the file belongs to
+   * The account ID the file belongs to.
    */
   @Column({
     type: DataType.INTEGER,
@@ -43,7 +34,7 @@ export class FileEntity extends Model<FileEntity> {
   declare accountId?: number;
 
   /**
-   * The album ID the file belongs to
+   * The album ID the file belongs to.
    */
   @Column({
     type: DataType.INTEGER,
@@ -72,7 +63,8 @@ export class FileEntity extends Model<FileEntity> {
   declare comment: string;
 
   /**
-   * This field is managed by Sequelize and tracks the date and time the row was created.  This field should not be specified if you are
+   * This field is managed by Sequelize and tracks the date and time the row was created.  This
+   * field should not be specified if you are
    * inserting and updating data.
    */
   @Column({
@@ -102,8 +94,8 @@ export class FileEntity extends Model<FileEntity> {
   /**
    * The file type for the music file
    */
-  @Column(DataType.ENUM(...Object.values(FileType)))
-  declare fileType: FileType;
+  @Column(DataType.ENUM(...Object.values(FileTypeEnum)))
+  declare fileType: FileTypeEnum;
 
   /**
    * The file modification time for the music file
@@ -115,7 +107,7 @@ export class FileEntity extends Model<FileEntity> {
   declare frequency: number;
 
   /**
-   * The ID of the table row is an auto-incrementing integer that is assigned by the database when the row is created
+   * The ID of the table row is an auto-incrementing integer that is assigned by the database when the row is created.
    */
   @Column({
     type: DataType.INTEGER,
@@ -161,7 +153,8 @@ export class FileEntity extends Model<FileEntity> {
   declare trackNumber: number;
 
   /**
-   * This field is managed by Sequelize and tracks the most recent date and time the row was last updated.  This field should not be specified if you are inserting and updating data
+   * This field is managed by Sequelize and tracks the most recent date and time the row was last
+   * updated.  This field should not be specified if you are inserting and updating data.
    */
   @Column(DataType.DATE)
   declare updatedAt?: Date;

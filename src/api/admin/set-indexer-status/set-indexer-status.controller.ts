@@ -1,26 +1,26 @@
+import { ADMIN_APIS, JWT_TOKEN } from 'src/constants/swagger';
 import { AccountEntity } from 'src/database/entities';
-import {
-  AdminSetIndexerStatusBodyDto,
-  AdminSetIndexerStatusResponseDto,
-} from './set-indexer-status.dto';
+import { AdminSetIndexerStatusBodyDto, AdminSetIndexerStatusResponseDto } from './set-indexer-status.dto';
 import { AdminSetIndexerStatusService } from './set-indexer-status.service';
 import { AllowedRoles } from 'src/api/role.guard';
-import { ApiBearerAuth, ApiHeader, ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiHeader, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Body, Controller, Patch } from '@nestjs/common';
-import { JWT_TOKEN } from 'src/constants/swagger';
 import { User } from 'src/api/user.decorator';
-import { UserRole } from 'src/constants/enums';
+import { UserRoleEnum } from 'src/constants/enums';
 
 @Controller({
   path: '/api/admin',
 })
+@ApiTags(ADMIN_APIS)
 export class AdminSetIndexerStatusController {
-  constructor(
-    private readonly setIndexerStatusService: AdminSetIndexerStatusService,
-  ) {}
+  constructor(private readonly setIndexerStatusService: AdminSetIndexerStatusService) {}
 
   @Patch('/set-indexer-status')
-  @AllowedRoles([UserRole.ADMIN])
+  @ApiOperation({
+    summary: 'Set the indexer status',
+    description: 'Enables or disables the indexer to allow moving root paths or to preserve system resources.',
+  })
+  @AllowedRoles([UserRoleEnum.ADMIN])
   @ApiBearerAuth(JWT_TOKEN)
   @ApiHeader({
     name: 'Authorization',

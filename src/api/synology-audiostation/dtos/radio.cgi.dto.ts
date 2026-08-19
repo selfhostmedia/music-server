@@ -1,12 +1,9 @@
 /* eslint-disable max-classes-per-file */
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsInt, IsOptional, IsString, IsUrl } from 'class-validator';
-import { ShoutcastItemType } from 'src/types/enums';
+import { ShoutcastItemTypeEnum } from 'src/types/enums';
 import { SynologyApiEnum, SynologyMethodEnum } from '../enums';
-import {
-  SynologyPaginationResponseDto,
-  SynologySuccessResponseDto,
-} from './synology.dto';
+import { SynologyPaginationResponseDto, SynologySuccessResponseDto } from './synology.dto';
 import { Transform } from 'class-transformer';
 
 class RadioBodyDto {
@@ -181,11 +178,11 @@ export class SynologyRadioItemDto {
    * stations.
    */
   @ApiProperty({
-    enum: ShoutcastItemType,
-    enumName: 'ShoutcastItemType',
+    enum: ShoutcastItemTypeEnum,
+    enumName: 'ShoutcastItemTypeEnum',
   })
-  @IsEnum(ShoutcastItemType)
-  declare type: ShoutcastItemType;
+  @IsEnum(ShoutcastItemTypeEnum)
+  declare type: ShoutcastItemTypeEnum;
 
   /**
    * The `url` value is expected to always be an empty string for SHOUTcast genres.

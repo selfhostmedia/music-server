@@ -1,12 +1,5 @@
 import { AccountEntity } from './account.entity';
-import {
-  BelongsTo,
-  Column,
-  DataType,
-  ForeignKey,
-  Model,
-  Table,
-} from 'sequelize-typescript';
+import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript';
 import { GenreEntity } from './genre.entity';
 
 /**
@@ -23,7 +16,7 @@ import { GenreEntity } from './genre.entity';
 })
 export class CollatedGenreAlbumEntity extends Model<CollatedGenreAlbumEntity> {
   /**
-   * The account ID the root path belongs to
+   * The account ID the root path belongs to.
    */
   @Column({
     type: DataType.INTEGER,
@@ -55,9 +48,7 @@ export class CollatedGenreAlbumEntity extends Model<CollatedGenreAlbumEntity> {
     type: DataType.TEXT,
     get(): string[] {
       const rawValue = this.getDataValue('composers');
-      return (
-        rawValue?.split(',').map((composer: string) => composer.trim()) || []
-      );
+      return rawValue?.split(',').map((composer: string) => composer.trim()) || [];
     },
   })
   declare composers: string[];
@@ -88,7 +79,7 @@ export class CollatedGenreAlbumEntity extends Model<CollatedGenreAlbumEntity> {
   declare genres: string[];
 
   /**
-   * The album ID the file belongs to
+   * The album ID the file belongs to.
    */
   @Column({
     type: DataType.INTEGER,

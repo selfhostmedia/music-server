@@ -4,11 +4,7 @@ import { IndexerService } from 'src/indexer/indexer.service';
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 
-function logToRow(
-  item,
-  accounts: Record<number, string>,
-  rootPaths: Record<number, string>,
-): AdminLogEntryDto {
+function logToRow(item, accounts: Record<number, string>, rootPaths: Record<number, string>): AdminLogEntryDto {
   return {
     ...item,
     username: accounts[item.accountId] || '',
@@ -48,11 +44,7 @@ export class AdminListIndexerLogsService {
     return rootPathMap;
   }
 
-  async list(
-    accountId?: number,
-    rootPathId?: number,
-    search?: string,
-  ): Promise<AdminLogEntryDto[]> {
+  async list(accountId?: number, rootPathId?: number, search?: string): Promise<AdminLogEntryDto[]> {
     const accounts = await this.getAccounts();
     const rootPaths = await this.getRootPaths();
     const searchNormalized = search?.toLowerCase()?.trim() || '';
@@ -61,8 +53,7 @@ export class AdminListIndexerLogsService {
         (item) =>
           (!accountId || item.accountId === accountId) &&
           (!rootPathId || item.rootPathId === rootPathId) &&
-          (!searchNormalized ||
-            item.message.toLowerCase().indexOf(searchNormalized) > -1),
+          (!searchNormalized || item.message.toLowerCase().indexOf(searchNormalized) > -1),
       )
       .map((item) => logToRow(item, accounts, rootPaths))
       .reverse();

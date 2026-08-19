@@ -1,3 +1,4 @@
+import { ADMIN_APIS, JWT_TOKEN } from 'src/constants/swagger';
 import {
   AdminDeleteRootPathNotFoundResponseDto,
   AdminDeleteRootPathQueryDto,
@@ -5,29 +6,25 @@ import {
 } from './delete-root-path.dto';
 import { AdminDeleteRootPathService } from './delete-root-path.service';
 import { AllowedRoles } from 'src/api/role.guard';
-import {
-  ApiBearerAuth,
-  ApiHeader,
-  ApiNotFoundResponse,
-  ApiOkResponse,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiHeader, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Controller, Delete, Query } from '@nestjs/common';
-import { JWT_TOKEN } from 'src/constants/swagger';
-import { UserRole } from 'src/constants/enums';
+import { UserRoleEnum } from 'src/constants/enums';
 
 @Controller({
   path: '/api/admin',
 })
+@ApiTags(ADMIN_APIS)
 export class AdminDeleteRootPathController {
-  constructor(
-    private readonly deleteRootPathService: AdminDeleteRootPathService,
-  ) {}
+  constructor(private readonly deleteRootPathService: AdminDeleteRootPathService) {}
 
-  /**
-   * Deletes a root path from the platform.
-   */
   @Delete('delete-root-path')
-  @AllowedRoles([UserRole.ADMIN])
+  @ApiOperation({
+    summary: 'Delete a root path',
+    description:
+      // eslint-disable-next-line max-len
+      'Deletes the specified root path.  This will delete all associated information in the database immediately, the songs and folders will no longer be present in their data.  This will not affect any files on the file system.',
+  })
+  @AllowedRoles([UserRoleEnum.ADMIN])
   @ApiBearerAuth(JWT_TOKEN)
   @ApiHeader({
     name: 'Authorization',
@@ -42,9 +39,7 @@ export class AdminDeleteRootPathController {
     description: 'Root path not found',
     type: AdminDeleteRootPathNotFoundResponseDto,
   })
-  async delete(
-    @Query() query: AdminDeleteRootPathQueryDto,
-  ): Promise<AdminDeleteRootPathResponseDto> {
+  async delete(@Query() query: AdminDeleteRootPathQueryDto): Promise<AdminDeleteRootPathResponseDto> {
     await this.deleteRootPathService.delete(query.id);
     return {
       success: true,

@@ -1,15 +1,8 @@
 import { AccountEntity } from './account.entity';
 import { AlbumEntity } from './album.entity';
-import {
-  BelongsTo,
-  Column,
-  DataType,
-  ForeignKey,
-  Model,
-  Table,
-} from 'sequelize-typescript';
+import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript';
 import { FileEntity } from './file.entity';
-import { FileType } from 'src/types/enums';
+import { FileTypeEnum } from 'src/types/enums';
 import { RootPathEntity } from './root-path.entity';
 
 /**
@@ -25,7 +18,7 @@ import { RootPathEntity } from './root-path.entity';
 })
 export class CollatedTrackEntity extends Model<CollatedTrackEntity> {
   /**
-   * The account ID the root path belongs to
+   * The account ID the root path belongs to.
    */
   @Column({
     type: DataType.INTEGER,
@@ -42,7 +35,7 @@ export class CollatedTrackEntity extends Model<CollatedTrackEntity> {
   declare account: AccountEntity;
 
   /**
-   * The album ID the file belongs to
+   * The album ID the file belongs to.
    */
   @Column({
     type: DataType.INTEGER,
@@ -76,11 +69,11 @@ export class CollatedTrackEntity extends Model<CollatedTrackEntity> {
   @Column(DataType.STRING(255))
   declare filePath: string;
 
-  @Column(DataType.ENUM(...Object.values(FileType)))
-  declare fileType: FileType;
+  @Column(DataType.ENUM(...Object.values(FileTypeEnum)))
+  declare fileType: FileTypeEnum;
 
   /**
-   * The linked file ID
+   * The linked file ID.
    */
   @Column({
     type: DataType.INTEGER,
@@ -131,9 +124,7 @@ export class CollatedTrackEntity extends Model<CollatedTrackEntity> {
     type: DataType.TEXT,
     get(): string[] {
       const rawValue = this.getDataValue('trackComposers');
-      return (
-        rawValue?.split(',').map((composer: string) => composer.trim()) || []
-      );
+      return rawValue?.split(',').map((composer: string) => composer.trim()) || [];
     },
   })
   declare trackComposers: string[];

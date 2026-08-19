@@ -1,6 +1,6 @@
 import { AccountEntity } from 'src/database/entities';
-import { AdminRegenerateUserSessionKeyController } from './regenerate-user-sessionkey.controller';
-import { AdminRegenerateUserSessionKeyService } from './regenerate-user-sessionkey.service';
+import { AdminRegenerateUserSessionKeyController } from './regenerate-user-session-key.controller';
+import { AdminRegenerateUserSessionKeyService } from './regenerate-user-session-key.service';
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize/dist/sequelize.module';
 

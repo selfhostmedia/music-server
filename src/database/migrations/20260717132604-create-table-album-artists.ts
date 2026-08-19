@@ -47,17 +47,8 @@ export async function up(queryInterface: QueryInterface): Promise<void> {
 }
 
 export async function down(queryInterface: QueryInterface): Promise<void> {
-  await queryInterface.removeIndex(
-    'album_artists',
-    'idx_album_artists_album_id',
-  );
-  await queryInterface.removeIndex(
-    'album_artists',
-    'idx_album_artists_artist_id',
-  );
-  await queryInterface.removeIndex(
-    'album_artists',
-    'idx_album_artists_album_id_artist_id',
-  );
+  await queryInterface.removeIndex('album_artists', 'idx_album_artists_album_id');
+  await queryInterface.removeIndex('album_artists', 'idx_album_artists_artist_id');
+  await queryInterface.removeIndex('album_artists', 'idx_album_artists_album_id_artist_id');
   await queryInterface.dropTable('album_artists');
 }

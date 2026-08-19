@@ -1,10 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  BadRequestResponse,
-  NotFoundResponse,
-  SuccessResponse,
-} from 'src/api/response.dto';
+import { BadRequestResponseDto, NotFoundResponseDto, SuccessResponseDto } from 'src/api/response.dto';
 import { ErrorCodes } from 'src/constants/error-codes';
 import { IsInt, IsString } from 'class-validator';
 
@@ -24,9 +20,9 @@ export class AdminCreateRootPathBodyDto {
   declare rootPath: string;
 }
 
-export class AdminCreateRootPathResponseDto extends SuccessResponse {}
+export class AdminCreateRootPathResponseDto extends SuccessResponseDto {}
 
-export class AdminCreateRootPathNotFoundResponseDto extends NotFoundResponse {
+export class AdminCreateRootPathNotFoundResponseDto extends NotFoundResponseDto {
   /**
    * The error message(s) that occurred during the validation of the request data or additional requirements
    * applied during the execution of the request
@@ -34,24 +30,21 @@ export class AdminCreateRootPathNotFoundResponseDto extends NotFoundResponse {
   @ApiProperty({
     isArray: true,
     enum: [ErrorCodes.ACCOUNT_NOT_FOUND_ERROR],
-    enumName: 'AdminCreateRootPathNotFoundErrorMessage',
+    enumName: 'AdminCreateRootPathNotFoundErrorMessageEnum',
     default: ErrorCodes.ACCOUNT_NOT_FOUND_ERROR,
   })
   declare message: ErrorCodes[];
 }
 
-export class AdminCreateRootPathBadRequestResponseDto extends BadRequestResponse {
+export class AdminCreateRootPathBadRequestResponseDto extends BadRequestResponseDto {
   /**
    * The error message(s) that occurred during the validation of the request data or additional requirements
    * applied during the execution of the request
    */
   @ApiProperty({
     isArray: true,
-    enum: [
-      ErrorCodes.ROOT_PATH_DOES_NOT_EXIST_ERROR,
-      ErrorCodes.DUPLICATE_ROOT_PATH_ERROR,
-    ],
-    enumName: 'AdminCreateRootPathBadRequestErrorMessage',
+    enum: [ErrorCodes.ROOT_PATH_DOES_NOT_EXIST_ERROR, ErrorCodes.DUPLICATE_ROOT_PATH_ERROR],
+    enumName: 'AdminCreateRootPathBadRequestErrorMessageEnum',
     default: ErrorCodes.ROOT_PATH_DOES_NOT_EXIST_ERROR,
   })
   declare message: ErrorCodes[];

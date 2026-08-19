@@ -1,16 +1,10 @@
-import {
-  Column,
-  DataType,
-  Model,
-  Sequelize,
-  Table,
-} from 'sequelize-typescript';
+import { Column, DataType, Model, Sequelize, Table } from 'sequelize-typescript';
 import { Guid } from 'typescript-guid';
-import { UserRole } from 'src/constants/enums';
+import { UserRoleEnum } from 'src/constants/enums';
 
 /**
- * The AccountEntity holds all of the information required for a person to securely-access the API including their hashed
- * password and session secrets.
+ * The AccountEntity holds all of the information required for a person to securely-access the
+ * API including their hashed password and session secrets.
  */
 @Table({
   tableName: 'accounts',
@@ -19,8 +13,9 @@ import { UserRole } from 'src/constants/enums';
 })
 export class AccountEntity extends Model<AccountEntity> {
   /**
-   * This field is managed by Sequelize and tracks the date and time the row was created.  This field should not be specified if you are
-   * inserting and updating data
+   * This field is managed by Sequelize and tracks the date and time the row was created.  This
+   * field should not be specified if you are
+   * inserting and updating data.
    */
   @Column({
     type: DataType.DATE,
@@ -29,7 +24,7 @@ export class AccountEntity extends Model<AccountEntity> {
   declare createdAt: Date;
 
   /**
-   * The ID of the table row is an integer that is assigned by the database when the row is created
+   * The ID of the table row is an integer that is assigned by the database when the row is created.
    */
   @Column({
     type: DataType.INTEGER,
@@ -54,7 +49,7 @@ export class AccountEntity extends Model<AccountEntity> {
     get() {
       const rawValue = this.getDataValue('roles');
       if (rawValue?.length) {
-        const roles = rawValue.split(',').map((p: string) => p as UserRole);
+        const roles = rawValue.split(',').map((p: string) => p as UserRoleEnum);
         return roles;
       }
       return [];
@@ -67,22 +62,25 @@ export class AccountEntity extends Model<AccountEntity> {
       }
     },
   })
-  declare roles: UserRole[];
+  declare roles: UserRoleEnum[];
 
   /**
-   * The session token is a random UUID used as part of a secret token that verifies session information.  A change in this value invalidates all sessions belongong to this user immediately.
+   * The session token is a random UUID used as part of a secret token that verifies session
+   * information.  A change in this value invalidates all sessions belongong to this user
+   * immediately.
    */
   @Column({
     type: DataType.UUID,
     allowNull: false,
     set(value: Guid) {
-      this.setDataValue('sessionMasterKey', value.toString());
+      this.setDataValue('sessionKey', value.toString());
     },
   })
   declare sessionKey: Guid;
 
   /**
-   * This field is managed by Sequelize and tracks the most recent date and time the row was last updated.  This field should not be specified if you are inserting and updating data
+   * This field is managed by Sequelize and tracks the most recent date and time the row was last
+   * updated.  This field should not be specified if you are inserting and updating data.
    */
   @Column({
     type: DataType.DATE,

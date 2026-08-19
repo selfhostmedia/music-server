@@ -1,12 +1,6 @@
 import * as bcrypt from 'bcryptjs';
 import { AccountEntity, SessionEntity } from 'src/database/entities';
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { ConfigService } from 'src/config/config.service';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ErrorCodes } from 'src/constants/error-codes';
 import { Guid } from 'typescript-guid';
 import { InjectModel } from '@nestjs/sequelize';
@@ -18,7 +12,6 @@ export class AuthenticationService {
   constructor(
     @InjectModel(AccountEntity)
     private readonly accountEntity: typeof AccountEntity,
-    private readonly configService: ConfigService,
     @Inject(JwtService) private readonly jwtService: JwtService,
     @InjectModel(SessionEntity)
     private readonly sessionEntity: typeof SessionEntity,
@@ -31,9 +24,7 @@ export class AuthenticationService {
       order: [['id', 'DESC']],
     });
     if (!systemConfiguration) {
-      throw new NotFoundException(
-        ErrorCodes.SYSTEM_CONFIGURATION_NOT_FOUND_ERROR,
-      );
+      throw new NotFoundException(ErrorCodes.SYSTEM_CONFIGURATION_NOT_FOUND_ERROR);
     }
     return systemConfiguration.sessionMasterKey;
   }
@@ -61,14 +52,13 @@ export class AuthenticationService {
     return account.sessionKey;
   }
 
-
   /**
    * Creates a user session used for access APIs requiring authentication
    * @param {string} username The username of the account the session is being created for
    * @param {string} password The password of the account the session is being created for
    * @param {string} userAgent The user agent of the client creating the session
    * @param {string} [restrictSession] Optional string to restrict the session to a specific app or API.
-   * @param {number} [expiresDays] Optional number of days until the session expires.  Defaults to 1 day if not provided.
+   * @param {number} [expiresDays] Optional number of days until the session expires.  Defaults to 1 day.
    * @returns {Promise<string>} The JWT session token
    */
   async createSession(
@@ -128,16 +118,8 @@ export class AuthenticationService {
    * @returns {string} The generated session token
    */
   // eslint-disable-next-line class-methods-use-this
-  private generateDeviceToken(
-    sessionMasterKey: Guid,
-    accountSessionKey: Guid,
-    userAgent: string,
-  ) {
-    return [
-      sessionMasterKey.toString(),
-      accountSessionKey.toString(),
-      userAgent,
-    ].join('-');
+  private generateDeviceToken(sessionMasterKey: Guid, accountSessionKey: Guid, userAgent: string) {
+    return [sessionMasterKey.toString(), accountSessionKey.toString(), userAgent].join('-');
   }
 
   /**
@@ -168,11 +150,7 @@ export class AuthenticationService {
   async generateDeviceHash(username: string, userAgent: string) {
     const sessionMasterKey = await this.getMasterSessionKey();
     const accountSessionKey = await this.getAccountSessionKeyByUsername(username);
-    const token = this.generateDeviceToken(
-      sessionMasterKey,
-      accountSessionKey,
-      userAgent,
-    );
+    const token = this.generateDeviceToken(sessionMasterKey, accountSessionKey, userAgent);
     return bcrypt.hashSync(token, 10);
   }
 
@@ -192,12 +170,7 @@ export class AuthenticationService {
     passwordHash: string,
     session: SessionEntity,
   ) {
-    const token = this.generateSessionToken(
-      sessionMasterKey,
-      accountSessionKey,
-      passwordHash,
-      session,
-    );
+    const token = this.generateSessionToken(sessionMasterKey, accountSessionKey, passwordHash, session);
     return bcrypt.hashSync(token, 10);
   }
 
@@ -208,22 +181,13 @@ export class AuthenticationService {
    * @param {SessionEntity} session The session entity
    * @returns {Promise<string>} The JWT session token
    */
-  async generateSignedToken(
-    account: AccountEntity,
-    session: SessionEntity,
-    expires: Date,
-  ): Promise<string> {
+  async generateSignedToken(account: AccountEntity, session: SessionEntity, expires: Date): Promise<string> {
     const sessionMasterKey = await this.getMasterSessionKey();
     return this.jwtService.signAsync({
       accountId: account.id,
       sessionId: session.id,
       roles: account.roles,
-      tokenHash: this.generateSessionTokenHash(
-        sessionMasterKey,
-        account.sessionKey,
-        account.passwordHash,
-        session,
-      ),
+      tokenHash: this.generateSessionTokenHash(sessionMasterKey, account.sessionKey, account.passwordHash, session),
       exp: Math.floor(expires.getTime() / 1000),
     });
   }
@@ -244,40 +208,23 @@ export class AuthenticationService {
     return session;
   }
 
-  async verifyDeviceToken(
-    accountId: number,
-    userAgent: string,
-    deviceToken: string,
-  ): Promise<boolean> {
+  async verifyDeviceToken(accountId: number, userAgent: string, deviceToken: string): Promise<boolean> {
     const sessionMasterKey = await this.getMasterSessionKey();
     const accountSessionKey = await this.getAccountSessionKey(accountId);
-    const token = this.generateDeviceToken(
-      sessionMasterKey,
-      accountSessionKey,
-      userAgent,
-    );
+    const token = this.generateDeviceToken(sessionMasterKey, accountSessionKey, userAgent);
     return bcrypt.compareSync(token, deviceToken);
   }
 
   /**
    * Verifies a session token by comparing its hashed secret to the original secret string it was from
-   * @param {AccountEntity} account The account entity the session belongs to
+   * @param {AccountEntity} account The account entity the session belongs to.
    * @param {SessionEntity} session The session entity
    * @param {string} tokenHash The hashed session token to compare against
    * @returns {boolean} Whether the session token is valid
    */
-  async verifySessionToken(
-    account: AccountEntity,
-    session: SessionEntity,
-    tokenHash: string,
-  ): Promise<boolean> {
+  async verifySessionToken(account: AccountEntity, session: SessionEntity, tokenHash: string): Promise<boolean> {
     const sessionMasterKey = await this.getMasterSessionKey();
-    const token = this.generateSessionToken(
-      sessionMasterKey,
-      account.sessionKey,
-      account.passwordHash,
-      session,
-    );
+    const token = this.generateSessionToken(sessionMasterKey, account.sessionKey, account.passwordHash, session);
     return bcrypt.compareSync(token, tokenHash);
   }
 }

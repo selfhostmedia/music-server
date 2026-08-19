@@ -1,10 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  BadRequestResponse,
-  NotFoundResponse,
-  SuccessResponse,
-} from 'src/api/response.dto';
+import { BadRequestResponseDto, NotFoundResponseDto, SuccessResponseDto } from 'src/api/response.dto';
 import { ErrorCodes } from 'src/constants/error-codes';
 import { IsDate, IsInt, IsOptional, IsString, Length } from 'class-validator';
 
@@ -43,7 +39,7 @@ export class AdminListIndexerLogsQueryDto {
   search?: string;
 }
 
-export class AdminListIndexerLogsResponseDto extends SuccessResponse {
+export class AdminListIndexerLogsResponseDto extends SuccessResponseDto {
   @ApiProperty({
     type: AdminLogEntryDto,
     isArray: true,
@@ -51,24 +47,21 @@ export class AdminListIndexerLogsResponseDto extends SuccessResponse {
   declare logs: AdminLogEntryDto[];
 }
 
-export class AdminListIndexerLogsNotFoundResponseDto extends NotFoundResponse {
+export class AdminListIndexerLogsNotFoundResponseDto extends NotFoundResponseDto {
   /**
    * The error message(s) that occurred during the validation of the request data or additional requirements
    * applied during the execution of the request
    */
   @ApiProperty({
     isArray: true,
-    enum: [
-      ErrorCodes.INVALID_ACCOUNT_ID_ERROR,
-      ErrorCodes.INVALID_ROOT_PATH_ID_ERROR,
-    ],
-    enumName: 'AdminListIndexerLogsNotFoundErrorMessage',
+    enum: [ErrorCodes.INVALID_ACCOUNT_ID_ERROR, ErrorCodes.INVALID_ROOT_PATH_ID_ERROR],
+    enumName: 'AdminListIndexerLogsNotFoundErrorMessageEnum',
     default: ErrorCodes.INVALID_ACCOUNT_ID_ERROR,
   })
   declare message: ErrorCodes[];
 }
 
-export class AdminListIndexerLogsBadRequestResponseDto extends BadRequestResponse {
+export class AdminListIndexerLogsBadRequestResponseDto extends BadRequestResponseDto {
   /**
    * The error message(s) that occurred during the validation of the request data or additional requirements
    * applied during the execution of the request
@@ -80,7 +73,7 @@ export class AdminListIndexerLogsBadRequestResponseDto extends BadRequestRespons
       ErrorCodes.INVALID_ROOT_PATH_ID_ERROR,
       ErrorCodes.INVALID_SEARCH_LENGTH_ERROR,
     ],
-    enumName: 'AdminListIndexerLogsBadRequestErrorMessage',
+    enumName: 'AdminListIndexerLogsBadRequestErrorMessageEnum',
     default: ErrorCodes.INVALID_ACCOUNT_ID_ERROR,
   })
   declare message: ErrorCodes[];

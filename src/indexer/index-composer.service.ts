@@ -1,9 +1,5 @@
 /* eslint-disable no-await-in-loop */
-import {
-  ComposerEntity,
-  FileEntity,
-  LinkedComposerEntity,
-} from 'src/database/entities';
+import { ComposerEntity, FileEntity, LinkedComposerEntity } from 'src/database/entities';
 import { IAudioMetadata } from 'src/types/music-metadata';
 import { InjectModel } from '@nestjs/sequelize';
 import { Injectable, Logger } from '@nestjs/common';
@@ -21,10 +17,7 @@ export class IndexComposerService {
     private readonly linkedComposerEntity: typeof LinkedComposerEntity,
   ) {}
 
-  async insertOrRetrieveComposer(
-    name: string,
-    transaction?: Transaction,
-  ): Promise<number> {
+  async insertOrRetrieveComposer(name: string, transaction?: Transaction): Promise<number> {
     const nameNormalized = normalizeString(name);
     const existing = await this.composerEntity.findOne({
       where: {
@@ -50,19 +43,12 @@ export class IndexComposerService {
     return composerId;
   }
 
-  async updateComposers(
-    embeddedData: IAudioMetadata,
-    fileDetail: FileEntity,
-    transaction?: Transaction,
-  ) {
+  async updateComposers(embeddedData: IAudioMetadata, fileDetail: FileEntity, transaction?: Transaction) {
     const composers = splitArray(embeddedData?.common.composer || []);
     for (let i = 0; i < composers.length; i += 1) {
       const name = composers[i]?.trim();
       if (name) {
-        const composerId = await this.insertOrRetrieveComposer(
-          name,
-          transaction,
-        );
+        const composerId = await this.insertOrRetrieveComposer(name, transaction);
         const existingAssociation = await this.linkedComposerEntity.findOne({
           where: {
             composerId,

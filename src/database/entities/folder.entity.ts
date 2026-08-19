@@ -1,11 +1,5 @@
 import { AccountEntity } from './account.entity';
-import {
-  Column,
-  DataType,
-  ForeignKey,
-  Model,
-  Table,
-} from 'sequelize-typescript';
+import { Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript';
 import { RootPathEntity } from './root-path.entity';
 
 /**
@@ -19,7 +13,7 @@ import { RootPathEntity } from './root-path.entity';
 })
 export class FolderEntity extends Model<FolderEntity> {
   /**
-   * The account ID the file belongs to
+   * The account ID the file belongs to.
    */
   @Column({
     type: DataType.INTEGER,
@@ -33,7 +27,7 @@ export class FolderEntity extends Model<FolderEntity> {
   declare accountId?: number;
 
   /**
-   * The file path for the music file relative to the root path
+   * The file path for the music file relative to the root path.
    */
   @Column({
     type: DataType.STRING(255),
@@ -41,7 +35,7 @@ export class FolderEntity extends Model<FolderEntity> {
   declare folderPath: string;
 
   /**
-   * The ID of the table row is the first file ID that was found in the folder path
+   * The ID of the table row is the first file ID that was found in the folder path.
    */
   @Column({
     type: DataType.INTEGER,

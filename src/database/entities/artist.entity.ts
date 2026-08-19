@@ -1,12 +1,5 @@
 import { AlbumArtistEntity } from './album-artist.entity';
-import {
-  Column,
-  DataType,
-  HasMany,
-  Model,
-  Sequelize,
-  Table,
-} from 'sequelize-typescript';
+import { Column, DataType, HasMany, Model, Sequelize, Table } from 'sequelize-typescript';
 import { LinkedArtistEntity } from './linked-artist.entity';
 
 /**
@@ -22,8 +15,8 @@ export class ArtistEntity extends Model<ArtistEntity> {
   declare albumArtists: AlbumArtistEntity[];
 
   /**
-   * This field is managed by Sequelize and tracks the date and time the row was created.  This field should not be specified if you are
-   * inserting and updating data
+   * This field is managed by Sequelize and tracks the date and time the row was created.  This field should not be
+   * specified if you are inserting and updating data.
    */
   @Column({
     type: DataType.DATE,
@@ -47,7 +40,7 @@ export class ArtistEntity extends Model<ArtistEntity> {
   declare nameNormalized: string;
 
   /**
-   * The ID of the table row is an integer that is assigned by the database when the row is created
+   * The ID of the table row is an integer that is assigned by the database when the row is created.
    */
   @Column({
     type: DataType.INTEGER,
@@ -58,7 +51,8 @@ export class ArtistEntity extends Model<ArtistEntity> {
   declare id: number;
 
   /**
-   * This field is managed by Sequelize and tracks the most recent date and time the row was last updated.  This field should not be specified if you are inserting and updating data
+   * This field is managed by Sequelize and tracks the most recent date and time the row was last updated.  This field
+   * should not be specified if you are inserting and updating data.
    */
   @Column(DataType.DATE)
   declare updatedAt?: Date;

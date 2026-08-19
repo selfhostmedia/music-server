@@ -1,16 +1,8 @@
-import {
-  FileEntity,
-  GenreEntity,
-  LinkedGenreEntity,
-} from 'src/database/entities';
+import { FileEntity, GenreEntity, LinkedGenreEntity } from 'src/database/entities';
 import { InjectModel } from '@nestjs/sequelize';
 import { Injectable } from '@nestjs/common';
 import { Sequelize } from 'sequelize-typescript';
-import {
-  SynologyDefaultGenreDataDto,
-  SynologyGenreDataDto,
-  SynologyGenreDto,
-} from './dtos';
+import { SynologyDefaultGenreDataDto, SynologyGenreDataDto, SynologyGenreDto } from './dtos';
 import { replaceDoubleQuotes } from 'src/utils/strings';
 
 function genreToRow(genre: GenreEntity): SynologyGenreDto {
@@ -32,9 +24,7 @@ export class SynologyGenreService {
     private readonly genreEntity: typeof GenreEntity,
   ) {}
 
-  async listDefaultGenres(
-    accountId: number,
-  ): Promise<SynologyDefaultGenreDataDto> {
+  async listDefaultGenres(accountId: number): Promise<SynologyDefaultGenreDataDto> {
     const genres = await this.genreEntity.findAll({
       where: {
         accountId,
@@ -49,11 +39,7 @@ export class SynologyGenreService {
     };
   }
 
-  async listGenres(
-    accountId: number,
-    offset: number,
-    limit: number,
-  ): Promise<SynologyGenreDataDto> {
+  async listGenres(accountId: number, offset: number, limit: number): Promise<SynologyGenreDataDto> {
     const genres = await this.genreEntity.findAll({
       attributes: ['id', 'name'],
       include: [
@@ -77,15 +63,7 @@ export class SynologyGenreService {
       limit: limit || 100000,
     });
     const total = await this.genreEntity.count({
-      attributes: [
-        [
-          Sequelize.fn(
-            'COUNT',
-            Sequelize.fn('DISTINCT', Sequelize.col('name')),
-          ),
-          'count',
-        ],
-      ],
+      attributes: [[Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('name'))), 'count']],
       include: [
         {
           model: LinkedGenreEntity,

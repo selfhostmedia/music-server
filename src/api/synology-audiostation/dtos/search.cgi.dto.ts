@@ -1,11 +1,7 @@
 /* eslint-disable max-classes-per-file */
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsInt, IsNotEmpty, IsString } from 'class-validator';
-import {
-  SynologyApiEnum,
-  SynologyLibraryEnum,
-  SynologyMethodEnum,
-} from '../enums';
+import { SynologyApiEnum, SynologyLibraryEnum, SynologyMethodEnum } from '../enums';
 import { SynologySongDto } from './song.cgi.dto';
 import { SynologySuccessResponseDto } from './synology.dto';
 import { Transform } from 'class-transformer';

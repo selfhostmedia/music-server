@@ -4,20 +4,17 @@ import {
   ApiBearerAuth,
   ApiHeader,
   ApiInternalServerErrorResponse,
+  ApiOperation,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import {
-  BadRequestResponse,
-  InternalServerErrorResponse,
-  SuccessResponse,
-} from 'src/api/response.dto';
+import { BadRequestResponseDto, InternalServerErrorResponseDto, SuccessResponseDto } from 'src/api/response.dto';
 import { Controller, Delete, Logger } from '@nestjs/common';
 import { JWT_TOKEN, USER_APIS } from 'src/constants/swagger';
 import { Session } from 'src/api/session.decorator';
 import { SessionEntity } from 'src/database/entities';
 import { UserEndSessionService } from './end-session.service';
-import { UserRole } from 'src/constants/enums/user-role.enum';
+import { UserRoleEnum } from 'src/constants/enums/user-role.enum';
 
 @Controller({
   path: '/api/user',
@@ -28,12 +25,12 @@ export class UserEndSessionController {
 
   constructor(private readonly endSessionService: UserEndSessionService) {}
 
-  /**
-   * Ends a user session and invalidates the associated JWT token. The user must be authenticated
-   * and provide a valid JWT token to end the session.
-   */
   @Delete('end-session')
-  @AllowedRoles([UserRole.USER, UserRole.ADMIN])
+  @ApiOperation({
+    summary: 'Signs out',
+    description: 'Ends a user session and invalidates the associated JWT token.',
+  })
+  @AllowedRoles([UserRoleEnum.USER, UserRoleEnum.ADMIN])
   @ApiBearerAuth(JWT_TOKEN)
   @ApiHeader({
     name: 'Authorization',
@@ -41,25 +38,22 @@ export class UserEndSessionController {
     required: true,
   })
   @ApiResponse({
-    type: SuccessResponse,
+    type: SuccessResponseDto,
   })
   @ApiBadRequestResponse({
-    type: BadRequestResponse,
+    type: BadRequestResponseDto,
   })
   @ApiInternalServerErrorResponse({
-    type: InternalServerErrorResponse,
+    type: InternalServerErrorResponseDto,
   })
-  async delete(@Session() session: SessionEntity): Promise<SuccessResponse> {
+  async delete(@Session() session: SessionEntity): Promise<SuccessResponseDto> {
     try {
       const success = await this.endSessionService.delete(session);
       return {
         success,
       };
     } catch (error) {
-      this.logger.error(
-        'Error ending session:',
-        error instanceof Error ? error.message : error,
-      );
+      this.logger.error('Error ending session:', error instanceof Error ? error.message : error);
       throw error;
     }
   }

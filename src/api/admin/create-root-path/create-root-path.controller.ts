@@ -14,22 +14,25 @@ import {
   ApiCreatedResponse,
   ApiHeader,
   ApiNotFoundResponse,
+  ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
 import { Body, Controller, Post, Query } from '@nestjs/common';
-import { UserRole } from 'src/constants/enums';
+import { UserRoleEnum } from 'src/constants/enums';
 
 @Controller({
   path: 'api/admin',
 })
 @ApiTags(ADMIN_APIS)
 export class AdminCreateRootPathController {
-  constructor(
-    private readonly createRootPathService: AdminCreateRootPathService,
-  ) {}
+  constructor(private readonly createRootPathService: AdminCreateRootPathService) {}
 
   @Post('create-root-path')
-  @AllowedRoles([UserRole.ADMIN])
+  @ApiOperation({
+    summary: 'Create a new root path',
+    description: 'Creates a new root path for the specified account.',
+  })
+  @AllowedRoles([UserRoleEnum.ADMIN])
   @ApiBearerAuth(JWT_TOKEN)
   @ApiHeader({
     name: 'Authorization',
@@ -52,10 +55,7 @@ export class AdminCreateRootPathController {
     @Query() query: AdminCreateRootPathQueryDto,
     @Body() body: AdminCreateRootPathBodyDto,
   ): Promise<AdminCreateRootPathResponseDto> {
-    await this.createRootPathService.createRootPath(
-      query.accountId,
-      body.rootPath,
-    );
+    await this.createRootPathService.createRootPath(query.accountId, body.rootPath);
     return {
       success: true,
     };

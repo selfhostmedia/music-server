@@ -2,7 +2,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ErrorCodes } from 'src/constants/error-codes';
 import { IsInt, Min } from 'class-validator';
-import { NotFoundResponse, SuccessResponse } from 'src/api/response.dto';
+import { NotFoundResponseDto, SuccessResponseDto } from 'src/api/response.dto';
 
 export class AdminDeleteRootPathQueryDto {
   /**
@@ -13,9 +13,9 @@ export class AdminDeleteRootPathQueryDto {
   declare id: number;
 }
 
-export class AdminDeleteRootPathResponseDto extends SuccessResponse {}
+export class AdminDeleteRootPathResponseDto extends SuccessResponseDto {}
 
-export class AdminDeleteRootPathNotFoundResponseDto extends NotFoundResponse {
+export class AdminDeleteRootPathNotFoundResponseDto extends NotFoundResponseDto {
   /**
    * The error message(s) that occurred during the validation of the request data or additional requirements
    * applied during the execution of the request
@@ -23,7 +23,7 @@ export class AdminDeleteRootPathNotFoundResponseDto extends NotFoundResponse {
   @ApiProperty({
     isArray: true,
     enum: [ErrorCodes.ROOT_PATH_NOT_FOUND_ERROR],
-    enumName: 'AdminDeleteRootPathNotFoundErrorMessage',
+    enumName: 'AdminDeleteRootPathNotFoundErrorMessageEnum',
     default: ErrorCodes.ROOT_PATH_NOT_FOUND_ERROR,
   })
   declare message: ErrorCodes[];

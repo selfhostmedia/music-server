@@ -1,16 +1,8 @@
 /* eslint-disable max-classes-per-file */
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsInt, IsNumber, IsString } from 'class-validator';
-import {
-  SynologyApiEnum,
-  SynologyLibraryEnum,
-  SynologyMethodEnum,
-} from '../enums';
-import {
-  SynologyPaginationDto,
-  SynologyPaginationResponseDto,
-  SynologySuccessResponseDto,
-} from './synology.dto';
+import { SynologyApiEnum, SynologyLibraryEnum, SynologyMethodEnum } from '../enums';
+import { SynologyPaginationDto, SynologyPaginationResponseDto, SynologySuccessResponseDto } from './synology.dto';
 import { Transform } from 'class-transformer';
 
 export class SynologyAlbumsBodyDto extends SynologyPaginationDto {

@@ -31,10 +31,7 @@ export class SynologyCoverImageService {
    * @param {string} albumArtist The name of the artist for which to retrieve the cover image.
    * @returns {Promise<CoverImage | undefined>} The album cover image.
    */
-  async getArtistCoverImage(
-    accountId: number,
-    albumArtist: string,
-  ): Promise<CoverImage | undefined> {
+  async getArtistCoverImage(accountId: number, albumArtist: string): Promise<CoverImage | undefined> {
     const artist = await await this.albumEntity.findOne({
       attributes: ['coverImage', 'coverImageMimeType'],
       where: {
@@ -57,9 +54,7 @@ export class SynologyCoverImageService {
       ],
     });
     if (!artist) {
-      throw new NotFoundException(
-        `Cover image not found for artist: ${albumArtist}`,
-      );
+      throw new NotFoundException(`Cover image not found for artist: ${albumArtist}`);
     }
     return artist;
   }
@@ -102,9 +97,7 @@ export class SynologyCoverImageService {
       ],
     });
     if (!album) {
-      throw new NotFoundException(
-        `Album not found for title: ${albumTitle} and artist: ${albumArtist}`,
-      );
+      throw new NotFoundException(`Album not found for title: ${albumTitle} and artist: ${albumArtist}`);
     }
     return album;
   }
@@ -118,10 +111,7 @@ export class SynologyCoverImageService {
    * @param {string} composer The name of the composer for which to retrieve the cover image.
    * @returns {Promise<CoverImage | undefined>} The album cover image.
    */
-  async getComposerCoverImage(
-    accountId: number,
-    composerName: string,
-  ): Promise<CoverImage | undefined> {
+  async getComposerCoverImage(accountId: number, composerName: string): Promise<CoverImage | undefined> {
     const composer = await this.composerEntity.findOne({
       attributes: ['id'],
       where: {
@@ -150,9 +140,7 @@ export class SynologyCoverImageService {
       ],
     });
     if (!composer) {
-      throw new NotFoundException(
-        `Cover image not found for composer: ${composerName}`,
-      );
+      throw new NotFoundException(`Cover image not found for composer: ${composerName}`);
     }
     return composer.linkedComposers?.[0]?.file?.album;
   }
@@ -166,10 +154,7 @@ export class SynologyCoverImageService {
    * @param {number} fileId The ID of the track for which to retrieve the cover image.
    * @returns {Promise<CoverImage | undefined>} The track cover image.
    */
-  async getFileCoverImage(
-    accountId: number,
-    fileId: number,
-  ): Promise<CoverImage | undefined> {
+  async getFileCoverImage(accountId: number, fileId: number): Promise<CoverImage | undefined> {
     const file = await this.fileEntity.findOne({
       attributes: [],
       where: {

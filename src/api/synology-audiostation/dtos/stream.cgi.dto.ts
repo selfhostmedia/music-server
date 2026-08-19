@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import { ApiProperty } from '@nestjs/swagger';
-import { FileType } from 'src/types/enums';
+import { FileTypeEnum } from 'src/types/enums';
 import { IsEnum, IsInt, IsString } from 'class-validator';
 import { SynologyApiEnum, SynologyMethodEnum } from '../enums';
 import { Transform } from 'class-transformer';
@@ -63,12 +63,12 @@ export class StreamDto {
    * The codec of the audio file, e.g. 'flac'
    */
   @ApiProperty({
-    enum: FileType,
-    enumName: 'FileType',
-    example: FileType.FLAC,
+    enum: FileTypeEnum,
+    enumName: 'FileTypeEnum',
+    example: FileTypeEnum.FLAC,
   })
-  @IsEnum(FileType)
-  declare codec: FileType;
+  @IsEnum(FileTypeEnum)
+  declare codec: FileTypeEnum;
 
   /**
    * The size of the audio file in bytes

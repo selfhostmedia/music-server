@@ -1,15 +1,7 @@
 import { AccountEntity } from './account.entity';
 import { AlbumEntity } from './album.entity';
 import { ArtistEntity } from './artist.entity';
-import {
-  BelongsTo,
-  Column,
-  DataType,
-  ForeignKey,
-  Model,
-  Sequelize,
-  Table,
-} from 'sequelize-typescript';
+import { BelongsTo, Column, DataType, ForeignKey, Model, Sequelize, Table } from 'sequelize-typescript';
 import { ComposerEntity } from './composer.entity';
 import { FolderEntity } from './folder.entity';
 import { GenreEntity } from './genre.entity';
@@ -25,7 +17,7 @@ import { PlaylistEntity } from './playlist.entity';
 })
 export class FavoriteItemEntity extends Model<FavoriteItemEntity> {
   /**
-   * The account ID the pinned item belongs to
+   * The account ID the pinned item belongs to.
    */
   @Column({
     type: DataType.INTEGER,
@@ -103,8 +95,8 @@ export class FavoriteItemEntity extends Model<FavoriteItemEntity> {
   declare composer: ComposerEntity;
 
   /**
-   * This field is managed by Sequelize and tracks the date and time the row was created.  This field should not be specified if you are
-   * inserting and updating data.
+   * This field is managed by Sequelize and tracks the date and time the row was created.  This
+   * field should not be specified if you are inserting and updating data.
    */
   @Column({
     type: DataType.DATE,
@@ -196,7 +188,8 @@ export class FavoriteItemEntity extends Model<FavoriteItemEntity> {
   declare recentlyAdded: boolean;
 
   /**
-   * This field is managed by Sequelize and tracks the most recent date and time the row was last updated.  This field should not be specified if you are inserting and updating data
+   * This field is managed by Sequelize and tracks the most recent date and time the row was last
+   * updated.  This field should not be specified if you are inserting and updating data.
    */
   @Column(DataType.DATE)
   declare updatedAt?: Date;

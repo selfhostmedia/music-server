@@ -1,8 +1,4 @@
-import {
-  CollatedArtistEntity,
-  CollatedGenreAlbumEntity,
-  GenreEntity,
-} from 'src/database/entities';
+import { CollatedArtistEntity, CollatedGenreAlbumEntity, GenreEntity } from 'src/database/entities';
 import { InjectModel } from '@nestjs/sequelize';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Op } from 'sequelize';
@@ -45,11 +41,7 @@ export class SynologyArtistService {
     private readonly genreEntity: typeof GenreEntity,
   ) {}
 
-  async listArtists(
-    accountId: number,
-    offset: number,
-    limit: number,
-  ): Promise<SynologyArtistDataDto> {
+  async listArtists(accountId: number, offset: number, limit: number): Promise<SynologyArtistDataDto> {
     const artists = await this.collatedArtistEntity.findAll({
       where: {
         accountId,
@@ -101,15 +93,7 @@ export class SynologyArtistService {
       limit: limit || 100000,
     });
     const total = await this.collatedGenreAlbumEntity.count({
-      attributes: [
-        [
-          Sequelize.fn(
-            'COUNT',
-            Sequelize.fn('DISTINCT', Sequelize.col('title')),
-          ),
-          'count',
-        ],
-      ],
+      attributes: [[Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('title'))), 'count']],
       where: {
         accountId,
         genreId: {

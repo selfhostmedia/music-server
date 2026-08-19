@@ -1,13 +1,9 @@
 /* eslint-disable max-classes-per-file */
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  BadRequestResponse,
-  NotFoundResponse,
-  SuccessResponse,
-} from 'src/api/response.dto';
+import { BadRequestResponseDto, NotFoundResponseDto, SuccessResponseDto } from 'src/api/response.dto';
 import { ErrorCodes } from 'src/constants/error-codes';
-import { IsEnum, IsInt } from 'class-validator';
-import { UserRole } from 'src/constants/enums';
+import { IsEnum, IsInt, IsNotEmpty } from 'class-validator';
+import { UserRoleEnum } from 'src/constants/enums';
 
 export class AdminUpdateUserRolesQueryDto {
   /**
@@ -19,20 +15,21 @@ export class AdminUpdateUserRolesQueryDto {
 
 export class AdminUpdateUserRolesBodyDto {
   @ApiProperty({
-    enum: UserRole,
-    enumName: 'UserRole',
+    enum: UserRoleEnum,
+    enumName: 'UserRoleEnum',
     isArray: true,
   })
-  @IsEnum(UserRole, {
+  @IsEnum(UserRoleEnum, {
     each: true,
-    message: ErrorCodes.INVALID_USER_ROLE_ERROR,
+    message: ErrorCodes.INVALID_ROLE_ERROR,
   })
-  declare roles: UserRole[];
+  @IsNotEmpty({ message: ErrorCodes.INVALID_USER_ROLE_ERROR })
+  declare roles: UserRoleEnum[];
 }
 
-export class AdminUpdateUserRolesResponseDto extends SuccessResponse {}
+export class AdminUpdateUserRolesResponseDto extends SuccessResponseDto {}
 
-export class AdminUpdateUserRolesNotFoundResponseDto extends NotFoundResponse {
+export class AdminUpdateUserRolesNotFoundResponseDto extends NotFoundResponseDto {
   /**
    * The error message(s) that occurred during the validation of the request data or additional requirements
    * applied during the execution of the request
@@ -40,24 +37,21 @@ export class AdminUpdateUserRolesNotFoundResponseDto extends NotFoundResponse {
   @ApiProperty({
     isArray: true,
     enum: [ErrorCodes.ACCOUNT_NOT_FOUND_ERROR],
-    enumName: 'AdminUpdateUserRolesNotFoundErrorMessage',
+    enumName: 'AdminUpdateUserRolesNotFoundErrorMessageEnum',
     default: ErrorCodes.ACCOUNT_NOT_FOUND_ERROR,
   })
   declare message: ErrorCodes[];
 }
 
-export class AdminUpdateUserRolesBadRequestResponseDto extends BadRequestResponse {
+export class AdminUpdateUserRolesBadRequestResponseDto extends BadRequestResponseDto {
   /**
    * The error message(s) that occurred during the validation of the request data or additional requirements
    * applied during the execution of the request
    */
   @ApiProperty({
     isArray: true,
-    enum: [
-      ErrorCodes.INVALID_USER_ROLE_ERROR,
-      ErrorCodes.ACCOUNT_ONLY_ADMIN_ERROR,
-    ],
-    enumName: 'AdminUpdateUserRolesBadRequestErrorMessage',
+    enum: [ErrorCodes.INVALID_USER_ROLE_ERROR, ErrorCodes.ACCOUNT_ONLY_ADMIN_ERROR],
+    enumName: 'AdminUpdateUserRolesBadRequestErrorMessageEnum',
     default: ErrorCodes.INVALID_USER_ROLE_ERROR,
   })
   declare message: ErrorCodes[];

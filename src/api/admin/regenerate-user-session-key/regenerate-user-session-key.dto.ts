@@ -2,7 +2,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ErrorCodes } from 'src/constants/error-codes';
 import { IsInt } from 'class-validator';
-import { NotFoundResponse, SuccessResponse } from 'src/api/response.dto';
+import { NotFoundResponseDto, SuccessResponseDto } from 'src/api/response.dto';
 
 export class AdminRegenerateUserSessionKeyQueryDto {
   /**
@@ -12,9 +12,9 @@ export class AdminRegenerateUserSessionKeyQueryDto {
   declare accountId: number;
 }
 
-export class AdminRegenerateUserSessionKeyResponseDto extends SuccessResponse {}
+export class AdminRegenerateUserSessionKeyResponseDto extends SuccessResponseDto {}
 
-export class AdminRegenerateUserSessionKeyNotFoundResponseDto extends NotFoundResponse {
+export class AdminRegenerateUserSessionKeyNotFoundResponseDto extends NotFoundResponseDto {
   /**
    * The error message(s) that occurred during the validation of the request data or additional requirements
    * applied during the execution of the request
@@ -22,7 +22,7 @@ export class AdminRegenerateUserSessionKeyNotFoundResponseDto extends NotFoundRe
   @ApiProperty({
     isArray: true,
     enum: [ErrorCodes.ACCOUNT_NOT_FOUND_ERROR],
-    enumName: 'AdminRegenerateUserSessionKeyNotFoundErrorMessage',
+    enumName: 'AdminRegenerateUserSessionKeyNotFoundErrorMessageEnum',
     default: ErrorCodes.ACCOUNT_NOT_FOUND_ERROR,
   })
   declare message: ErrorCodes[];

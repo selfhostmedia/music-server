@@ -1,15 +1,8 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
-import {
-  ShoutcastContainerEntity,
-  ShoutcastItemEntity,
-} from 'src/database/entities';
-import { ShoutcastItemType } from 'src/types/enums';
+import { ShoutcastContainerEntity, ShoutcastItemEntity } from 'src/database/entities';
+import { ShoutcastItemTypeEnum } from 'src/types/enums';
 import {
   SynologyRadioAddOrUpdateItemBodyDto,
   SynologyRadioItemDataDto,
@@ -17,14 +10,12 @@ import {
   SynologyRadioItemListBodyDto,
 } from './dtos';
 
-function containerToRow(
-  container: ShoutcastContainerEntity,
-): SynologyRadioItemDto {
+function containerToRow(container: ShoutcastContainerEntity): SynologyRadioItemDto {
   return {
     desc: '',
     id: container.id.toString(),
     title: container.title,
-    type: ShoutcastItemType.CONTAINER,
+    type: ShoutcastItemTypeEnum.CONTAINER,
     url: '',
   };
 }
@@ -61,24 +52,15 @@ export class SynologyRadioService {
     };
   }
 
-  async listItems(
-    accountId: number,
-    body: SynologyRadioItemListBodyDto,
-  ): Promise<SynologyRadioItemDataDto> {
+  async listItems(accountId: number, body: SynologyRadioItemListBodyDto): Promise<SynologyRadioItemDataDto> {
     const container = await this.shoutcastContainerEntity.findOne({
       where: {
         accountId,
-        [Op.or]: [
-          { id: body.container },
-          { title: body.container },
-          { title: body.container.split('_')[0] },
-        ],
+        [Op.or]: [{ id: body.container }, { title: body.container }, { title: body.container.split('_')[0] }],
       },
     });
     if (!container) {
-      throw new Error(
-        `Container not found for account ${accountId} and title ${body.container}`,
-      );
+      throw new Error(`Container not found for account ${accountId} and title ${body.container}`);
     }
     const items = await this.shoutcastItemEntity.findAll({
       where: {
@@ -92,15 +74,10 @@ export class SynologyRadioService {
     };
   }
 
-  async listStations(
-    accountId: number,
-    body: SynologyRadioItemListBodyDto,
-  ): Promise<SynologyRadioItemDataDto> {
+  async listStations(accountId: number, body: SynologyRadioItemListBodyDto): Promise<SynologyRadioItemDataDto> {
     const genreName = body.container.split('_genre_')[1];
     if (!genreName) {
-      throw new Error(
-        `Invalid genre name in container field: ${body.container}`,
-      );
+      throw new Error(`Invalid genre name in container field: ${body.container}`);
     }
     const container = await this.shoutcastContainerEntity.findOne({
       where: {
@@ -109,32 +86,27 @@ export class SynologyRadioService {
       },
     });
     if (!container) {
-      throw new Error(
-        `Container not found for account ${accountId} and title ${body.container}`,
-      );
+      throw new Error(`Container not found for account ${accountId} and title ${body.container}`);
     }
     // return SHOUTcast stations for the given genre
     if (container.title === 'SHOUTcast') {
       const postBody = `genrename=${genreName}`;
-      const request = await fetch(
-        `https://directory.shoutcast.com/Home/BrowseByGenre`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'Content-Length': postBody.length.toString(),
-            Referer: 'https://directory.shoutcast.com/',
-          },
-          body: postBody,
+      const request = await fetch(`https://directory.shoutcast.com/Home/BrowseByGenre`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          'Content-Length': postBody.length.toString(),
+          Referer: 'https://directory.shoutcast.com/',
         },
-      );
+        body: postBody,
+      });
       const response = await request.json();
       return {
         radios: response.map((station) => {
           return {
             id: `radio_${station.Name} http://yp.shoutcast.com/sbin/tunein-station.pls?id=${station.ID}`,
             title: station.Name,
-            type: ShoutcastItemType.STATION,
+            type: ShoutcastItemTypeEnum.STATION,
             url: `http://yp.shoutcast.com/sbin/tunein-station.pls?id=${station.ID}`,
           };
         }),
@@ -155,15 +127,10 @@ export class SynologyRadioService {
     };
   }
 
-  async addOrUpdateItem(
-    accountId: number,
-    body: SynologyRadioAddOrUpdateItemBodyDto,
-  ): Promise<void> {
+  async addOrUpdateItem(accountId: number, body: SynologyRadioAddOrUpdateItemBodyDto): Promise<void> {
     const data = body.radios_json[0];
     if (!data?.title || !data?.url) {
-      throw new BadRequestException(
-        `Missing required fields for adding a new item: title and url are required`,
-      );
+      throw new BadRequestException(`Missing required fields for adding a new item: title and url are required`);
     }
     const container = await this.shoutcastContainerEntity.findOne({
       where: {
@@ -172,9 +139,7 @@ export class SynologyRadioService {
       },
     });
     if (!container) {
-      throw new NotFoundException(
-        `Container not found for account ${accountId} and title ${body.container}`,
-      );
+      throw new NotFoundException(`Container not found for account ${accountId} and title ${body.container}`);
     }
     // add item
     if (body.offset === -1) {
@@ -182,7 +147,7 @@ export class SynologyRadioService {
         containerId: container.id,
         desc: data.desc,
         title: data.title,
-        type: ShoutcastItemType.STATION,
+        type: ShoutcastItemTypeEnum.STATION,
         url: data.url,
       } as ShoutcastItemEntity);
       return;
@@ -197,9 +162,7 @@ export class SynologyRadioService {
     });
     const itemToUpdate = items[0];
     if (!itemToUpdate) {
-      throw new NotFoundException(
-        `Item not found for account ${accountId} at offset ${body.offset}`,
-      );
+      throw new NotFoundException(`Item not found for account ${accountId} at offset ${body.offset}`);
     }
     await this.shoutcastItemEntity.update(
       {
@@ -215,10 +178,7 @@ export class SynologyRadioService {
     );
   }
 
-  async deleteItem(
-    accountId: number,
-    body: SynologyRadioAddOrUpdateItemBodyDto,
-  ): Promise<SynologyRadioItemDataDto> {
+  async deleteItem(accountId: number, body: SynologyRadioAddOrUpdateItemBodyDto): Promise<SynologyRadioItemDataDto> {
     const container = await this.shoutcastContainerEntity.findOne({
       where: {
         accountId,
@@ -226,9 +186,7 @@ export class SynologyRadioService {
       },
     });
     if (!container) {
-      throw new NotFoundException(
-        `Container not found for account ${accountId} and title ${body.container}`,
-      );
+      throw new NotFoundException(`Container not found for account ${accountId} and title ${body.container}`);
     }
     const items = await this.shoutcastItemEntity.findAll({
       where: {
@@ -239,9 +197,7 @@ export class SynologyRadioService {
     });
     const itemToDelete = items[0];
     if (!itemToDelete) {
-      throw new NotFoundException(
-        `Item not found for account ${accountId} at offset ${body.offset}`,
-      );
+      throw new NotFoundException(`Item not found for account ${accountId} at offset ${body.offset}`);
     }
     await this.shoutcastItemEntity.destroy({
       where: {

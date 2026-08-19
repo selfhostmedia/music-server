@@ -1,9 +1,5 @@
 import { AccountEntity, RootPathEntity } from 'src/database/entities';
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ErrorCodes } from 'src/constants/error-codes';
 import { InjectModel } from '@nestjs/sequelize';
 import { existsSync } from 'node:fs';
@@ -17,10 +13,7 @@ export class AdminCreateRootPathService {
     private readonly rootPathEntity: typeof RootPathEntity,
   ) {}
 
-  async createRootPath(
-    accountId: number,
-    rootPath: string,
-  ): Promise<RootPathEntity> {
+  async createRootPath(accountId: number, rootPath: string): Promise<RootPathEntity> {
     const account = await this.accountEntity.findByPk(accountId);
     if (!account) {
       throw new NotFoundException(ErrorCodes.ACCOUNT_NOT_FOUND_ERROR);

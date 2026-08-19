@@ -1,20 +1,16 @@
+import { AUTHENTICATED_REQUEST_DESCRIPTION, PAGINATED_DATA_DESCRIPTION } from './consts';
 import { AccountEntity } from 'src/database/entities';
 import {
   ApiBody,
   ApiExtraModels,
   ApiHeader,
   ApiOkResponse,
+  ApiOperation,
   ApiTags,
   getSchemaPath,
 } from '@nestjs/swagger';
-import {
-  Body,
-  Controller,
-  HttpCode,
-  HttpStatus,
-  Logger,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Logger, Post } from '@nestjs/common';
+import { SYNOLOGY_AUDIOSTATION_APIS } from 'src/constants/swagger';
 import {
   SynologySongResponseDto,
   SynologySongsBodyDto,
@@ -33,7 +29,7 @@ import { User } from '../user.decorator';
 import { plainToInstance } from 'class-transformer';
 
 @Controller()
-@ApiTags('Synology AudioStation APIs')
+@ApiTags(SYNOLOGY_AUDIOSTATION_APIS)
 export class SynologySongController {
   private readonly logger: Logger = new Logger(SynologySongController.name);
 
@@ -41,11 +37,17 @@ export class SynologySongController {
 
   @Post('/webapi/AudioStation/song.cgi')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Lists songs in the music library',
+    description: [
+      `Lists songs found in the music library.  The songs can be filtered by album, artist, composer, or genre.`,
+      PAGINATED_DATA_DESCRIPTION,
+      AUTHENTICATED_REQUEST_DESCRIPTION,
+    ].join('\n\n'),
+  })
   @ApiHeader({
     name: 'cookie',
-    description:
-      'The session ID and device ID tokens for the authenticated user',
-    required: true,
+    description: 'The session ID and device ID cookies for the user `id={sessionId}; did={deviceId}`',
   })
   @ApiOkResponse({
     description: 'Returns a list of songs',
@@ -99,7 +101,7 @@ export class SynologySongController {
       ],
     },
   })
-  async postSongCgi(
+  async route(
     @User() user: AccountEntity,
     @Body()
     variousBodies:
@@ -116,10 +118,7 @@ export class SynologySongController {
   ): Promise<SynologySongResponseDto> {
     if ('composer' in variousBodies) {
       if ('album' in variousBodies) {
-        const body = plainToInstance(
-          SynologySongsByAlbumComposerBodyDto,
-          variousBodies,
-        );
+        const body = plainToInstance(SynologySongsByAlbumComposerBodyDto, variousBodies);
         const data = await this.songService.listComposerAlbumTracks(
           user.id,
           body.composer,
@@ -133,16 +132,8 @@ export class SynologySongController {
           success: true,
         };
       }
-      const body = plainToInstance(
-        SynologySongsByComposerBodyDto,
-        variousBodies,
-      );
-      const data = await this.songService.listComposerTracks(
-        user.id,
-        body.composer,
-        body.offset,
-        body.limit,
-      );
+      const body = plainToInstance(SynologySongsByComposerBodyDto, variousBodies);
+      const data = await this.songService.listComposerTracks(user.id, body.composer, body.offset, body.limit);
       return {
         data,
         success: true,
@@ -150,10 +141,7 @@ export class SynologySongController {
     }
     if ('genre' in variousBodies) {
       if ('album' in variousBodies) {
-        const body = plainToInstance(
-          SynologySongsByAlbumGenreBodyDto,
-          variousBodies,
-        );
+        const body = plainToInstance(SynologySongsByAlbumGenreBodyDto, variousBodies);
         const data = await this.songService.listGenreAlbumTracks(
           user.id,
           body.album,
@@ -168,12 +156,7 @@ export class SynologySongController {
         };
       }
       const body = plainToInstance(SynologySongsByGenreBodyDto, variousBodies);
-      const data = await this.songService.listGenreTracks(
-        user.id,
-        body.genre,
-        body.offset,
-        body.limit,
-      );
+      const data = await this.songService.listGenreTracks(user.id, body.genre, body.offset, body.limit);
       return {
         data,
         success: true,
@@ -181,10 +164,7 @@ export class SynologySongController {
     }
     if ('genre_filter' in variousBodies) {
       if ('album' in variousBodies) {
-        const body = plainToInstance(
-          SynologySongsByAlbumDefaultGenreBodyDto,
-          variousBodies,
-        );
+        const body = plainToInstance(SynologySongsByAlbumDefaultGenreBodyDto, variousBodies);
         const data = await this.songService.listGenreAlbumTracks(
           user.id,
           body.album,
@@ -198,16 +178,8 @@ export class SynologySongController {
           success: true,
         };
       }
-      const body = plainToInstance(
-        SynologySongsByAlbumDefaultGenreBodyDto,
-        variousBodies,
-      );
-      const data = await this.songService.listGenreTracks(
-        user.id,
-        body.genre_filter,
-        body.offset,
-        body.limit,
-      );
+      const body = plainToInstance(SynologySongsByAlbumDefaultGenreBodyDto, variousBodies);
+      const data = await this.songService.listGenreTracks(user.id, body.genre_filter, body.offset, body.limit);
       return {
         data,
         success: true,
@@ -229,23 +201,14 @@ export class SynologySongController {
     }
     if ('artist' in variousBodies) {
       const body = plainToInstance(SynologySongsByArtistBodyDto, variousBodies);
-      const data = await this.songService.listArtistTracks(
-        user.id,
-        body.artist,
-        body.offset,
-        body.limit,
-      );
+      const data = await this.songService.listArtistTracks(user.id, body.artist, body.offset, body.limit);
       return {
         data,
         success: true,
       };
     }
     const body = plainToInstance(SynologySongsBodyDto, variousBodies);
-    const data = await this.songService.listTracks(
-      user.id,
-      body.offset,
-      body.limit,
-    );
+    const data = await this.songService.listTracks(user.id, body.offset, body.limit);
     return {
       data,
       success: true,

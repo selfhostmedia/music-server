@@ -1,8 +1,8 @@
 /* eslint-disable max-classes-per-file */
 import { ApiProperty } from '@nestjs/swagger/dist/decorators/api-property.decorator';
 import { IsInt, IsString } from 'class-validator';
-import { SuccessResponse } from 'src/api/response.dto';
-import { UserRole } from 'src/constants/enums';
+import { SuccessResponseDto } from 'src/api/response.dto';
+import { UserRoleEnum } from 'src/constants/enums';
 
 export class AdminAccountDto {
   @IsInt()
@@ -12,14 +12,14 @@ export class AdminAccountDto {
   declare username: string;
 
   @ApiProperty({
-    enum: UserRole,
-    enumName: 'UserRole',
+    enum: UserRoleEnum,
+    enumName: 'UserRoleEnum',
     isArray: true,
   })
-  declare roles: UserRole[];
+  declare roles: UserRoleEnum[];
 }
 
-export class AdminListAccountsResponseDto extends SuccessResponse {
+export class AdminListAccountsResponseDto extends SuccessResponseDto {
   @ApiProperty({ type: AdminAccountDto, isArray: true })
   declare accounts: AdminAccountDto[];
 }

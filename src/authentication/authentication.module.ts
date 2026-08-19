@@ -6,13 +6,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { SystemConfigurationEntity } from 'src/database/entities/system-configurations.entity';
 
 @Module({
-  imports: [
-    SequelizeModule.forFeature([
-      AccountEntity,
-      SessionEntity,
-      SystemConfigurationEntity,
-    ]),
-  ],
+  imports: [SequelizeModule.forFeature([AccountEntity, SessionEntity, SystemConfigurationEntity])],
   providers: [
     AuthenticationService,
     {

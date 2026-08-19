@@ -1,3 +1,4 @@
+import { ADMIN_APIS, JWT_TOKEN } from 'src/constants/swagger';
 import {
   AdminUpdateRootPathBadRequestResponseDto,
   AdminUpdateRootPathBodyDto,
@@ -13,24 +14,27 @@ import {
   ApiHeader,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiOperation,
+  ApiTags,
 } from '@nestjs/swagger';
 import { Body, Controller, Patch, Query } from '@nestjs/common';
-import { JWT_TOKEN } from 'src/constants/swagger';
-import { UserRole } from 'src/constants/enums';
+import { UserRoleEnum } from 'src/constants/enums';
 
 @Controller({
   path: '/api/admin',
 })
+@ApiTags(ADMIN_APIS)
 export class AdminUpdateRootPathController {
-  constructor(
-    private readonly updateRootPathService: AdminUpdateRootPathService,
-  ) {}
+  constructor(private readonly updateRootPathService: AdminUpdateRootPathService) {}
 
-  /**
-   * Updates a root path
-   */
   @Patch('update-root-path')
-  @AllowedRoles([UserRole.ADMIN])
+  @ApiOperation({
+    summary: 'Update a root path',
+    description:
+      // eslint-disable-next-line max-len
+      'Updates the specified root path with a new path. If the scanner is running then all previous data will be removed and recreated when it indexes the new path.  If the scanner is paued you may move the files to the new path and then resume the scanner to continue indexing.',
+  })
+  @AllowedRoles([UserRoleEnum.ADMIN])
   @ApiBearerAuth(JWT_TOKEN)
   @ApiHeader({
     name: 'Authorization',

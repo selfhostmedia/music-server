@@ -46,13 +46,6 @@ export class Environment {
   SESSION_EXPIRES!: string;
 
   /**
-   * The session signing key used for signing and verifying session data. This should be a long, random string for security purposes.
-   */
-  @IsString()
-  @IsNotEmpty()
-  SESSION_SIGNING_KEY!: string;
-
-  /**
    * Optional flag for enabling the endpoints required to use Synology DS Audio apps
    */
   @IsBoolean()

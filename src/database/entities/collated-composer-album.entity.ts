@@ -1,13 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import { AccountEntity } from './account.entity';
-import {
-  BelongsTo,
-  Column,
-  DataType,
-  ForeignKey,
-  Model,
-  Table,
-} from 'sequelize-typescript';
+import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript';
 import { ComposerEntity } from './composer.entity';
 
 /**
@@ -24,7 +17,7 @@ import { ComposerEntity } from './composer.entity';
 })
 export class CollatedComposerAlbumEntity extends Model<CollatedComposerAlbumEntity> {
   /**
-   * The account ID the root path belongs to
+   * The account ID the root path belongs to.
    */
   @Column({
     type: DataType.INTEGER,
@@ -69,9 +62,7 @@ export class CollatedComposerAlbumEntity extends Model<CollatedComposerAlbumEnti
     type: DataType.TEXT,
     get(): string[] {
       const rawValue = this.getDataValue('composers');
-      return (
-        rawValue?.split(',').map((composer: string) => composer.trim()) || []
-      );
+      return rawValue?.split(',').map((composer: string) => composer.trim()) || [];
     },
   })
   declare composers: string[];

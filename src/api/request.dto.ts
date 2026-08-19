@@ -9,10 +9,7 @@ export class PaginationQueryDto {
    */
   @ApiProperty({ required: false, default: 0 })
   @Transform(({ value }) => parseInt(value, 10) || 0)
-  @IsNumber(
-    { allowNaN: false, allowInfinity: false },
-    { message: ErrorCodes.INVALID_LIMIT_ERROR },
-  )
+  @IsNumber({ allowNaN: false, allowInfinity: false }, { message: ErrorCodes.INVALID_LIMIT_ERROR })
   @Min(1, { message: ErrorCodes.INVALID_LIMIT_ERROR })
   @Max(100, { message: ErrorCodes.INVALID_LIMIT_ERROR })
   @IsOptional()
@@ -22,10 +19,7 @@ export class PaginationQueryDto {
   /*
    * The starting point of results returned for pagination within the total set of results
    */
-  @IsNumber(
-    { allowNaN: false, allowInfinity: false },
-    { message: ErrorCodes.INVALID_OFFSET_ERROR },
-  )
+  @IsNumber({ allowNaN: false, allowInfinity: false }, { message: ErrorCodes.INVALID_OFFSET_ERROR })
   @Transform(({ value }) => parseInt(value, 10) || 0)
   @ApiProperty({ required: false, default: 0 })
   @Min(0, { message: ErrorCodes.INVALID_OFFSET_ERROR })
