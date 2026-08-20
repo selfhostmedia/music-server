@@ -5,10 +5,10 @@ import createClient from 'openapi-fetch';
 let administratorJwtToken: string;
 let userJwtToken: string;
 
-export const ADMIN_USERNAME = process.env.DEFAULT_USERNAME || 'admin';
-export const ADMIN_PASSWORD = process.env.DEFAULT_PASSWORD || 'admin';
-export const USER_USERNAME = 'user-only';
-export const USER_PASSWORD = 'user-only';
+export const ADMIN_USERNAME = process.env.DEFAULT_ADMIN_USERNAME || 'admin';
+export const ADMIN_PASSWORD = process.env.DEFAULT_ADMIN_PASSWORD || 'admin';
+export const USER_USERNAME = process.env.DEFAULT_USER_USERNAME || 'user';
+export const USER_PASSWORD = process.env.DEFAULT_USER_PASSWORD || 'user';
 
 export const api: ReturnType<typeof createClient<paths>> = createClient<paths>({
   baseUrl: `http://localhost:${process.env.SERVER_PORT}`,
@@ -325,8 +325,8 @@ export async function signInDefaultAccount(administrator = true) {
     });
   }
   const jwtToken = await createJwtToken(
-    administrator ? process.env.DEFAULT_USERNAME || 'admin' : 'user-only',
-    administrator ? process.env.DEFAULT_PASSWORD || 'admin' : 'user-only',
+    administrator ? process.env.DEFAULT_ADMIN_USERNAME || 'admin' : 'user-only',
+    administrator ? process.env.DEFAULT_ADMIN_PASSWORD || 'admin' : 'user-only',
   );
   if (administrator) {
     administratorJwtToken = jwtToken;

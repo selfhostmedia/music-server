@@ -51,8 +51,8 @@ describe('/webapi/AudioStation/entry.cgi', () => {
         throw new Error(`Failed to get encryption key`);
       }
       const payload = encryptCredentials(
-        process.env.DEFAULT_USERNAME || 'admin',
-        process.env.DEFAULT_PASSWORD || 'admin',
+        process.env.DEFAULT_ADMIN_USERNAME || 'admin',
+        process.env.DEFAULT_ADMIN_PASSWORD || 'admin',
         encryptionKey.data.public_key,
       );
       const { error, data } = await api.POST(`/webapi/entry.cgi`, {
@@ -81,7 +81,7 @@ describe('/webapi/AudioStation/entry.cgi', () => {
       }
       const payload = encryptCredentials(
         'fred',
-        process.env.DEFAULT_PASSWORD || 'admin',
+        process.env.DEFAULT_ADMIN_PASSWORD || 'admin',
         encryptionKey.data.public_key,
       );
       const { error } = await api.POST(`/webapi/entry.cgi`, {
@@ -107,7 +107,7 @@ describe('/webapi/AudioStation/entry.cgi', () => {
         throw new Error(`Failed to get encryption key`);
       }
       const payload = encryptCredentials(
-        process.env.DEFAULT_USERNAME || 'admin',
+        process.env.DEFAULT_ADMIN_USERNAME || 'admin',
         'pony123',
         encryptionKey.data.public_key,
       );
@@ -123,8 +123,8 @@ describe('/webapi/AudioStation/entry.cgi', () => {
 
     it('should reject invalid public key', async () => {
       const payload = encryptCredentials(
-        process.env.DEFAULT_USERNAME || 'admin',
-        process.env.DEFAULT_PASSWORD || 'admin',
+        process.env.DEFAULT_ADMIN_USERNAME || 'admin',
+        process.env.DEFAULT_ADMIN_PASSWORD || 'admin',
         [
           'MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAygDdPPqBY3P1IWl7rsoP',
           '/M6MV/yBABTuQaPjJg8Yt8xWtH5xg/hdSXYeqme+DcajL2xg8hY2pqUVAVUWHscT',

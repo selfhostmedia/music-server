@@ -82,8 +82,8 @@ export async function createSignInCookie() {
   }
   // encrypt the payload
   const payload = encryptCredentials(
-    process.env.DEFAULT_USERNAME || 'admin',
-    process.env.DEFAULT_PASSWORD || 'admin',
+    process.env.DEFAULT_ADMIN_USERNAME || 'admin',
+    process.env.DEFAULT_ADMIN_PASSWORD || 'admin',
     encryptionKey.data.public_key,
   );
   // do the sign in
