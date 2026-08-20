@@ -42,6 +42,7 @@ export class AdminCreateAccountBadRequestResponseDto extends BadRequestResponseD
   @ApiProperty({
     isArray: true,
     enum: [
+      ErrorCodes.INVALID_ROLE_ERROR,
       ErrorCodes.INVALID_USER_ROLE_ERROR,
       ErrorCodes.INVALID_USERNAME_ERROR,
       ErrorCodes.INVALID_USERNAME_LENGTH_ERROR,
