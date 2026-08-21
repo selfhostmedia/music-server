@@ -24,6 +24,12 @@ export class AdminUpdateRootPathService {
     if (!existsSync(newPath)) {
       throw new BadRequestException(ErrorCodes.ROOT_PATH_DOES_NOT_EXIST_ERROR);
     }
+    const existingRootPath = await this.rootPathEntity.findOne({
+      where: { rootPath: newPath, accountId: rootPath.accountId },
+    });
+    if (existingRootPath) {
+      throw new BadRequestException(ErrorCodes.DUPLICATE_ROOT_PATH_ERROR);
+    }
     await this.rootPathEntity.update({ rootPath: newPath }, { where: { id: rootPathId } });
   }
 }
