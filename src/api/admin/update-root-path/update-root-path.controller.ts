@@ -17,11 +17,12 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { Body, Controller, Patch, Query } from '@nestjs/common';
+import { Body, Controller, Patch, Query, Scope } from '@nestjs/common';
 import { UserRoleEnum } from 'src/constants/enums';
 
 @Controller({
   path: '/api/admin',
+  scope: Scope.REQUEST,
 })
 @ApiTags(ADMIN_APIS)
 export class AdminUpdateRootPathController {
