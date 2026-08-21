@@ -3,11 +3,12 @@ import { AdminListRootPathsResponseDto } from './list-root-paths.dto';
 import { AdminListRootPathsService } from './list-root-paths.service';
 import { AllowedRoles } from 'src/api/role.guard';
 import { ApiBearerAuth, ApiHeader, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Scope } from '@nestjs/common';
 import { UserRoleEnum } from 'src/constants/enums';
 
 @Controller({
   path: '/api/admin',
+  scope: Scope.REQUEST,
 })
 @ApiTags(ADMIN_APIS)
 export class AdminListRootPathsController {

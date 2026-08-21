@@ -7,11 +7,12 @@ import {
 import { AdminDeleteRootPathService } from './delete-root-path.service';
 import { AllowedRoles } from 'src/api/role.guard';
 import { ApiBearerAuth, ApiHeader, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Controller, Delete, Query } from '@nestjs/common';
+import { Controller, Delete, Query, Scope } from '@nestjs/common';
 import { UserRoleEnum } from 'src/constants/enums';
 
 @Controller({
   path: '/api/admin',
+  scope: Scope.REQUEST,
 })
 @ApiTags(ADMIN_APIS)
 export class AdminDeleteRootPathController {

@@ -4,12 +4,13 @@ import { AdminRegenerateMasterSessionKeyResponseDto } from './regenerate-master-
 import { AdminRegenerateMasterSessionKeyService } from './regenerate-master-session-key.service';
 import { AllowedRoles } from 'src/api/role.guard';
 import { ApiBearerAuth, ApiCreatedResponse, ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Controller, Post } from '@nestjs/common';
+import { Controller, Post, Scope } from '@nestjs/common';
 import { User } from 'src/api/user.decorator';
 import { UserRoleEnum } from 'src/constants/enums';
 
 @Controller({
   path: '/api/admin',
+  scope: Scope.REQUEST,
 })
 @ApiTags(ADMIN_APIS)
 export class AdminRegenerateMasterSessionKeyController {

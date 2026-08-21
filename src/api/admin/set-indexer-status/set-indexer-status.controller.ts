@@ -4,12 +4,13 @@ import { AdminSetIndexerStatusBodyDto, AdminSetIndexerStatusResponseDto } from '
 import { AdminSetIndexerStatusService } from './set-indexer-status.service';
 import { AllowedRoles } from 'src/api/role.guard';
 import { ApiBearerAuth, ApiHeader, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Body, Controller, Patch } from '@nestjs/common';
+import { Body, Controller, Patch, Scope } from '@nestjs/common';
 import { User } from 'src/api/user.decorator';
 import { UserRoleEnum } from 'src/constants/enums';
 
 @Controller({
   path: '/api/admin',
+  scope: Scope.REQUEST,
 })
 @ApiTags(ADMIN_APIS)
 export class AdminSetIndexerStatusController {
