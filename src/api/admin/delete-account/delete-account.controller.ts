@@ -58,7 +58,7 @@ export class AdminDeleteAccountController {
     @User() user: AccountEntity,
     @Query() query: AdminDeleteAccountQueryDto,
   ): Promise<AdminDeleteAccountResponseDto> {
-    await this.deleteAccountService.deleteAccount(user.id, query.accountId);
+    await this.deleteAccountService.deleteAccount(user.id, query.id);
     return {
       success: true,
     };

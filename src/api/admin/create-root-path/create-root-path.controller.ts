@@ -55,7 +55,7 @@ export class AdminCreateRootPathController {
     @Query() query: AdminCreateRootPathQueryDto,
     @Body() body: AdminCreateRootPathBodyDto,
   ): Promise<AdminCreateRootPathResponseDto> {
-    await this.createRootPathService.createRootPath(query.accountId, body.rootPath);
+    await this.createRootPathService.createRootPath(query.id, body.rootPath);
     return {
       success: true,
     };

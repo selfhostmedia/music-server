@@ -9,7 +9,7 @@ export class AdminDeleteAccountQueryDto {
    * The ID of the account to be deleted.
    */
   @IsInt({ message: ErrorCodes.INVALID_ACCOUNT_ID_ERROR })
-  declare accountId: number;
+  declare id: number;
 }
 
 export class AdminDeleteAccountResponseDto extends SuccessResponseDto {}
