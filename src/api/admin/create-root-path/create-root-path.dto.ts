@@ -9,7 +9,7 @@ export class AdminCreateRootPathQueryDto {
    * The ID of the account to create the root path for.
    */
   @IsInt({ message: ErrorCodes.INVALID_ACCOUNT_ID_ERROR })
-  declare accountId: number;
+  declare id: number;
 }
 
 export class AdminCreateRootPathBodyDto {
