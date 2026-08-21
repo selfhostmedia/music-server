@@ -94,7 +94,7 @@ export async function createRootPath(accountId: number, rootPath: string, admini
     },
     params: {
       query: {
-        accountId,
+        id: accountId,
       },
       header: {
         ...getAuthenticationHeaders(administrator),
@@ -108,7 +108,7 @@ export async function deleteAccount(accountId: number, administrator = true) {
   const response = await api.DELETE(`/api/admin/delete-account`, {
     params: {
       query: {
-        accountId,
+        id: accountId,
       },
       header: {
         ...getAuthenticationHeaders(administrator),
