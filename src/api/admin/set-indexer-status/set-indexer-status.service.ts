@@ -9,7 +9,7 @@ export class AdminSetIndexerStatusService {
     private readonly indexerConfigurationEntity: typeof IndexerConfigurationEntity,
   ) {}
 
-  setScannerStatus(accountId: number, enabled: boolean) {
+  async setScannerStatus(accountId: number, enabled: boolean) {
     return this.indexerConfigurationEntity.create({
       isEnabled: enabled,
       createdByAccountId: accountId,
