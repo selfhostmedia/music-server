@@ -32,7 +32,7 @@ describe('/api/admin/list-root-paths', () => {
     it('should list root paths', async () => {
       const adminRootPaths = process.env.DEFAULT_ADMIN_ROOT_PATH?.split(',').map((path) => path.trim()) as string[];
       const userRootPaths = process.env.DEFAULT_USER_ROOT_PATH?.split(',').map((path) => path.trim()) as string[];
-      const defaultRootPaths = [...adminRootPaths, ...userRootPaths];
+      const defaultRootPaths = [...(adminRootPaths || []), ...(userRootPaths || [])];
       const { error, data } = await listRootPaths();
       expect(error).toBeUndefined();
       expect(data?.success).toBe(true);
