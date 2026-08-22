@@ -1,5 +1,5 @@
-import { Transform } from 'class-transformer';
 import { IsBoolean, IsIn, IsNotEmpty, IsString, IsUrl } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 /**
  * Structure of the environment configuration variables.
