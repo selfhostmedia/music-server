@@ -53,30 +53,17 @@ Run it directly:
 - Build the server with `npm run build`
 - Start the server with `npm run start:prod`
 
-Run it through Docker:
-
 ```bash
-git clone https://github.com/selfhostmedia/docker-image.git
-cd docker-image
-docker build -t music-server .
-```
-
-## Running
-
-```bash
-docker run --rm \
-  -p 7000:7000 \
-  -p 8000:8000 \
-  -v /my/musiclibrary:/music \
-  -v /my/data:/data \
-  -e DEFAULT_ADMIN_USERNAME=admin \
-  -e DEFAULT_ADMIN_PASSWORD=admin \
-  -e DEFAULT_USER_USERNAME=user \
-  -e DEFAULT_USER_PASSWORD=user \
-  -e DISABLE_DEFAULT_USER=true \ # or disable default user
-  -e SYNOLOGY_AUDIOSTATION_ENABLED=true \ # for DS Audio smartphone apps
-  -e JWT_SECRET=$(openssl rand -hex 32) \
-  music-server
+$ git clone https://github.com/selfhostmedia/music-server.git
+$ cd music-server
+$ npm ci
+$ npm run build
+# set up your environment variables (see `.env.localdev` for an example)
+$ npm run sequelize:migrate
+$ npm run sequelize:seed:all
+$ npm run start:prod
+# or to just get started immediately:
+$ npx dotenv -e .env.localdev npm run start:prod
 ```
 
 ## Technical details
