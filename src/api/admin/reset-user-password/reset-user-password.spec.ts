@@ -36,7 +36,7 @@ describe('/api/admin/reset-user-password', () => {
 
     it('should reject non-admin access', async () => {
       const { error } = await resetUserPassword(1, 'test-123', false);
-      expect(error?.message[0]).toBe(ErrorCodes.AUTHORIZATION_ERROR);
+      expect(error?.message[0]).toBe(ErrorCodes.FORBIDDEN_ERROR);
     });
   });
 

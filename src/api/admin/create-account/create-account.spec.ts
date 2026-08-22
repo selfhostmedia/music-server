@@ -36,7 +36,7 @@ describe('/api/admin/create-account', () => {
     it('should reject non-admin access', async () => {
       const username = `username-${Date.now()}`;
       const { error } = await createAccount(username, 'test-123', [UserRoleEnum.user], false);
-      expect(error?.message[0]).toBe(ErrorCodes.AUTHORIZATION_ERROR);
+      expect(error?.message[0]).toBe(ErrorCodes.FORBIDDEN_ERROR);
     });
   });
 

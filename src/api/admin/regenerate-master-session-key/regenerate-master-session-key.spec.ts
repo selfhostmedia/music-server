@@ -31,7 +31,7 @@ describe('/api/admin/regenerate-master-session-key', () => {
     it('should reject non-admin access', async () => {
       const { error } = await deleteAccount(2, false);
       const typedError = error as unknown as Record<string, string | string[]>;
-      expect(typedError?.message?.[0]).toBe(ErrorCodes.AUTHORIZATION_ERROR);
+      expect(typedError?.message?.[0]).toBe(ErrorCodes.FORBIDDEN_ERROR);
     });
   });
 

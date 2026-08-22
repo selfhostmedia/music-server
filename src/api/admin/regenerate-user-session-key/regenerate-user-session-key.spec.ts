@@ -35,7 +35,7 @@ describe('/api/admin/regenerate-user-session-key', () => {
     it('should reject non-admin access', async () => {
       const { error } = await regenerateUserSessionKey(2, false);
       const typedError = error as unknown as Record<string, string | string[]>;
-      expect(typedError?.message?.[0]).toBe(ErrorCodes.AUTHORIZATION_ERROR);
+      expect(typedError?.message?.[0]).toBe(ErrorCodes.FORBIDDEN_ERROR);
     });
   });
 

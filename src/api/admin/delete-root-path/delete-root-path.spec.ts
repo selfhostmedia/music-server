@@ -37,7 +37,7 @@ describe('/api/admin/delete-root-path', () => {
 
     it('should reject non-admin access', async () => {
       const { error } = await deleteRootPath(1, false);
-      expect(error?.message[0]).toBe(ErrorCodes.AUTHORIZATION_ERROR);
+      expect(error?.message[0]).toBe(ErrorCodes.FORBIDDEN_ERROR);
     });
   });
 
