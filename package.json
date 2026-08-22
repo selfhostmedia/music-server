@@ -22,7 +22,7 @@
     "reflect-metadata": "^0.2.2",
     "sequelize": "^6.37.8",
     "typescript-guid": "^1.0.3",
-    "umzug": "^3.8.3"
+    "umzug": "2.3"
   },
   "description": "",
   "devDependencies": {
