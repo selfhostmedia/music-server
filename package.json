@@ -21,7 +21,8 @@
     "openapi-fetch": "^0.17.0",
     "reflect-metadata": "^0.2.2",
     "sequelize": "^6.37.8",
-    "typescript-guid": "^1.0.3"
+    "typescript-guid": "^1.0.3",
+    "umzug": "^3.8.3"
   },
   "description": "",
   "devDependencies": {
