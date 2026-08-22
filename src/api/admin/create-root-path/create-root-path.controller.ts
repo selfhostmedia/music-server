@@ -21,7 +21,7 @@ import { Body, Controller, Post, Query } from '@nestjs/common';
 import { UserRoleEnum } from 'src/constants/enums';
 
 @Controller({
-  path: 'api/admin',
+  path: '/api/admin',
 })
 @ApiTags(ADMIN_APIS)
 export class AdminCreateRootPathController {
