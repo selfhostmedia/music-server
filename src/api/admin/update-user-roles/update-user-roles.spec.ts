@@ -38,7 +38,7 @@ describe('/api/admin/update-user-roles', () => {
 
     it('should reject non-admin access', async () => {
       const { error } = await updateUserRoles(1, [UserRoleEnum.user], false);
-      expect(error?.message[0]).toBe(ErrorCodes.AUTHORIZATION_ERROR);
+      expect(error?.message[0]).toBe(ErrorCodes.FORBIDDEN_ERROR);
     });
   });
 

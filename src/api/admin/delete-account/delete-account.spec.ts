@@ -21,7 +21,7 @@ describe('/api/admin/delete-account', () => {
       const { error } = await api.DELETE(`/api/admin/delete-account`, {
         params: {
           query: {
-            accountId: 1,
+            id: 1,
           },
           header: {
             Authorization: '',
@@ -33,7 +33,7 @@ describe('/api/admin/delete-account', () => {
 
     it('should reject non-admin access', async () => {
       const { error } = await deleteAccount(2, false);
-      expect(error?.message[0]).toBe(ErrorCodes.AUTHORIZATION_ERROR);
+      expect(error?.message[0]).toBe(ErrorCodes.FORBIDDEN_ERROR);
     });
   });
 

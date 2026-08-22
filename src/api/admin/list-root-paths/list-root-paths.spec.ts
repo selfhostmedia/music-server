@@ -24,13 +24,15 @@ describe('/api/admin/list-root-paths', () => {
     it('should reject non-admin access', async () => {
       const { error } = await listRootPaths(false);
       const typedError = error as unknown as Record<string, string | string[]>;
-      expect(typedError?.message?.[0]).toBe(ErrorCodes.AUTHORIZATION_ERROR);
+      expect(typedError?.message?.[0]).toBe(ErrorCodes.FORBIDDEN_ERROR);
     });
   });
 
   describe('success', () => {
     it('should list root paths', async () => {
-      const defaultRootPaths = process.env.DEFAULT_ROOT_PATH?.split(',').map((path) => path.trim()) as string[];
+      const adminRootPaths = process.env.DEFAULT_ADMIN_ROOT_PATH?.split(',').map((path) => path.trim()) as string[];
+      const userRootPaths = process.env.DEFAULT_USER_ROOT_PATH?.split(',').map((path) => path.trim()) as string[];
+      const defaultRootPaths = [...(adminRootPaths || []), ...(userRootPaths || [])];
       const { error, data } = await listRootPaths();
       expect(error).toBeUndefined();
       expect(data?.success).toBe(true);

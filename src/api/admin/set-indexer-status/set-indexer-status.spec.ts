@@ -27,7 +27,7 @@ describe('/api/admin/set-indexer-status', () => {
     it('should reject non-admin access', async () => {
       const { error } = await setIndexerStatus(true, false);
       const typedError = error as unknown as Record<string, string | string[]>;
-      expect(typedError?.message?.[0]).toBe(ErrorCodes.AUTHORIZATION_ERROR);
+      expect(typedError?.message?.[0]).toBe(ErrorCodes.FORBIDDEN_ERROR);
     });
   });
 

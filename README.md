@@ -32,13 +32,15 @@ This software does not modify your music files in any way. It reads the metadata
 
 ## Managing users and root folders
 
-Currently there is no user interface for managing users and root folders. You can open the SQLite database file and add them directly to the database. You will need to bcrypt-encrypt your password which can be done [here](https://www.w3schools.com/tools/tool_bcrypt.php).
+Use the [music-webui](https://github.com/selfhostmedia/music-webui) project to manage users and root folders. The web interface is built with React and provides user, root path and session management.
 
 # Configuration and setup
 
 ## Default account
 
-The default account is `admin` with password `admin`. You can change the default account by setting the `DEFAULT_USERNAME` and `DEFAULT_PASSWORD` environment variables in your environment settings.
+The default administrator account is `admin` with password `admin`. You can change the default account by setting the `DEFAULT_ADMIN_USERNAME` and `DEFAULT_ADMIN_PASSWORD` environment variables in your environment settings. 
+
+The default user account is `user` with password `user`. You can change the default account by setting the `DEFAULT_USER_USERNAME` and `DEFAULT_USER_PASSWORD` environment variables in your environment settings.  Disable this account with the `DISABLE_DEFAULT_USER` environment variable if you want to use your administrator account or manage users within it.
 
 The default library path is set with `DEFAULT_ROOT_PATH` environment variable which allows a comma-delimited string of multiple paths to be specified. You can make the music folder read-only to ensure your collection cannot be modified.
 
@@ -46,24 +48,22 @@ The default library path is set with `DEFAULT_ROOT_PATH` environment variable wh
 
 Run it directly:
 
-- Install NodeJS 20 or later
+- Install NodeJS 24
 - Install dependencies with `npm install`
 - Build the server with `npm run build`
 - Start the server with `npm run start:prod`
 
-Run it through Docker:
-
 ```bash
-$ docker build -t music-server .
-$ docker run \
-    -p 3000:3000 \
-    -v /path/to/music:/music:ro \
-    -v /path/to/data:/data \
-    -e DEFAULT_USERNAME=admin \
-    -e DEFAULT_PASSWORD=admin \
-    -e SYNOLOGY_AUDIOSTATION_ENABLED=true \
-    -e SWAGGER_ENABLED=true \
-    music-server
+$ git clone https://github.com/selfhostmedia/music-server.git
+$ cd music-server
+$ npm ci
+$ npm run build
+# set up your environment variables (see `.env.localdev` for an example)
+$ npm run sequelize:migrate
+$ npm run sequelize:seed:all
+$ npm run start:prod
+# or to just get started immediately:
+$ npx dotenv -e .env.localdev npm run start:prod
 ```
 
 ## Technical details

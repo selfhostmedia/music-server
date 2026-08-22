@@ -59,7 +59,7 @@ export class AppModule implements NestModule {
     await this.sequelize.query('PRAGMA journal_mode=WAL;');
     // if using a :memory: sqlite database for tests then make sure the database
     // migrations and seeders are run
-    if (this.configService.isTesting()) {
+    if (this.configService.get('BUILD_DATABASE') || this.configService.isTesting()) {
       await this.runMigrationsAndSeeders();
     }
   }

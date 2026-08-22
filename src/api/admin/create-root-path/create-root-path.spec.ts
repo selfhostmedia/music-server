@@ -28,7 +28,7 @@ describe('/api/admin/create-root-path', () => {
         },
         params: {
           query: {
-            accountId: 1,
+            id: 1,
           },
           header: {
             Authorization: '',
@@ -41,7 +41,7 @@ describe('/api/admin/create-root-path', () => {
     it('should reject non-admin access', async () => {
       const newRootPath = join(tmpdir(), `test-user-create-unauthorized-access-${Date.now()}`);
       const { error } = await createRootPath(1, newRootPath, false);
-      expect(error?.message[0]).toBe(ErrorCodes.AUTHORIZATION_ERROR);
+      expect(error?.message[0]).toBe(ErrorCodes.FORBIDDEN_ERROR);
     });
   });
 

@@ -1,7 +1,7 @@
 import { AccountEntity } from 'src/database/entities';
 import { AuthenticationService } from 'src/authentication/authentication.service';
 import { ErrorCodes } from 'src/constants/error-codes';
-import { Inject, Injectable, Logger, SetMetadata, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, Logger, SetMetadata, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
@@ -92,10 +92,7 @@ export class RoleGuard implements CanActivate {
     // enforce the role requirement for protected route
     if (request.url.startsWith('/api/admin/')) {
       if (!requiredRoles.includes(UserRoleEnum.ADMIN)) {
-        throw new UnauthorizedException(
-          ErrorCodes.AUTHORIZATION_ERROR,
-          'Administration routes must require the ADMIN role',
-        );
+        throw new ForbiddenException(ErrorCodes.FORBIDDEN_ERROR);
       }
     }
     const user = request.user as AccountEntity;
@@ -107,7 +104,7 @@ export class RoleGuard implements CanActivate {
       // user satisfies role requirement
       return true;
     }
-    throw new UnauthorizedException(ErrorCodes.AUTHORIZATION_ERROR);
+    throw new ForbiddenException(ErrorCodes.FORBIDDEN_ERROR);
   }
 
   // eslint-disable-next-line class-methods-use-this

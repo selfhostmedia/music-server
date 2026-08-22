@@ -24,7 +24,7 @@ describe('/api/admin/list-indexer-logs', () => {
     it('should reject non-admin access', async () => {
       const { error } = await listIndexerLogs(false);
       const typedError = error as unknown as Record<string, string | string[]>;
-      expect(typedError?.message?.[0]).toBe(ErrorCodes.AUTHORIZATION_ERROR);
+      expect(typedError?.message?.[0]).toBe(ErrorCodes.FORBIDDEN_ERROR);
     });
   });
 

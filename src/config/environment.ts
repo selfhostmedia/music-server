@@ -1,9 +1,19 @@
 import { IsBoolean, IsIn, IsNotEmpty, IsString, IsUrl } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 /**
  * Structure of the environment configuration variables.
  */
 export class Environment {
+  /**
+   * Flag for running database migrations and seeders on application startup. The
+   * only time you would not set this is if you are running the server directly and
+   * have manually run the migration/seed scripts as required.
+   */
+  @IsBoolean()
+  @Transform(({ value }) => value === 'true' || value === true)
+  BUILD_DATABASE?: boolean;
+
   /**
    * The SQLite database file path
    */

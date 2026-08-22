@@ -24,7 +24,7 @@ describe('/api/admin/indexer-configuration', () => {
     it('should reject non-admin access', async () => {
       const { error } = await getIndexerConfiguration(false);
       const typedError = error as unknown as Record<string, string | string[]>;
-      expect(typedError?.message?.[0]).toBe(ErrorCodes.AUTHORIZATION_ERROR);
+      expect(typedError?.message?.[0]).toBe(ErrorCodes.FORBIDDEN_ERROR);
     });
   });
 
