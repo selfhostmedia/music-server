@@ -1,8 +1,11 @@
 import { QueryInterface } from 'sequelize';
 
-const rootPaths = (process.env.DEFAULT_ROOT_PATH || '/mnt/storage/media/music').split(',');
+const rootPaths = process.env.DEFAULT_ROOT_PATH?.split(',');
 
 export async function up(queryInterface: QueryInterface) {
+  if (!rootPaths || rootPaths.length === 0) {
+    return;
+  }
   await queryInterface.bulkInsert(
     'root_paths',
     rootPaths.map((path) => ({
