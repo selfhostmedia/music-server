@@ -142,7 +142,7 @@ async function updateUserRoles(params: RequestParams, accountId: number, roles: 
     params: {
       ...params,
       query: {
-        accountId,
+        id: accountId,
       },
     },
   });

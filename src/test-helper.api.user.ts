@@ -51,8 +51,8 @@ async function regenerateSessionKey(params: RequestParams) {
   });
 }
 
-async function resetPassword(params: RequestParams, newPassword: string) {
-  return api.POST(`/api/user/reset-password`, {
+async function updatePassword(params: RequestParams, newPassword: string) {
+  return api.POST(`/api/user/update-password`, {
     body: {
       newPassword,
     },
@@ -67,7 +67,7 @@ export type UserApi = {
   listIndexerLogs: () => ReturnType<typeof listIndexerLogs>;
   listRootPaths: () => ReturnType<typeof listRootPaths>;
   regenerateSessionKey: () => ReturnType<typeof regenerateSessionKey>;
-  resetPassword: (newPassword: string) => ReturnType<typeof resetPassword>;
+  updatePassword: (newPassword: string) => ReturnType<typeof updatePassword>;
 };
 
 /**
@@ -106,8 +106,8 @@ export async function createUserApi(username?: string, password?: string): Promi
     async regenerateSessionKey() {
       return regenerateSessionKey(params);
     },
-    async resetPassword(newPassword: string) {
-      return resetPassword(params, newPassword);
+    async updatePassword(newPassword: string) {
+      return updatePassword(params, newPassword);
     },
   };
 }
