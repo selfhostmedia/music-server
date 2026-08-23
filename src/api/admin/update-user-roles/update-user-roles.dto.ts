@@ -10,7 +10,7 @@ export class AdminUpdateUserRolesQueryDto {
    * The ID of the account whose roles are changing.
    */
   @IsInt({ message: ErrorCodes.INVALID_ACCOUNT_ID_ERROR })
-  declare accountId: number;
+  declare id: number;
 }
 
 export class AdminUpdateUserRolesBodyDto {

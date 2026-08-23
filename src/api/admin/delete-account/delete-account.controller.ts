@@ -22,7 +22,7 @@ import { User } from 'src/api/user.decorator';
 import { UserRoleEnum } from 'src/constants/enums';
 
 @Controller({
-  path: 'api/admin',
+  path: '/api/admin',
 })
 @ApiTags(ADMIN_APIS)
 export class AdminDeleteAccountController {

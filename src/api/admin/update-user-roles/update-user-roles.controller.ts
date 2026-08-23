@@ -23,7 +23,7 @@ import { User } from 'src/api/user.decorator';
 import { UserRoleEnum } from 'src/constants/enums';
 
 @Controller({
-  path: 'api/admin',
+  path: '/api/admin',
 })
 @ApiTags(ADMIN_APIS)
 export class AdminUpdateUserRolesController {
@@ -59,7 +59,7 @@ export class AdminUpdateUserRolesController {
     @Query() query: AdminUpdateUserRolesQueryDto,
     @Body() body: AdminUpdateUserRolesBodyDto,
   ): Promise<AdminUpdateUserRolesResponseDto> {
-    await this.updateRolesService.updateUserRoles(user.id, query.accountId, body.roles);
+    await this.updateRolesService.updateUserRoles(user.id, query.id, body.roles);
     return {
       success: true,
     };

@@ -11,7 +11,7 @@ import { Controller, Post, Query } from '@nestjs/common';
 import { UserRoleEnum } from 'src/constants/enums';
 
 @Controller({
-  path: 'api/admin',
+  path: '/api/admin',
 })
 @ApiTags(ADMIN_APIS)
 export class AdminRegenerateUserSessionKeyController {
@@ -40,7 +40,7 @@ export class AdminRegenerateUserSessionKeyController {
     description: 'Account not found',
   })
   async post(@Query() query: AdminRegenerateUserSessionKeyQueryDto): Promise<AdminRegenerateUserSessionKeyResponseDto> {
-    await this.regenerateSessionKeyService.regenerateSessionKey(query.accountId); // Replace with the actual account ID
+    await this.regenerateSessionKeyService.regenerateSessionKey(query.id);
     return {
       success: true,
     };

@@ -1,27 +1,55 @@
-import { ShoutcastItemTypeEnum } from '../../types/enums';
-import { SynologyApiEnum, SynologyLibraryEnum, SynologyMethodEnum } from '../../types/api-schema';
-import { SynologyRadioItemResponseDto } from './dtos';
-import {
-  api,
-  createSignInCookie,
-  createTestStation,
-  deleteStation,
-  getAuthenticationHeaders,
-  getStationIndex,
-  listStationsInContainer,
-} from '../../test-helper.synology';
+import { ShoutcastItemTypeEnum, components } from '../../types/api-schema';
+import { SynologyApi, createSynologyApi } from '../../test-helper.synology';
 import { beforeAll, describe, expect, it } from '@jest/globals';
 
 describe('/webapi/AudioStation/radio.cgi', () => {
+  let synologyApi: SynologyApi;
+
+  async function listStationsInContainer(container: 'User defined' | 'My favorite' | 'SHOUTcast' | string) {
+    const { data, error } = await synologyApi.listStationsInContainer(container);
+    const typedData = data as components['schemas']['SynologyRadioItemResponseDto'];
+    return {
+      data: typedData,
+      error,
+      radios: typedData?.data.radios || [],
+      total: typedData?.data.total || 0,
+    };
+  }
+
+  async function listRadioContainers() {
+    const { data, error } = await synologyApi.listRadioContainers();
+    const typedData = data as components['schemas']['SynologyRadioItemResponseDto'];
+    return {
+      data: typedData,
+      error,
+      radios: typedData?.data.radios || [],
+      total: typedData?.data.total || 0,
+    };
+  }
+
+  async function getStationIndex(
+    container: 'User defined' | 'My favorite' | 'SHOUTcast' | string,
+    title: string,
+    url: string,
+  ) {
+    const { data, error } = await synologyApi.listStationsInContainer(container);
+    const typedData = data as components['schemas']['SynologyRadioItemResponseDto'];
+    return {
+      data: typedData,
+      error,
+      stationIndex: typedData?.data.radios.findIndex((item) => item.title === title && item.url === url),
+    };
+  }
+
   beforeAll(async () => {
-    await createSignInCookie();
+    synologyApi = await createSynologyApi();
   });
 
   it('should add a new user-defined station', async () => {
     const title = `Test Station ${Date.now()}`;
     const url = `http://yp.shoutcast.com/sbin/tunein-station.pls?id=${Date.now()}`;
-    await createTestStation('User defined', title, 'A test station for unit testing', url);
-    const radios = await listStationsInContainer('User defined');
+    await synologyApi.createStation('User defined', title, 'A test station for unit testing', url);
+    const { radios } = await listStationsInContainer('User defined');
     expect(radios.some((item) => item.title === title && item.url === url)).toBe(true);
   });
 
@@ -29,16 +57,16 @@ describe('/webapi/AudioStation/radio.cgi', () => {
     // create the station
     const title = `Test Station ${Date.now()}`;
     const url = `http://yp.shoutcast.com/sbin/tunein-station.pls?id=${Date.now()}`;
-    await createTestStation('User defined', title, 'A test station for unit testing', url);
+    await synologyApi.createStation('User defined', title, 'A test station for unit testing', url);
     // get the station index
-    const stationIndex = await getStationIndex('User defined', title, url);
+    const { stationIndex } = await getStationIndex('User defined', title, url);
     // update the station
     const updatedTitle = `${title} - Updated`;
     const updatedDesc = 'An updated test station for unit testing';
     const updatedUrl = `http://yp.shoutcast.com/sbin/tunein-station.pls?id=${Date.now()}`;
-    await createTestStation('User defined', updatedTitle, updatedDesc, updatedUrl, stationIndex);
+    await synologyApi.createStation('User defined', updatedTitle, updatedDesc, updatedUrl, stationIndex);
     // verify update
-    const radios = await listStationsInContainer('User defined');
+    const { radios } = await listStationsInContainer('User defined');
     expect(
       radios.some((item) => item.title === updatedTitle && item.url === updatedUrl && item.desc === updatedDesc),
     ).toBe(true);
@@ -48,21 +76,21 @@ describe('/webapi/AudioStation/radio.cgi', () => {
     // create the station
     const title = `Test Station ${Date.now()}`;
     const url = `http://yp.shoutcast.com/sbin/tunein-station.pls?id=${Date.now()}`;
-    await createTestStation('User defined', title, 'Another test station for unit testing', url);
+    await synologyApi.createStation('User defined', title, 'Another test station for unit testing', url);
     // get the station index
-    const stationIndex = await getStationIndex('User defined', title, url);
+    const { stationIndex } = await getStationIndex('User defined', title, url);
     // delete the station
-    await deleteStation('User defined', stationIndex);
+    await synologyApi.deleteStation('User defined', stationIndex);
     // verify delete
-    const radios = await listStationsInContainer('User defined');
+    const { radios } = await listStationsInContainer('User defined');
     expect(radios.some((item) => item.title === title && item.url === url)).toBe(false);
   });
 
   it('should add a new favorite station', async () => {
     const title = `Test Station ${Date.now()}`;
     const url = `http://yp.shoutcast.com/sbin/tunein-station.pls?id=${Date.now()}`;
-    await createTestStation('My favorite', title, 'A test station for unit testing', url);
-    const radios = await listStationsInContainer('My favorite');
+    await synologyApi.createStation('My favorite', title, 'A test station for unit testing', url);
+    const { radios } = await listStationsInContainer('My favorite');
     expect(radios.some((item) => item.title === title && item.url === url)).toBe(true);
   });
 
@@ -70,14 +98,14 @@ describe('/webapi/AudioStation/radio.cgi', () => {
     // create the station
     const title = `Test Station ${Date.now()}`;
     const url = `http://yp.shoutcast.com/sbin/tunein-station.pls?id=${Date.now()}`;
-    await createTestStation('My favorite', title, 'A test station for unit testing', url);
+    await synologyApi.createStation('My favorite', title, 'A test station for unit testing', url);
     // get the station index
-    const stationIndex = await getStationIndex('My favorite', title, url);
+    const { stationIndex } = await getStationIndex('My favorite', title, url);
     // update the station
     const updatedTitle = `${title} - Updated`;
-    await createTestStation('My favorite', updatedTitle, 'A test station for unit testing', url, stationIndex);
+    await synologyApi.createStation('My favorite', updatedTitle, 'A test station for unit testing', url, stationIndex);
     // verify update
-    const radios = await listStationsInContainer('My favorite');
+    const { radios } = await listStationsInContainer('My favorite');
     expect(radios.some((item) => item.title === updatedTitle && item.url === url)).toBe(true);
   });
 
@@ -85,59 +113,43 @@ describe('/webapi/AudioStation/radio.cgi', () => {
     // create the station
     const title = `Test Station ${Date.now()}`;
     const url = `http://yp.shoutcast.com/sbin/tunein-station.pls?id=${Date.now()}`;
-    await createTestStation('My favorite', title, 'Another test station for unit testing', url);
+    await synologyApi.createStation('My favorite', title, 'Another test station for unit testing', url);
     // get the station index
-    const stationIndex = await getStationIndex('My favorite', title, url);
+    const { stationIndex } = await getStationIndex('My favorite', title, url);
     // delete the station
-    await deleteStation('My favorite', stationIndex);
+    await synologyApi.deleteStation('My favorite', stationIndex);
     // verify delete
-    const radios = await listStationsInContainer('My favorite');
+    const { radios } = await listStationsInContainer('My favorite');
     expect(radios.some((item) => item.title === title && item.url === url)).toBe(false);
   });
 
   it('should list all containers', async () => {
-    const { data, error } = await api.POST('/webapi/AudioStation/radio.cgi', {
-      body: {
-        api: SynologyApiEnum.SYNO_AudioStation_Radio,
-        method: SynologyMethodEnum.list,
-        version: 1,
-        library: SynologyLibraryEnum.all,
-        offset: 0,
-        limit: 100000,
-      },
-      params: {
-        header: {
-          ...getAuthenticationHeaders(),
-        },
-      },
-    });
-    const typedData = data as unknown as SynologyRadioItemResponseDto;
-    expect(error).toBeUndefined();
-    expect(typedData.data.radios.length).toBe(3);
-    expect(typedData.data.radios.every((item) => item.type === ShoutcastItemTypeEnum.CONTAINER)).toBe(true);
-    expect(typedData.data.radios[0]?.title).toBe('SHOUTcast');
-    expect(typedData.data.radios[1]?.title).toBe('User defined');
-    expect(typedData.data.radios[2]?.title).toBe('My favorite');
+    const { radios } = await listRadioContainers();
+    expect(radios.length).toBe(3);
+    expect(radios.every((item) => item.type === ShoutcastItemTypeEnum.container)).toBe(true);
+    expect(radios[0]?.title).toBe('SHOUTcast');
+    expect(radios[1]?.title).toBe('User defined');
+    expect(radios[2]?.title).toBe('My favorite');
   });
 
   it('should list all genres in SHOUTcast container', async () => {
-    const genres = await listStationsInContainer('SHOUTcast');
-    expect(genres.length).toBeGreaterThan(0);
-    expect(genres.every((item) => item.type === ShoutcastItemTypeEnum.CONTAINER)).toBe(true);
+    const { radios } = await listStationsInContainer('SHOUTcast');
+    expect(radios.length).toBeGreaterThan(0);
+    expect(radios.every((item) => item.type === ShoutcastItemTypeEnum.container)).toBe(true);
   });
 
   it('should list all SHOUTcast stations in container + genre', async () => {
-    const radios = await listStationsInContainer('SHOUTcast_genre_Blues');
+    const { radios } = await listStationsInContainer('SHOUTcast_genre_Blues');
     expect(radios.length).toBeGreaterThan(0);
-    expect(radios.every((item) => item.type === ShoutcastItemTypeEnum.STATION)).toBe(true);
+    expect(radios.every((item) => item.type === ShoutcastItemTypeEnum.station)).toBe(true);
     expect(radios.every((item) => item.url?.length > 0)).toBe(true);
   });
 
   it('should list all stations in user container', async () => {
     const title = `Test Station ${Date.now()}`;
     const url = `http://yp.shoutcast.com/sbin/tunein-station.pls?id=${Date.now()}`;
-    await createTestStation('User defined', title, 'A test station for unit testing', url);
-    const radios = await listStationsInContainer('User defined');
+    await synologyApi.createStation('User defined', title, 'A test station for unit testing', url);
+    const { radios } = await listStationsInContainer('User defined');
     expect(radios.some((item) => item.title === title && item.url === url)).toBe(true);
   });
 });

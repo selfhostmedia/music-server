@@ -320,6 +320,46 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/api/user/create-root-path": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create a new root path
+         * @description Creates a new root path for the specified account.
+         */
+        post: operations["UserCreateRootPathController_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/user/delete-root-path": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete a root path
+         * @description Deletes the specified root path.  This will delete all associated information in the database immediately, the songs and folders will no longer be present in their data.  This will not affect any files on the file system.
+         */
+        delete: operations["UserDeleteRootPathController_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/user/end-session": {
         parameters: {
             query?: never;
@@ -335,6 +375,86 @@ export type paths = {
          * @description Ends a user session and invalidates the associated JWT token.
          */
         delete: operations["UserEndSessionController_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/user/list-indexer-logs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List indexer logs
+         * @description Retrieves a list of indexer logs based on the provided query parameters which may filter by root path or search term.  The logs are only held in memory and will disappear when the server restarts or to stay within the log size specified in the `system_configurations` table.
+         */
+        get: operations["UserListIndexerLogsController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/user/list-root-paths": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List all root paths
+         * @description Retrieves a list of all root paths in the system.
+         */
+        get: operations["UserListRootPathsController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/user/regenerate-session-key": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Invalidate a user's sessions
+         * @description Regenerates the session key for the user invalidating all existing sessions for their account.
+         */
+        post: operations["UserRegenerateSessionKeyController_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/user/update-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reset password
+         * @description Resets the user's password to a new value.
+         */
+        post: operations["UserUpdatePasswordController_post"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -1221,15 +1341,19 @@ export type components = {
              */
             success: boolean;
         };
+        /**
+         * @description A bad request occurred due to validation or other issues with the submitted data.
+         * @enum {string}
+         */
+        BadRequestErrorEnum: BadRequestErrorEnum;
         BadRequestResponseDto: {
             /** @description General description of the error class */
             error: string;
             /**
              * @description A bad request occurred due to validation or other issues with the submitted data.
              * @default bad-request-error
-             * @enum {string}
              */
-            message: BadRequestResponseDtoMessage;
+            message: components["schemas"]["BadRequestErrorEnum"][];
             /**
              * @description The success being "false" indicates that the request failed to complete.
              * @default false
@@ -1282,6 +1406,12 @@ export type components = {
              */
             success: boolean;
         };
+        /**
+         * @description An internal error occurred that isn't handled by the API and doesn't have a more specific error
+         *     message defined.
+         * @enum {string}
+         */
+        InternalServerErrorEnum: InternalServerErrorEnum;
         InternalServerErrorResponseDto: {
             /** @description General description of the error class */
             error: string;
@@ -1289,9 +1419,8 @@ export type components = {
              * @description An internal error occurred that isn't handled by the API and doesn't have a more specific error
              *     message defined.
              * @default internal-server-error
-             * @enum {string}
              */
-            message: InternalServerErrorResponseDtoMessage;
+            message: components["schemas"]["InternalServerErrorEnum"][];
             /**
              * @description The success being "false" indicates that the request failed to complete.
              * @default false
@@ -2691,6 +2820,15 @@ export type components = {
             rules_conjunction?: components["schemas"]["SmartPlaylistConjugalEnum"];
             sharing_info: components["schemas"]["SynologyPlaylistSharingInfoDto"];
         };
+        SynologyPlaylistAdditionalWithItemsDto: {
+            rules?: components["schemas"]["SynologyPlaylistRuleDto"][];
+            /** @example and */
+            rules_conjunction?: components["schemas"]["SmartPlaylistConjugalEnum"];
+            sharing_info: components["schemas"]["SynologyPlaylistSharingInfoDto"];
+            songs: components["schemas"]["SynologyPlaylistSongDto"][];
+            songs_offset: number;
+            songs_total: number;
+        };
         SynologyPlaylistAddOrRemoveItemBodyDto: {
             /**
              * @description Synology's API uses this value to route requests appropriately but this software has
@@ -3155,6 +3293,14 @@ export type components = {
             status: string;
             url: string;
         };
+        SynologyPlaylistSongDto: {
+            additional: components["schemas"]["SynologySongAdditionalDto"];
+            id: string;
+            path: string;
+            position: number;
+            title: string;
+            type: components["schemas"]["ContentTypeEnum"];
+        };
         SynologyPlaylistTrackListBodyDto: {
             /**
              * @description Additional data to include in the response.  This field is ignored by the backend for now
@@ -3241,7 +3387,7 @@ export type components = {
             playlists: components["schemas"]["SynologyPlaylistWithItemsDto"][];
         };
         SynologyPlaylistWithItemsDto: {
-            additional: components["schemas"]["SynologyPlaylistAdditionalDto"];
+            additional: components["schemas"]["SynologyPlaylistAdditionalWithItemsDto"];
             id: string;
             library: string;
             name: string;
@@ -4275,8 +4421,202 @@ export type components = {
              */
             success: boolean;
         };
+        /**
+         * @description The error message(s) that occurred during the validation of the request data or additional requirements
+         *     applied during the execution of the request
+         * @enum {string}
+         */
+        UserCreateRootPathBadRequestErrorMessageEnum: UserCreateRootPathBadRequestErrorMessageEnum;
+        UserCreateRootPathBadRequestResponseDto: {
+            /** @description General description of the error class */
+            error: string;
+            /**
+             * @description The error message(s) that occurred during the validation of the request data or additional requirements
+             *     applied during the execution of the request
+             * @default root-path-does-not-exist-error
+             */
+            message: components["schemas"]["UserCreateRootPathBadRequestErrorMessageEnum"][];
+            /**
+             * @description The success being "false" indicates that the request failed to complete.
+             * @default false
+             */
+            success: boolean;
+        };
+        UserCreateRootPathBodyDto: {
+            /** @description The fully-qualified path to set for the root path */
+            rootPath: string;
+        };
+        UserCreateRootPathResponseDto: {
+            /**
+             * Format: constant
+             * @description The success being "true" indicates that the request completed.
+             * @default true
+             */
+            success: boolean;
+        };
+        /**
+         * @description The error message(s) that occurred during the validation of the request data or additional requirements
+         *     applied during the execution of the request
+         * @enum {string}
+         */
+        UserDeleteRootPathNotFoundErrorMessageEnum: UserDeleteRootPathNotFoundErrorMessageEnum;
+        UserDeleteRootPathNotFoundResponseDto: {
+            /** @description General description of the error class */
+            error: string;
+            /**
+             * @description The error message(s) that occurred during the validation of the request data or additional requirements
+             *     applied during the execution of the request
+             * @default root-path-not-found-error
+             */
+            message: components["schemas"]["UserDeleteRootPathNotFoundErrorMessageEnum"][];
+            /**
+             * @description The success being "false" indicates that the request failed to complete.
+             * @default false
+             */
+            success: boolean;
+        };
+        UserDeleteRootPathResponseDto: {
+            /**
+             * Format: constant
+             * @description The success being "true" indicates that the request completed.
+             * @default true
+             */
+            success: boolean;
+        };
+        /**
+         * @description The error message(s) that occurred during the validation of the request data or additional requirements
+         *     applied during the execution of the request
+         * @enum {string}
+         */
+        UserListIndexerLogsBadRequestErrorMessageEnum: UserListIndexerLogsBadRequestErrorMessageEnum;
+        UserListIndexerLogsBadRequestResponseDto: {
+            /** @description General description of the error class */
+            error: string;
+            /**
+             * @description The error message(s) that occurred during the validation of the request data or additional requirements
+             *     applied during the execution of the request
+             * @default invalid-account-id-error
+             */
+            message: components["schemas"]["UserListIndexerLogsBadRequestErrorMessageEnum"][];
+            /**
+             * @description The success being "false" indicates that the request failed to complete.
+             * @default false
+             */
+            success: boolean;
+        };
+        /**
+         * @description The error message(s) that occurred during the validation of the request data or additional requirements
+         *     applied during the execution of the request
+         * @enum {string}
+         */
+        UserListIndexerLogsNotFoundErrorMessageEnum: UserListIndexerLogsNotFoundErrorMessageEnum;
+        UserListIndexerLogsNotFoundResponseDto: {
+            /** @description General description of the error class */
+            error: string;
+            /**
+             * @description The error message(s) that occurred during the validation of the request data or additional requirements
+             *     applied during the execution of the request
+             * @default invalid-account-id-error
+             */
+            message: components["schemas"]["UserListIndexerLogsNotFoundErrorMessageEnum"][];
+            /**
+             * @description The success being "false" indicates that the request failed to complete.
+             * @default false
+             */
+            success: boolean;
+        };
+        UserListIndexerLogsResponseDto: {
+            logs: components["schemas"]["UserLogEntryDto"][];
+            /**
+             * Format: constant
+             * @description The success being "true" indicates that the request completed.
+             * @default true
+             */
+            success: boolean;
+        };
+        UserListRootPathsResponseDto: {
+            /** @description The list of root paths with associated account owner information */
+            rootPaths: components["schemas"]["UserRootPathDto"][];
+            /**
+             * Format: constant
+             * @description The success being "true" indicates that the request completed.
+             * @default true
+             */
+            success: boolean;
+        };
+        UserLogEntryDto: {
+            /** Format: date-time */
+            date: string;
+            message: string;
+            rootPath: string;
+            rootPathId: number;
+        };
+        UserRegenerateSessionKeyResponseDto: {
+            /**
+             * Format: constant
+             * @description The success being "true" indicates that the request completed.
+             * @default true
+             */
+            success: boolean;
+        };
         /** @enum {string} */
         UserRoleEnum: UserRoleEnum;
+        UserRootPathDto: {
+            /**
+             * Format: date-time
+             * @description The date and time the row was created
+             */
+            createdAt: string;
+            /**
+             * @description The number of files or songs that have been found in this root path, this excludes
+             *     anything that is not a music track.
+             */
+            fileCount: number;
+            /** @description The ID of the root path row in the database */
+            id: number;
+            /** @description The fully-qualified path of the root path, this is the base path where music is stored for a user */
+            rootPath: string;
+            /** @description The total size of all the files in this root path contained in the `fileCount` field */
+            totalSize: number;
+            /**
+             * Format: date-time
+             * @description The date and time the row was last updated, this field is optional and may not be present
+             *     if the row has never been updated
+             */
+            updatedAt?: string;
+        };
+        /**
+         * @description The error message(s) that occurred during the validation of the request data or additional requirements
+         *     applied during the execution of the request
+         * @enum {string}
+         */
+        UserUpdatePasswordBadRequestErrorMessageEnum: UserUpdatePasswordBadRequestErrorMessageEnum;
+        UserUpdatePasswordBadRequestResponseDto: {
+            /** @description General description of the error class */
+            error: string;
+            /**
+             * @description The error message(s) that occurred during the validation of the request data or additional requirements
+             *     applied during the execution of the request
+             * @default invalid-password-error
+             */
+            message: components["schemas"]["UserUpdatePasswordBadRequestErrorMessageEnum"][];
+            /**
+             * @description The success being "false" indicates that the request failed to complete.
+             * @default false
+             */
+            success: boolean;
+        };
+        UserUpdatePasswordBodyDto: {
+            newPassword: string;
+        };
+        UserUpdatePasswordResponseDto: {
+            /**
+             * Format: constant
+             * @description The success being "true" indicates that the request completed.
+             * @default true
+             */
+            success: boolean;
+        };
     };
     responses: never;
     parameters: never;
@@ -4583,7 +4923,7 @@ export interface operations {
         parameters: {
             query: {
                 /** @description The ID of the account to regenerate the session key for. */
-                accountId: number;
+                id: number;
             };
             header: {
                 /** @description Bearer token for authentication */
@@ -4756,7 +5096,7 @@ export interface operations {
         parameters: {
             query: {
                 /** @description The ID of the account whose roles are changing. */
-                accountId: number;
+                id: number;
             };
             header: {
                 /** @description Bearer token for authentication */
@@ -4855,6 +5195,77 @@ export interface operations {
             };
         };
     };
+    UserCreateRootPathController_post: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Bearer token for authentication */
+                Authorization: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserCreateRootPathBodyDto"];
+            };
+        };
+        responses: {
+            /** @description Root path created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserCreateRootPathResponseDto"];
+                };
+            };
+            /** @description Invalid request data */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserCreateRootPathBadRequestResponseDto"];
+                };
+            };
+        };
+    };
+    UserDeleteRootPathController_delete: {
+        parameters: {
+            query: {
+                /** @description The ID of the root path to delete */
+                id: number;
+            };
+            header: {
+                /** @description Bearer token for authentication */
+                Authorization: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Root path deleted successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserDeleteRootPathResponseDto"];
+                };
+            };
+            /** @description Root path not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserDeleteRootPathNotFoundResponseDto"];
+                };
+            };
+        };
+    };
     UserEndSessionController_delete: {
         parameters: {
             query?: never;
@@ -4897,6 +5308,144 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SuccessResponseDto"];
+                };
+            };
+        };
+    };
+    UserListIndexerLogsController_get: {
+        parameters: {
+            query?: {
+                rootPathId?: number;
+                search?: string;
+            };
+            header: {
+                /** @description Bearer token for authentication */
+                Authorization: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserListIndexerLogsResponseDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserListIndexerLogsBadRequestResponseDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserListIndexerLogsNotFoundResponseDto"];
+                };
+            };
+        };
+    };
+    UserListRootPathsController_get: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Bearer token for authentication */
+                Authorization: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserListRootPathsResponseDto"];
+                };
+            };
+        };
+    };
+    UserRegenerateSessionKeyController_post: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Bearer token for authentication */
+                Authorization: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Session key regenerated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserRegenerateSessionKeyResponseDto"];
+                };
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserRegenerateSessionKeyResponseDto"];
+                };
+            };
+        };
+    };
+    UserUpdatePasswordController_post: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Bearer token for authentication */
+                Authorization: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserUpdatePasswordBodyDto"];
+            };
+        };
+        responses: {
+            /** @description Password reset successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserUpdatePasswordResponseDto"];
+                };
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserUpdatePasswordResponseDto"];
+                };
+            };
+            /** @description Invalid request data or additional requirements not met */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserUpdatePasswordBadRequestResponseDto"];
                 };
             };
         };
@@ -5425,44 +5974,8 @@ export enum AdminUpdateUserRolesBadRequestErrorMessageEnum {
 export enum AdminUpdateUserRolesNotFoundErrorMessageEnum {
     account_not_found_error = "account-not-found-error"
 }
-export enum BadRequestResponseDtoMessage {
-    invalid_account_error = "invalid-account-error",
-    invalid_enabled_error = "invalid-enabled-error",
-    invalid_ended_at_error = "invalid-ended-at-error",
-    invalid_expires_at_error = "invalid-expires-at-error",
-    invalid_expires_at_range_error = "invalid-expires-at-range-error",
-    invalid_password_error = "invalid-password-error",
-    invalid_password_length_error = "invalid-password-length-error",
-    invalid_root_path_error = "invalid-root-path-error",
-    invalid_search_length_error = "invalid-search-length-error",
-    invalid_username_error = "invalid-username-error",
-    invalid_username_length_error = "invalid-username-length-error",
-    invalid_username_not_unique_error = "invalid-username-not-unique-error",
-    invalid_user_role_error = "invalid-user-role-error",
-    invalid_limit_error = "invalid-limit-error",
-    invalid_limit_range_error = "invalid-limit-range-error",
-    invalid_offset_error = "invalid-offset-error",
-    invalid_offset_range_error = "invalid-offset-range-error",
-    invalid_jwt_token_error = "invalid-jwt-token-error",
-    invalid_role_error = "invalid-role-error",
-    invalid_session_error = "invalid-session-error",
-    invalid_session_key_error = "invalid-session-key-error",
-    account_not_found_error = "account-not-found-error",
-    account_only_admin_error = "account-only-admin-error",
-    session_not_found_error = "session-not-found-error",
-    root_path_not_found_error = "root-path-not-found-error",
-    invalid_account_id_error = "invalid-account-id-error",
-    invalid_root_path_id_error = "invalid-root-path-id-error",
-    invalid_session_id_error = "invalid-session-id-error",
-    authorization_error = "authorization-error",
-    forbidden_error = "forbidden-error",
-    bad_request_error = "bad-request-error",
-    internal_server_error = "internal-server-error",
-    indexer_configuration_not_found_error = "indexer-configuration-not-found-error",
-    system_configuration_not_found_error = "system-configuration-not-found-error",
-    not_found_error = "not-found-error",
-    root_path_does_not_exist_error = "root-path-does-not-exist-error",
-    duplicate_root_path_error = "duplicate-root-path-error"
+export enum BadRequestErrorEnum {
+    bad_request_error = "bad-request-error"
 }
 export enum ContentTypeEnum {
     file = "file",
@@ -5481,44 +5994,8 @@ export enum GuestCreateSessionBadRequestErrorMessageEnum {
     invalid_password_error = "invalid-password-error",
     invalid_password_length_error = "invalid-password-length-error"
 }
-export enum InternalServerErrorResponseDtoMessage {
-    invalid_account_error = "invalid-account-error",
-    invalid_enabled_error = "invalid-enabled-error",
-    invalid_ended_at_error = "invalid-ended-at-error",
-    invalid_expires_at_error = "invalid-expires-at-error",
-    invalid_expires_at_range_error = "invalid-expires-at-range-error",
-    invalid_password_error = "invalid-password-error",
-    invalid_password_length_error = "invalid-password-length-error",
-    invalid_root_path_error = "invalid-root-path-error",
-    invalid_search_length_error = "invalid-search-length-error",
-    invalid_username_error = "invalid-username-error",
-    invalid_username_length_error = "invalid-username-length-error",
-    invalid_username_not_unique_error = "invalid-username-not-unique-error",
-    invalid_user_role_error = "invalid-user-role-error",
-    invalid_limit_error = "invalid-limit-error",
-    invalid_limit_range_error = "invalid-limit-range-error",
-    invalid_offset_error = "invalid-offset-error",
-    invalid_offset_range_error = "invalid-offset-range-error",
-    invalid_jwt_token_error = "invalid-jwt-token-error",
-    invalid_role_error = "invalid-role-error",
-    invalid_session_error = "invalid-session-error",
-    invalid_session_key_error = "invalid-session-key-error",
-    account_not_found_error = "account-not-found-error",
-    account_only_admin_error = "account-only-admin-error",
-    session_not_found_error = "session-not-found-error",
-    root_path_not_found_error = "root-path-not-found-error",
-    invalid_account_id_error = "invalid-account-id-error",
-    invalid_root_path_id_error = "invalid-root-path-id-error",
-    invalid_session_id_error = "invalid-session-id-error",
-    authorization_error = "authorization-error",
-    forbidden_error = "forbidden-error",
-    bad_request_error = "bad-request-error",
-    internal_server_error = "internal-server-error",
-    indexer_configuration_not_found_error = "indexer-configuration-not-found-error",
-    system_configuration_not_found_error = "system-configuration-not-found-error",
-    not_found_error = "not-found-error",
-    root_path_does_not_exist_error = "root-path-does-not-exist-error",
-    duplicate_root_path_error = "duplicate-root-path-error"
+export enum InternalServerErrorEnum {
+    internal_server_error = "internal-server-error"
 }
 export enum PlaylistTypeEnum {
     normal = "normal",
@@ -5600,7 +6077,27 @@ export enum SynologyPlaylistDeleteBodyDtoType {
     normal = "normal",
     smart = "smart"
 }
+export enum UserCreateRootPathBadRequestErrorMessageEnum {
+    root_path_does_not_exist_error = "root-path-does-not-exist-error",
+    duplicate_root_path_error = "duplicate-root-path-error"
+}
+export enum UserDeleteRootPathNotFoundErrorMessageEnum {
+    root_path_not_found_error = "root-path-not-found-error"
+}
+export enum UserListIndexerLogsBadRequestErrorMessageEnum {
+    invalid_account_id_error = "invalid-account-id-error",
+    invalid_root_path_id_error = "invalid-root-path-id-error",
+    invalid_search_length_error = "invalid-search-length-error"
+}
+export enum UserListIndexerLogsNotFoundErrorMessageEnum {
+    invalid_account_id_error = "invalid-account-id-error",
+    invalid_root_path_id_error = "invalid-root-path-id-error"
+}
 export enum UserRoleEnum {
     user = "user",
     admin = "admin"
+}
+export enum UserUpdatePasswordBadRequestErrorMessageEnum {
+    invalid_password_error = "invalid-password-error",
+    invalid_password_length_error = "invalid-password-length-error"
 }

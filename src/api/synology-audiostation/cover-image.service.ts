@@ -32,7 +32,7 @@ export class SynologyCoverImageService {
    * @returns {Promise<CoverImage | undefined>} The album cover image.
    */
   async getArtistCoverImage(accountId: number, albumArtist: string): Promise<CoverImage | undefined> {
-    const artist = await await this.albumEntity.findOne({
+    const artist = await this.albumEntity.findOne({
       attributes: ['coverImage', 'coverImageMimeType'],
       where: {
         accountId,

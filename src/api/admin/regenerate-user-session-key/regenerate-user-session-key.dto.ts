@@ -9,7 +9,7 @@ export class AdminRegenerateUserSessionKeyQueryDto {
    * The ID of the account to regenerate the session key for.
    */
   @IsInt({ message: ErrorCodes.INVALID_ACCOUNT_ID_ERROR })
-  declare accountId: number;
+  declare id: number;
 }
 
 export class AdminRegenerateUserSessionKeyResponseDto extends SuccessResponseDto {}

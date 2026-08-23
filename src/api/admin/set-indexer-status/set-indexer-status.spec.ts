@@ -1,11 +1,12 @@
 import { ErrorCodes } from '../../../constants/error-codes';
-import { api, getIndexerConfiguration, setIndexerStatus, signInDefaultAccount } from '../../../test-helper';
+import { USER_PASSWORD, USER_USERNAME, api, createAdminApi } from '../../../test-helper';
 import { beforeAll, describe, expect, it } from '@jest/globals';
 
 describe('/api/admin/set-indexer-status', () => {
+  let adminApi;
+
   beforeAll(async () => {
-    await signInDefaultAccount(true);
-    await signInDefaultAccount(false);
+    adminApi = await createAdminApi();
   });
 
   describe('authorized access', () => {
@@ -25,7 +26,8 @@ describe('/api/admin/set-indexer-status', () => {
     });
 
     it('should reject non-admin access', async () => {
-      const { error } = await setIndexerStatus(true, false);
+      const nonAdminApi = await createAdminApi(USER_USERNAME, USER_PASSWORD);
+      const { error } = await nonAdminApi.setIndexerStatus(true);
       const typedError = error as unknown as Record<string, string | string[]>;
       expect(typedError?.message?.[0]).toBe(ErrorCodes.FORBIDDEN_ERROR);
     });
@@ -33,7 +35,7 @@ describe('/api/admin/set-indexer-status', () => {
 
   describe('errors', () => {
     it('should reject missing enabled value', async () => {
-      const { error } = await setIndexerStatus(undefined as unknown as boolean);
+      const { error } = await adminApi.setIndexerStatus(undefined as unknown as boolean);
       const typedError = error as unknown as Record<string, string | string[]>;
       expect(typedError?.message?.[0]).toBe(ErrorCodes.INVALID_ENABLED_ERROR);
     });
@@ -41,11 +43,11 @@ describe('/api/admin/set-indexer-status', () => {
 
   describe('success', () => {
     it('should change status', async () => {
-      const before = await getIndexerConfiguration();
-      await setIndexerStatus(!before.data?.configuration.isEnabled);
-      const after = await getIndexerConfiguration();
+      const before = await adminApi.getIndexerConfiguration();
+      await adminApi.setIndexerStatus(!before.data?.configuration.isEnabled);
+      const after = await adminApi.getIndexerConfiguration();
       expect(after.data?.configuration.isEnabled).toBe(!before.data?.configuration.isEnabled);
-      await setIndexerStatus(true);
+      await adminApi.setIndexerStatus(true);
     });
   });
 });

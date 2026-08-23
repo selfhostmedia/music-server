@@ -137,7 +137,12 @@ export class SynologyPlaylistController {
       | SynologyPlaylistRetrieveBodyDto
       | SynologyPlaylistTrackListBodyDto
       | SynologyPlaylistUpdateSmartBodyDto,
-  ): Promise<SynologySuccessResponseDto | SynologyPlaylistResponseDto | SynologyPlaylistResponseDto> {
+  ): Promise<
+    | SynologySuccessResponseDto
+    | SynologyPlaylistResponseDto
+    | SynologyPlaylistIdResponseDto
+    | SynologyPlaylistWithItemsResponseDto
+  > {
     // Route #1:  create a playlist
     if (variousBodies.method === SynologyMethodEnum.CREATE) {
       const body = plainToInstance(SynologyPlaylistCreateNormalBodyDto, variousBodies);
