@@ -33,6 +33,12 @@ async function endSession(params: RequestParams) {
   });
 }
 
+async function listIndexerLogs(params: RequestParams) {
+  return api.GET(`/api/user/list-indexer-logs`, {
+    params,
+  });
+}
+
 async function listRootPaths(params: RequestParams) {
   return api.GET(`/api/user/list-root-paths`, {
     params,
@@ -58,6 +64,7 @@ export type UserApi = {
   createRootPath: (rootPath: string) => ReturnType<typeof createRootPath>;
   deleteRootPath: (rootPathId: number) => ReturnType<typeof deleteRootPath>;
   endSession: () => ReturnType<typeof endSession>;
+  listIndexerLogs: () => ReturnType<typeof listIndexerLogs>;
   listRootPaths: () => ReturnType<typeof listRootPaths>;
   regenerateSessionKey: () => ReturnType<typeof regenerateSessionKey>;
   resetPassword: (newPassword: string) => ReturnType<typeof resetPassword>;
@@ -89,6 +96,9 @@ export async function createUserApi(username?: string, password?: string): Promi
     },
     async endSession() {
       return endSession(params);
+    },
+    async listIndexerLogs() {
+      return listIndexerLogs(params);
     },
     async listRootPaths() {
       return listRootPaths(params);

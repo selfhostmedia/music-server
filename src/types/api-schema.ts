@@ -380,6 +380,26 @@ export type paths = {
     patch?: never;
     trace?: never;
   };
+  '/api/user/list-indexer-logs': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List indexer logs
+     * @description Retrieves a list of indexer logs based on the provided query parameters which may filter by root path or search term.  The logs are only held in memory and will disappear when the server restarts or to stay within the log size specified in the `system_configurations` table.
+     */
+    get: operations['UserListIndexerLogsController_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/user/list-root-paths': {
     parameters: {
       query?: never;
@@ -433,7 +453,7 @@ export type paths = {
      * Reset password
      * @description Resets the user's password to a new value.
      */
-    post: operations['UserResetPasswordController_post'];
+    post: operations['UserUpdatePasswordController_post'];
     delete?: never;
     options?: never;
     head?: never;
@@ -4454,6 +4474,57 @@ export type components = {
        */
       success: boolean;
     };
+    /**
+     * @description The error message(s) that occurred during the validation of the request data or additional requirements
+     *     applied during the execution of the request
+     * @enum {string}
+     */
+    UserListIndexerLogsBadRequestErrorMessageEnum: UserListIndexerLogsBadRequestErrorMessageEnum;
+    UserListIndexerLogsBadRequestResponseDto: {
+      /** @description General description of the error class */
+      error: string;
+      /**
+       * @description The error message(s) that occurred during the validation of the request data or additional requirements
+       *     applied during the execution of the request
+       * @default invalid-account-id-error
+       */
+      message: components['schemas']['UserListIndexerLogsBadRequestErrorMessageEnum'][];
+      /**
+       * @description The success being "false" indicates that the request failed to complete.
+       * @default false
+       */
+      success: boolean;
+    };
+    /**
+     * @description The error message(s) that occurred during the validation of the request data or additional requirements
+     *     applied during the execution of the request
+     * @enum {string}
+     */
+    UserListIndexerLogsNotFoundErrorMessageEnum: UserListIndexerLogsNotFoundErrorMessageEnum;
+    UserListIndexerLogsNotFoundResponseDto: {
+      /** @description General description of the error class */
+      error: string;
+      /**
+       * @description The error message(s) that occurred during the validation of the request data or additional requirements
+       *     applied during the execution of the request
+       * @default invalid-account-id-error
+       */
+      message: components['schemas']['UserListIndexerLogsNotFoundErrorMessageEnum'][];
+      /**
+       * @description The success being "false" indicates that the request failed to complete.
+       * @default false
+       */
+      success: boolean;
+    };
+    UserListIndexerLogsResponseDto: {
+      logs: components['schemas']['UserLogEntryDto'][];
+      /**
+       * Format: constant
+       * @description The success being "true" indicates that the request completed.
+       * @default true
+       */
+      success: boolean;
+    };
     UserListRootPathsResponseDto: {
       /** @description The list of root paths with associated account owner information */
       rootPaths: components['schemas']['UserRootPathDto'][];
@@ -4463,6 +4534,15 @@ export type components = {
        * @default true
        */
       success: boolean;
+    };
+    UserLogEntryDto: {
+      accountId: number;
+      /** Format: date-time */
+      date: string;
+      message: string;
+      rootPath: string;
+      rootPathId: number;
+      username: string;
     };
     UserRegenerateSessionKeyResponseDto: {
       /**
@@ -4477,8 +4557,8 @@ export type components = {
      *     applied during the execution of the request
      * @enum {string}
      */
-    UserResetPasswordBadRequestErrorMessageEnum: UserResetPasswordBadRequestErrorMessageEnum;
-    UserResetPasswordBadRequestResponseDto: {
+    UserUpdatePasswordBadRequestErrorMessageEnum: UserUpdatePasswordBadRequestErrorMessageEnum;
+    UserUpdatePasswordBadRequestResponseDto: {
       /** @description General description of the error class */
       error: string;
       /**
@@ -4486,17 +4566,17 @@ export type components = {
        *     applied during the execution of the request
        * @default invalid-password-error
        */
-      message: components['schemas']['UserResetPasswordBadRequestErrorMessageEnum'][];
+      message: components['schemas']['UserUpdatePasswordBadRequestErrorMessageEnum'][];
       /**
        * @description The success being "false" indicates that the request failed to complete.
        * @default false
        */
       success: boolean;
     };
-    UserResetPasswordBodyDto: {
+    UserUpdatePasswordBodyDto: {
       newPassword: string;
     };
-    UserResetPasswordResponseDto: {
+    UserUpdatePasswordResponseDto: {
       /**
        * Format: constant
        * @description The success being "true" indicates that the request completed.
@@ -5225,6 +5305,47 @@ export interface operations {
       };
     };
   };
+  UserListIndexerLogsController_get: {
+    parameters: {
+      query?: {
+        rootPathId?: number;
+        search?: string;
+      };
+      header: {
+        /** @description Bearer token for authentication */
+        Authorization: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['UserListIndexerLogsResponseDto'];
+        };
+      };
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['UserListIndexerLogsBadRequestResponseDto'];
+        };
+      };
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['UserListIndexerLogsNotFoundResponseDto'];
+        };
+      };
+    };
+  };
   UserListRootPathsController_get: {
     parameters: {
       query?: never;
@@ -5278,7 +5399,7 @@ export interface operations {
       };
     };
   };
-  UserResetPasswordController_post: {
+  UserUpdatePasswordController_post: {
     parameters: {
       query?: never;
       header: {
@@ -5290,7 +5411,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['UserResetPasswordBodyDto'];
+        'application/json': components['schemas']['UserUpdatePasswordBodyDto'];
       };
     };
     responses: {
@@ -5300,7 +5421,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['UserResetPasswordResponseDto'];
+          'application/json': components['schemas']['UserUpdatePasswordResponseDto'];
         };
       };
       201: {
@@ -5308,7 +5429,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['UserResetPasswordResponseDto'];
+          'application/json': components['schemas']['UserUpdatePasswordResponseDto'];
         };
       };
       /** @description Invalid request data or additional requirements not met */
@@ -5317,7 +5438,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['UserResetPasswordBadRequestResponseDto'];
+          'application/json': components['schemas']['UserUpdatePasswordBadRequestResponseDto'];
         };
       };
     };
@@ -6094,7 +6215,16 @@ export enum UserCreateRootPathBadRequestErrorMessageEnum {
 export enum UserDeleteRootPathNotFoundErrorMessageEnum {
   root_path_not_found_error = 'root-path-not-found-error',
 }
-export enum UserResetPasswordBadRequestErrorMessageEnum {
+export enum UserListIndexerLogsBadRequestErrorMessageEnum {
+  invalid_account_id_error = 'invalid-account-id-error',
+  invalid_root_path_id_error = 'invalid-root-path-id-error',
+  invalid_search_length_error = 'invalid-search-length-error',
+}
+export enum UserListIndexerLogsNotFoundErrorMessageEnum {
+  invalid_account_id_error = 'invalid-account-id-error',
+  invalid_root_path_id_error = 'invalid-root-path-id-error',
+}
+export enum UserUpdatePasswordBadRequestErrorMessageEnum {
   invalid_password_error = 'invalid-password-error',
   invalid_password_length_error = 'invalid-password-length-error',
 }
