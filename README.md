@@ -38,9 +38,9 @@ Use the [music-webui](https://github.com/selfhostmedia/music-webui) project to m
 
 ## Default account
 
-The default administrator account is `admin` with password `admin`. You can change the default account by setting the `DEFAULT_ADMIN_USERNAME` and `DEFAULT_ADMIN_PASSWORD` environment variables in your environment settings. 
+The default administrator account is `admin` with password `admin`. You can change the default account by setting the `DEFAULT_ADMIN_USERNAME` and `DEFAULT_ADMIN_PASSWORD` environment variables in your environment settings.
 
-The default user account is `user` with password `user`. You can change the default account by setting the `DEFAULT_USER_USERNAME` and `DEFAULT_USER_PASSWORD` environment variables in your environment settings.  Disable this account with the `DISABLE_DEFAULT_USER` environment variable if you want to use your administrator account or manage users within it.
+The default user account is `user` with password `user`. You can change the default account by setting the `DEFAULT_USER_USERNAME` and `DEFAULT_USER_PASSWORD` environment variables in your environment settings. Disable this account with the `DISABLE_DEFAULT_USER` environment variable if you want to use your administrator account or manage users within it.
 
 The default library path is set with `DEFAULT_ROOT_PATH` environment variable which allows a comma-delimited string of multiple paths to be specified. You can make the music folder read-only to ensure your collection cannot be modified.
 
