@@ -59,7 +59,7 @@ export class AdminUpdateUserRolesController {
     @Query() query: AdminUpdateUserRolesQueryDto,
     @Body() body: AdminUpdateUserRolesBodyDto,
   ): Promise<AdminUpdateUserRolesResponseDto> {
-    await this.updateRolesService.updateUserRoles(user.id, query.accountId, body.roles);
+    await this.updateRolesService.updateUserRoles(user.id, query.id, body.roles);
     return {
       success: true,
     };
