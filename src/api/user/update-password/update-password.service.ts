@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 import bcrypt from 'bcryptjs';
 
 @Injectable()
-export class UserResetPasswordService {
+export class UserUpdatePasswordService {
   constructor(
     @InjectModel(AccountEntity)
     private readonly accountEntity: typeof AccountEntity,

@@ -4,23 +4,23 @@ import { ApiBadRequestResponse, ApiBearerAuth, ApiHeader, ApiOkResponse, ApiOper
 import { Body, Controller, Post, Scope } from '@nestjs/common';
 import { JWT_TOKEN, USER_APIS } from 'src/constants/swagger';
 import { User } from 'src/api/user.decorator';
-import {
-  UserResetPasswordBadRequestResponseDto,
-  UserResetPasswordBodyDto,
-  UserResetPasswordResponseDto,
-} from './reset-password.dto';
-import { UserResetPasswordService } from './reset-password.service';
 import { UserRoleEnum } from 'src/constants/enums';
+import {
+  UserUpdatePasswordBadRequestResponseDto,
+  UserUpdatePasswordBodyDto,
+  UserUpdatePasswordResponseDto,
+} from './update-password.dto';
+import { UserUpdatePasswordService } from './update-password.service';
 
 @Controller({
   path: '/api/user',
   scope: Scope.REQUEST,
 })
 @ApiTags(USER_APIS)
-export class UserResetPasswordController {
-  constructor(private readonly resetPasswordService: UserResetPasswordService) {}
+export class UserUpdatePasswordController {
+  constructor(private readonly resetPasswordService: UserUpdatePasswordService) {}
 
-  @Post('reset-password')
+  @Post('update-password')
   @ApiOperation({
     summary: 'Reset password',
     description: `Resets the user's password to a new value.`,
@@ -33,17 +33,17 @@ export class UserResetPasswordController {
     required: true,
   })
   @ApiOkResponse({
-    type: UserResetPasswordResponseDto,
+    type: UserUpdatePasswordResponseDto,
     description: 'Password reset successfully',
   })
   @ApiBadRequestResponse({
-    type: UserResetPasswordBadRequestResponseDto,
+    type: UserUpdatePasswordBadRequestResponseDto,
     description: 'Invalid request data or additional requirements not met',
   })
   async post(
     @User() user: AccountEntity,
-    @Body() body: UserResetPasswordBodyDto,
-  ): Promise<UserResetPasswordResponseDto> {
+    @Body() body: UserUpdatePasswordBodyDto,
+  ): Promise<UserUpdatePasswordResponseDto> {
     await this.resetPasswordService.resetUserPassword(user.id, body.newPassword);
     return {
       success: true,

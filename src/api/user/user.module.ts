@@ -6,7 +6,7 @@ import { UserDeleteRootPathModule } from './delete-root-path/delete-root-path.mo
 import { UserEndSessionModule } from './end-session/end-session.module';
 import { UserListRootPathsModule } from './list-root-paths/list-root-paths.module';
 import { UserRegenerateSessionKeyModule } from './regenerate-session-key/regenerate-session-key.module';
-import { UserResetPasswordModule } from './reset-password/reset-password.module';
+import { UserUpdatePasswordModule } from './update-password/update-password.module';
 
 @Module({
   imports: [
@@ -14,7 +14,7 @@ import { UserResetPasswordModule } from './reset-password/reset-password.module'
     UserDeleteRootPathModule,
     UserEndSessionModule,
     UserListRootPathsModule,
-    UserResetPasswordModule,
+    UserUpdatePasswordModule,
     UserRegenerateSessionKeyModule,
   ],
   providers: [
