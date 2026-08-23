@@ -74,10 +74,12 @@ export class InternalServerErrorResponseDto extends FailedResponseDto {
    * message defined.
    */
   @ApiProperty({
-    enum: ErrorCodes,
+    enum: [ErrorCodes.INTERNAL_SERVER_ERROR],
+    enumName: 'InternalServerErrorEnum',
     default: ErrorCodes.INTERNAL_SERVER_ERROR,
+    isArray: true,
   })
-  declare readonly message: string[];
+  declare readonly message: ErrorCodes[];
 }
 
 /**
@@ -88,10 +90,12 @@ export class BadRequestResponseDto extends FailedResponseDto {
    * A bad request occurred due to validation or other issues with the submitted data.
    */
   @ApiProperty({
-    enum: ErrorCodes,
+    enum: [ErrorCodes.BAD_REQUEST_ERROR],
     default: ErrorCodes.BAD_REQUEST_ERROR,
+    enumName: 'BadRequestErrorEnum',
+    isArray: true,
   })
-  declare readonly message: string[];
+  declare readonly message: ErrorCodes[];
 }
 
 /**
@@ -102,8 +106,10 @@ export class NotFoundResponseDto extends FailedResponseDto {
    * A not found error occurred due to the requested resource not being found.
    */
   @ApiProperty({
-    enum: ErrorCodes,
+    enum: [ErrorCodes.NOT_FOUND_ERROR],
     default: ErrorCodes.NOT_FOUND_ERROR,
+    enumName: 'NotFoundErrorEnum',
+    isArray: true,
   })
-  declare readonly message: string[];
+  declare readonly message: ErrorCodes[];
 }
