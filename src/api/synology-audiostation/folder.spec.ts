@@ -1,58 +1,72 @@
+import { SynologyApi, createSynologyApi } from '../../test-helper.synology';
 import { beforeAll, describe, expect, it } from '@jest/globals';
-import { createSignInCookie, listFolders } from '../../test-helper.synology';
+import { components } from 'src/types/api-schema';
 
 describe('/webapi/AudioStation/folder.cgi', () => {
+  let synologyApi: SynologyApi;
+
+  async function listFolders(id?: string, offset?: number, limit?: number) {
+    const { data, error } = await synologyApi.listFolders(id, offset, limit);
+    const typedData = data as components['schemas']['SynologyFolderResponseDto'];
+    return {
+      data: typedData,
+      error,
+      folders: typedData?.data.items || [],
+      total: typedData?.data.total || 0,
+    };
+  }
+
   beforeAll(async () => {
-    await createSignInCookie();
+    synologyApi = await createSynologyApi();
   });
 
   it('should list root folders', async () => {
-    const data = await listFolders();
-    expect(data?.data.items.length).toBe(2);
-    expect(data?.data.items[0]?.title).toBe('root-1');
-    expect(data?.data.items[1]?.title).toBe('root-2');
+    const { folders } = await listFolders();
+    expect(folders.length).toBe(2);
+    expect(folders[0]?.title).toBe('root-1');
+    expect(folders[1]?.title).toBe('root-2');
   });
 
   it('should list folders under a root folder', async () => {
-    const data = await listFolders('dir_1');
-    expect(data?.data.items.length).toBe(2);
-    expect(data?.data.items[0]?.title).toBe('Artist 1');
-    expect(data?.data.items[1]?.title).toBe('Artist 2');
+    const { folders } = await listFolders('dir_1');
+    expect(folders.length).toBe(2);
+    expect(folders[0]?.title).toBe('Artist 1');
+    expect(folders[1]?.title).toBe('Artist 2');
   });
 
   it('should list folders under a nested folder', async () => {
-    const data = await listFolders('dir_2');
-    expect(data?.data.items.length).toBe(2);
-    expect(data?.data.items[0]?.title).toBe('Album 1');
-    expect(data?.data.items[1]?.title).toBe('Album 2');
+    const { folders } = await listFolders('dir_2');
+    expect(folders.length).toBe(2);
+    expect(folders[0]?.title).toBe('Album 1');
+    expect(folders[1]?.title).toBe('Album 2');
   });
 
   it('should list folders under a deeper-nested folder', async () => {
-    const data = await listFolders('dir_5');
-    expect(data?.data.items.length).toBe(2);
-    expect(data?.data.items[0]?.title).toBe('CD 1');
-    expect(data?.data.items[1]?.title).toBe('CD 2');
+    const { folders } = await listFolders('dir_5');
+    expect(folders.length).toBe(2);
+    expect(folders[0]?.title).toBe('CD 1');
+    expect(folders[1]?.title).toBe('CD 2');
   });
 
   it('should list files under a deeper-nested folder', async () => {
-    const data = await listFolders('dir_7');
-    expect(data?.data.items.length).toBe(4);
-    expect(data?.data.items[0]?.title).toBe('01 First Track.flac');
-    expect(data?.data.items[1]?.title).toBe('02 Second Track.flac');
-    expect(data?.data.items[2]?.title).toBe('03 Third Track.flac');
-    expect(data?.data.items[3]?.title).toBe('04 Fourth Track.flac');
+    const { folders } = await listFolders('dir_7');
+    expect(folders.length).toBe(4);
+    expect(folders[0]?.title).toBe('01 First Track.flac');
+    expect(folders[1]?.title).toBe('02 Second Track.flac');
+    expect(folders[2]?.title).toBe('03 Third Track.flac');
+    expect(folders[3]?.title).toBe('04 Fourth Track.flac');
   });
 
   it('should paginate folders', async () => {
     // page 1
-    const data = await listFolders('dir_1', 0, 1);
-    expect(data?.data.total).toBe(2);
-    expect(data?.data.items.length).toBe(1);
-    expect(data?.data.items[0]?.title).toBe('Artist 1');
+    const { folders, total } = await listFolders('dir_1', 0, 1);
+    expect(total).toBe(2);
+    expect(folders.length).toBe(1);
+    expect(folders[0]?.title).toBe('Artist 1');
     // page 2
-    const data2 = await listFolders('dir_1', 1, 1);
-    expect(data2?.data.total).toBe(2);
-    expect(data2?.data.items.length).toBe(1);
-    expect(data2?.data.items[0]?.title).toBe('Artist 2');
+    const { folders: folders2, total: total2 } = await listFolders('dir_1', 1, 1);
+    expect(total2).toBe(2);
+    expect(folders2.length).toBe(1);
+    expect(folders2[0]?.title).toBe('Artist 2');
   });
 });

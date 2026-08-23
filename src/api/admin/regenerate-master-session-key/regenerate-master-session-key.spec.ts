@@ -1,18 +1,12 @@
 import { ErrorCodes } from '../../../constants/error-codes';
-import {
-  api,
-  clearSessionToken,
-  deleteAccount,
-  listAccounts,
-  regenerateMasterSessionKey,
-  signInDefaultAccount,
-} from '../../../test-helper';
+import { USER_PASSWORD, USER_USERNAME, api, createAdminApi } from '../../../test-helper';
 import { beforeAll, describe, expect, it } from '@jest/globals';
 
 describe('/api/admin/regenerate-master-session-key', () => {
+  let adminApi;
+
   beforeAll(async () => {
-    await signInDefaultAccount(true);
-    await signInDefaultAccount(false);
+    adminApi = await createAdminApi();
   });
 
   describe('authorized access', () => {
@@ -29,7 +23,8 @@ describe('/api/admin/regenerate-master-session-key', () => {
     });
 
     it('should reject non-admin access', async () => {
-      const { error } = await deleteAccount(2, false);
+      const nonAdminApi = await createAdminApi(USER_USERNAME, USER_PASSWORD);
+      const { error } = await nonAdminApi.regenerateMasterSessionKey();
       const typedError = error as unknown as Record<string, string | string[]>;
       expect(typedError?.message?.[0]).toBe(ErrorCodes.FORBIDDEN_ERROR);
     });
@@ -38,14 +33,12 @@ describe('/api/admin/regenerate-master-session-key', () => {
   describe('success', () => {
     // note: enabling this test will break the other tests that require a valid session key, so it is skipped for now
     it.skip('should generate new master session key', async () => {
-      const { error, data } = await regenerateMasterSessionKey();
+      const { error, data } = await adminApi.regenerateMasterSessionKey();
       expect(error).toBeUndefined();
       expect(data?.success).toBe(true);
-      const { error: error2 } = await listAccounts();
+      const { error: error2 } = await adminApi.listAccounts();
       const typedError2 = error2 as unknown as Record<string, string | string[]>;
       expect(typedError2?.message?.[0]).toBe(ErrorCodes.AUTHORIZATION_ERROR);
-      await clearSessionToken(true);
-      await clearSessionToken(false);
     });
   });
 });

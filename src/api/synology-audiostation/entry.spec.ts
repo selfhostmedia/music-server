@@ -1,25 +1,44 @@
-import { SynologyApiEnum, SynologyMethodEnum, SynologyPinTypeEnum } from '../../types/api-schema';
 import {
-  SynologyEntryCertificateResponseDto,
-  SynologyEntryListPinsResponseDto,
-  SynologyEntrySignInResponseDto,
-} from './dtos';
-import {
-  addContainerToPlaylist,
-  addFavorite,
-  api,
-  clearSessionToken,
-  createPlaylist,
-  createSignInCookie,
-  encryptCredentials,
-  getAuthenticationHeaders,
-  getPlaylistItems,
-} from '../../test-helper.synology';
+  SmartPlaylistConjugalEnum,
+  SynologyApiEnum,
+  SynologyMethodEnum,
+  SynologyPinTypeEnum,
+  components,
+} from '../../types/api-schema';
+import { SynologyApi, createSynologyApi, encryptSynologyCredentials } from '../../test-helper.synology';
+import { api } from '../../test-helper';
 import { beforeAll, describe, expect, it } from '@jest/globals';
 
 describe('/webapi/AudioStation/entry.cgi', () => {
+  let synologyApi: SynologyApi;
+
+  async function createPlaylist(
+    name: string,
+    type: 'normal' | 'smart',
+    conj_rule?: SmartPlaylistConjugalEnum,
+    rules_json?: string,
+  ) {
+    const { data, error } = await synologyApi.createPlaylist(name, type, conj_rule, rules_json);
+    const typedData = data as components['schemas']['SynologyPlaylistIdResponseDto'];
+    return { data: typedData, error, playlistId: typedData!.data.id };
+  }
+
+  async function getPlaylistItems(playlistId: string) {
+    const { data, error } = await synologyApi.getPlaylistItems(playlistId);
+    const typedData = data as components['schemas']['SynologyPlaylistWithItemsResponseDto'];
+    return { data: typedData, error, playlist: typedData!.data.playlists![0]! };
+  }
+
+  async function addFavorite(
+    items: Array<{ criteria: Record<string, string>; name: string; type: SynologyPinTypeEnum }>,
+  ) {
+    const { error, data } = await synologyApi.addFavorite(items);
+    const typedData = data as components['schemas']['SynologyEntryListPinsResponseDto'];
+    return { error, data: typedData, items: typedData?.data.items || [] };
+  }
+
   beforeAll(async () => {
-    await createSignInCookie();
+    synologyApi = await createSynologyApi();
   });
 
   describe('authentication', () => {
@@ -32,7 +51,7 @@ describe('/webapi/AudioStation/entry.cgi', () => {
         },
       });
       expect(error).toBeUndefined();
-      const typedData = data as SynologyEntryCertificateResponseDto;
+      const typedData = data as components['schemas']['SynologyEntryCertificateResponseDto'];
       expect(typedData?.data?.public_key.length).toBeGreaterThan(0);
       expect(typedData?.data?.cipherkey.length).toBeGreaterThan(0);
       expect(typedData?.data?.ciphertoken.length).toBeGreaterThan(0);
@@ -46,11 +65,11 @@ describe('/webapi/AudioStation/entry.cgi', () => {
           version: 1,
         },
       });
-      const encryptionKey = encryptionKeyResponse?.data as SynologyEntryCertificateResponseDto;
+      const encryptionKey = encryptionKeyResponse?.data as components['schemas']['SynologyEntryCertificateResponseDto'];
       if (!encryptionKey?.data?.public_key?.length) {
         throw new Error(`Failed to get encryption key`);
       }
-      const payload = encryptCredentials(
+      const payload = encryptSynologyCredentials(
         process.env.DEFAULT_ADMIN_USERNAME || 'admin',
         process.env.DEFAULT_ADMIN_PASSWORD || 'admin',
         encryptionKey.data.public_key,
@@ -62,7 +81,7 @@ describe('/webapi/AudioStation/entry.cgi', () => {
         },
       });
       expect(error).toBeUndefined();
-      const typedData = data as SynologyEntrySignInResponseDto;
+      const typedData = data as components['schemas']['SynologyEntrySignInResponseDto'];
       expect(typedData?.data?.sid.length).toBeGreaterThan(0);
       expect(typedData?.data?.did.length).toBeGreaterThan(0);
     });
@@ -75,11 +94,11 @@ describe('/webapi/AudioStation/entry.cgi', () => {
           version: 1,
         },
       });
-      const encryptionKey = encryptionKeyResponse?.data as SynologyEntryCertificateResponseDto;
+      const encryptionKey = encryptionKeyResponse?.data as components['schemas']['SynologyEntryCertificateResponseDto'];
       if (!encryptionKey?.data?.public_key?.length) {
         throw new Error(`Failed to get encryption key`);
       }
-      const payload = encryptCredentials(
+      const payload = encryptSynologyCredentials(
         'fred',
         process.env.DEFAULT_ADMIN_PASSWORD || 'admin',
         encryptionKey.data.public_key,
@@ -102,11 +121,11 @@ describe('/webapi/AudioStation/entry.cgi', () => {
           version: 1,
         },
       });
-      const encryptionKey = encryptionKeyResponse?.data as SynologyEntryCertificateResponseDto;
+      const encryptionKey = encryptionKeyResponse?.data as components['schemas']['SynologyEntryCertificateResponseDto'];
       if (!encryptionKey?.data?.public_key?.length) {
         throw new Error(`Failed to get encryption key`);
       }
-      const payload = encryptCredentials(
+      const payload = encryptSynologyCredentials(
         process.env.DEFAULT_ADMIN_USERNAME || 'admin',
         'pony123',
         encryptionKey.data.public_key,
@@ -122,7 +141,7 @@ describe('/webapi/AudioStation/entry.cgi', () => {
     });
 
     it('should reject invalid public key', async () => {
-      const payload = encryptCredentials(
+      const payload = encryptSynologyCredentials(
         process.env.DEFAULT_ADMIN_USERNAME || 'admin',
         process.env.DEFAULT_ADMIN_PASSWORD || 'admin',
         [
@@ -151,58 +170,41 @@ describe('/webapi/AudioStation/entry.cgi', () => {
     });
 
     it('should clearSessionToken', async () => {
-      const { data } = await api.POST('/webapi/entry.cgi', {
-        body: {
-          api: SynologyApiEnum.SYNO_API_Auth,
-          method: SynologyMethodEnum.clearSessionToken,
-          version: 1,
-        },
-        params: {
-          header: {
-            ...getAuthenticationHeaders(),
-          },
-        },
-      });
+      const newApi = await createSynologyApi();
+      const { data } = await newApi.clearSessionToken();
       expect(data?.success).toBe(true);
-      await clearSessionToken();
     });
   });
 
   describe('favorites', () => {
-    beforeAll(async () => {
-      await createSignInCookie();
-    });
-
     it('should list favorite items', async () => {});
 
     it('should favorite "recently added" playlist', async () => {
-      const data = await addFavorite([
+      const { items } = await addFavorite([
         {
           criteria: {},
           name: 'Recently Added',
           type: SynologyPinTypeEnum.recently_added,
         },
       ]);
-      expect(data?.success).toBe(true);
-      expect(data?.data.items?.length).toBeGreaterThan(0);
-      expect(data?.data.items?.some((item) => item.type.toString() === SynologyPinTypeEnum.recently_added)).toBe(true);
+      expect(items.length).toBeGreaterThan(0);
+      expect(items.some((item) => item.type.toString() === SynologyPinTypeEnum.recently_added)).toBe(true);
     });
 
     it('should favorite "random 100" playlist', async () => {
-      const data = await addFavorite([
+      const { items } = await addFavorite([
         {
           criteria: {},
           name: 'Random100',
           type: SynologyPinTypeEnum.random_100,
         },
       ]);
-      expect(data?.success).toBe(true);
-      expect(data?.data.items?.length).toBeGreaterThan(0);
-      expect(data?.data.items?.some((item) => item.type.toString() === SynologyPinTypeEnum.random_100)).toBe(true);
+      expect(items.length).toBeGreaterThan(0);
+      expect(items.some((item) => item.type.toString() === SynologyPinTypeEnum.random_100)).toBe(true);
     });
 
     it('should favorite root folder', async () => {
-      const data = await addFavorite([
+      const { items } = await addFavorite([
         {
           criteria: {
             folder: '1',
@@ -211,15 +213,14 @@ describe('/webapi/AudioStation/entry.cgi', () => {
           type: SynologyPinTypeEnum.folder,
         },
       ]);
-      expect(data?.success).toBe(true);
-      expect(data?.data.items?.length).toBeGreaterThan(0);
-      expect(
-        data?.data.items?.some((item) => item.type.toString() === SynologyPinTypeEnum.folder && item.name === 'root-1'),
-      ).toBe(true);
+      expect(items.length).toBeGreaterThan(0);
+      expect(items.some((item) => item.type.toString() === SynologyPinTypeEnum.folder && item.name === 'root-1')).toBe(
+        true,
+      );
     });
 
     it('should favorite nested folder', async () => {
-      const data = await addFavorite([
+      const { items } = await addFavorite([
         {
           criteria: {
             folder: '5',
@@ -228,17 +229,14 @@ describe('/webapi/AudioStation/entry.cgi', () => {
           type: SynologyPinTypeEnum.folder,
         },
       ]);
-      expect(data?.success).toBe(true);
-      expect(data?.data.items?.length).toBeGreaterThan(0);
-      expect(
-        data?.data.items?.some(
-          (item) => item.type.toString() === SynologyPinTypeEnum.folder && item.name === 'Album 2',
-        ),
-      ).toBe(true);
+      expect(items.length).toBeGreaterThan(0);
+      expect(items.some((item) => item.type.toString() === SynologyPinTypeEnum.folder && item.name === 'Album 2')).toBe(
+        true,
+      );
     });
 
     it('should favorite artist', async () => {
-      const data = await addFavorite([
+      const { items } = await addFavorite([
         {
           criteria: {
             artist: 'Artist 1',
@@ -247,17 +245,14 @@ describe('/webapi/AudioStation/entry.cgi', () => {
           type: SynologyPinTypeEnum.artist,
         },
       ]);
-      expect(data?.success).toBe(true);
-      expect(data?.data.items?.length).toBeGreaterThan(0);
+      expect(items.length).toBeGreaterThan(0);
       expect(
-        data?.data.items?.some(
-          (item) => item.type.toString() === SynologyPinTypeEnum.artist && item.name === 'Artist 1',
-        ),
+        items.some((item) => item.type.toString() === SynologyPinTypeEnum.artist && item.name === 'Artist 1'),
       ).toBe(true);
     });
 
     it('should favorite composer', async () => {
-      const data = await addFavorite([
+      const { items } = await addFavorite([
         {
           criteria: {
             composer: 'Composer 1',
@@ -266,17 +261,14 @@ describe('/webapi/AudioStation/entry.cgi', () => {
           type: SynologyPinTypeEnum.composer,
         },
       ]);
-      expect(data?.success).toBe(true);
-      expect(data?.data.items?.length).toBeGreaterThan(0);
+      expect(items.length).toBeGreaterThan(0);
       expect(
-        data?.data.items?.some(
-          (item) => item.type.toString() === SynologyPinTypeEnum.composer && item.name === 'Composer 1',
-        ),
+        items.some((item) => item.type.toString() === SynologyPinTypeEnum.composer && item.name === 'Composer 1'),
       ).toBe(true);
     });
 
     it('should favorite genre', async () => {
-      const data = await addFavorite([
+      const { items } = await addFavorite([
         {
           criteria: {
             genre: 'Acid',
@@ -285,15 +277,14 @@ describe('/webapi/AudioStation/entry.cgi', () => {
           type: SynologyPinTypeEnum.genre,
         },
       ]);
-      expect(data?.success).toBe(true);
-      expect(data?.data.items?.length).toBeGreaterThan(0);
-      expect(
-        data?.data.items?.some((item) => item.type.toString() === SynologyPinTypeEnum.genre && item.name === 'Acid'),
-      ).toBe(true);
+      expect(items.length).toBeGreaterThan(0);
+      expect(items.some((item) => item.type.toString() === SynologyPinTypeEnum.genre && item.name === 'Acid')).toBe(
+        true,
+      );
     });
 
     it('should favorite album', async () => {
-      const data = await addFavorite([
+      const { items } = await addFavorite([
         {
           criteria: {
             album: 'Album 1',
@@ -303,16 +294,15 @@ describe('/webapi/AudioStation/entry.cgi', () => {
           type: SynologyPinTypeEnum.album,
         },
       ]);
-      expect(data?.success).toBe(true);
-      expect(data?.data.items?.length).toBeGreaterThan(0);
-      expect(
-        data?.data.items?.some((item) => item.type.toString() === SynologyPinTypeEnum.album && item.name === 'Album 1'),
-      ).toBe(true);
+      expect(items.length).toBeGreaterThan(0);
+      expect(items.some((item) => item.type.toString() === SynologyPinTypeEnum.album && item.name === 'Album 1')).toBe(
+        true,
+      );
     });
 
     it('should favorite playlist', async () => {
-      const playlistId = await createPlaylist('Test Playlist', 'normal');
-      const data = await addFavorite([
+      const { playlistId } = await createPlaylist('Test Playlist', 'normal');
+      const { items } = await addFavorite([
         {
           criteria: {
             playlist: playlistId,
@@ -321,17 +311,15 @@ describe('/webapi/AudioStation/entry.cgi', () => {
           type: SynologyPinTypeEnum.playlist,
         },
       ]);
-      expect(data?.success).toBe(true);
-      expect(data?.data.items?.length).toBeGreaterThan(0);
+      expect(items).toBeDefined();
+      expect(items.length).toBeGreaterThan(0);
       expect(
-        data?.data.items?.some(
-          (item) => item.type.toString() === SynologyPinTypeEnum.playlist && item.name === 'Test Playlist',
-        ),
+        items.some((item) => item.type.toString() === SynologyPinTypeEnum.playlist && item.name === 'Test Playlist'),
       ).toBe(true);
     });
 
     it('should unfavorite items', async () => {
-      const data = await addFavorite([
+      const { items } = await addFavorite([
         {
           criteria: {
             album: 'Album 1',
@@ -340,46 +328,27 @@ describe('/webapi/AudioStation/entry.cgi', () => {
           type: SynologyPinTypeEnum.album,
         },
       ]);
-      const favorite = data?.data.items?.find(
+      const favorite = items.find(
         (item) => item.type.toString() === SynologyPinTypeEnum.album && item.name === 'Album 1',
       );
       expect(favorite).toBeDefined();
-      const { data: unpinData, error: unpinError } = await api.POST('/webapi/entry.cgi', {
-        body: {
-          api: SynologyApiEnum.SYNO_AudioStation_Pin,
-          method: SynologyMethodEnum.unpin,
-          version: 1,
-          items: JSON.stringify([Number.parseInt(favorite?.id || '0', 10)]),
-        },
-        params: {
-          header: {
-            ...getAuthenticationHeaders(),
-          },
-        },
-      });
-      const typedUnpinData = unpinData as SynologyEntryListPinsResponseDto;
-      expect(unpinError).toBeUndefined();
-      expect(typedUnpinData?.success).toBe(true);
-      expect(typedUnpinData?.data.items?.some((item) => item.id === favorite?.id)).toBe(false);
+      const { data: unpinData } = await synologyApi.deleteFavorite([Number.parseInt(favorite?.id || '0', 10)]);
+      expect(unpinData?.success).toBe(true);
     });
   });
 
   describe('playlists', () => {
-    beforeAll(async () => {
-      await createSignInCookie();
-    });
-
     it('should add album to playlist', async () => {
       const playlistName = `Test Playlist ${new Date().getTime()}`;
-      const playlistId = await createPlaylist(playlistName, 'normal');
-      const data = await addContainerToPlaylist(playlistId, {
+      const { playlistId } = await createPlaylist(playlistName, 'normal');
+      const { data } = await synologyApi.addContainerToPlaylist(playlistId, {
         album: 'Album 1',
         album_artist: 'Artist 1',
       });
       expect(data?.success).toBe(true);
-      const data2 = await getPlaylistItems(playlistId);
+      const { playlist } = await getPlaylistItems(playlistId);
       expect(
-        data2?.additional.songs.some(
+        playlist.additional.songs.some(
           (item) =>
             item.additional.song_tag.album === 'Album 1' && item.additional.song_tag.album_artist === 'Artist 1',
         ),
@@ -388,35 +357,35 @@ describe('/webapi/AudioStation/entry.cgi', () => {
 
     it('should add artist to playlist', async () => {
       const playlistName = `Test Playlist ${new Date().getTime()}`;
-      const playlistId = await createPlaylist(playlistName, 'normal');
-      const data = await addContainerToPlaylist(playlistId, {
+      const { playlistId } = await createPlaylist(playlistName, 'normal');
+      const { data } = await synologyApi.addContainerToPlaylist(playlistId, {
         artist: 'Artist 1',
       });
       expect(data?.success).toBe(true);
-      const data2 = await getPlaylistItems(playlistId);
-      expect(data2?.additional.songs.some((item) => item.additional.song_tag.artist === 'Artist 1')).toBe(true);
+      const { playlist } = await getPlaylistItems(playlistId);
+      expect(playlist.additional.songs.some((item) => item.additional.song_tag.artist === 'Artist 1')).toBe(true);
     });
 
     it('should add composer to playlist', async () => {
       const playlistName = `Test Playlist ${new Date().getTime()}`;
-      const playlistId = await createPlaylist(playlistName, 'normal');
-      const data = await addContainerToPlaylist(playlistId, {
+      const { playlistId } = await createPlaylist(playlistName, 'normal');
+      const { data } = await synologyApi.addContainerToPlaylist(playlistId, {
         composer: 'Composer 4',
       });
       expect(data?.success).toBe(true);
-      const data2 = await getPlaylistItems(playlistId);
-      expect(data2?.additional.songs.some((item) => item.additional.song_tag.composer === 'Composer 4')).toBe(true);
+      const { playlist } = await getPlaylistItems(playlistId);
+      expect(playlist.additional.songs.some((item) => item.additional.song_tag.composer === 'Composer 4')).toBe(true);
     });
 
     it('should add genre to playlist', async () => {
       const playlistName = `Test Playlist ${new Date().getTime()}`;
-      const playlistId = await createPlaylist(playlistName, 'normal');
-      const data = await addContainerToPlaylist(playlistId, {
+      const { playlistId } = await createPlaylist(playlistName, 'normal');
+      const { data } = await synologyApi.addContainerToPlaylist(playlistId, {
         genre: 'Acid',
       });
       expect(data?.success).toBe(true);
-      const data2 = await getPlaylistItems(playlistId);
-      expect(data2?.additional.songs.some((item) => item.additional.song_tag.genre === 'Acid')).toBe(true);
+      const { playlist } = await getPlaylistItems(playlistId);
+      expect(playlist.additional.songs.some((item) => item.additional.song_tag.genre === 'Acid')).toBe(true);
     });
   });
 });

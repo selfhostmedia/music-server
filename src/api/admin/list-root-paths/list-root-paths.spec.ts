@@ -1,11 +1,12 @@
 import { ErrorCodes } from '../../../constants/error-codes';
-import { api, listRootPaths, signInDefaultAccount } from '../../../test-helper';
+import { USER_PASSWORD, USER_USERNAME, api, createAdminApi } from '../../../test-helper';
 import { beforeAll, describe, expect, it } from '@jest/globals';
 
 describe('/api/admin/list-root-paths', () => {
+  let adminApi;
+
   beforeAll(async () => {
-    await signInDefaultAccount(true);
-    await signInDefaultAccount(false);
+    adminApi = await createAdminApi();
   });
 
   describe('authorized access', () => {
@@ -22,7 +23,8 @@ describe('/api/admin/list-root-paths', () => {
     });
 
     it('should reject non-admin access', async () => {
-      const { error } = await listRootPaths(false);
+      const nonAdminApi = await createAdminApi(USER_USERNAME, USER_PASSWORD);
+      const { error } = await nonAdminApi.listRootPaths();
       const typedError = error as unknown as Record<string, string | string[]>;
       expect(typedError?.message?.[0]).toBe(ErrorCodes.FORBIDDEN_ERROR);
     });
@@ -33,7 +35,7 @@ describe('/api/admin/list-root-paths', () => {
       const adminRootPaths = process.env.DEFAULT_ADMIN_ROOT_PATH?.split(',').map((path) => path.trim()) as string[];
       const userRootPaths = process.env.DEFAULT_USER_ROOT_PATH?.split(',').map((path) => path.trim()) as string[];
       const defaultRootPaths = [...(adminRootPaths || []), ...(userRootPaths || [])];
-      const { error, data } = await listRootPaths();
+      const { error, data } = await adminApi.listRootPaths();
       expect(error).toBeUndefined();
       expect(data?.success).toBe(true);
       expect(data?.rootPaths.length).toBeGreaterThanOrEqual(defaultRootPaths.length);
