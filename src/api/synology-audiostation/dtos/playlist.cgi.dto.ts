@@ -627,7 +627,7 @@ export class SynologyPlaylistAdditionalWithItemsDto extends SynologyPlaylistAddi
 
 export class SynologyPlaylistWithItemsDto extends SynologyPlaylistDto {
   @ApiProperty({
-    type: SynologyPlaylistAdditionalDto,
+    type: SynologyPlaylistAdditionalWithItemsDto,
   })
   declare additional: SynologyPlaylistAdditionalWithItemsDto;
 }
