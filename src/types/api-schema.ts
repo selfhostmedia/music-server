@@ -1361,6 +1361,8 @@ export type components = {
        */
       success: boolean;
     };
+    /** @enum {string} */
+    AlbumSortFieldEnum: AlbumSortFieldEnum;
     /**
      * @description A bad request occurred due to validation or other issues with the submitted data.
      * @enum {string}
@@ -1490,6 +1492,8 @@ export type components = {
     ShoutcastItemTypeEnum: ShoutcastItemTypeEnum;
     /** @enum {string} */
     SmartPlaylistConjugalEnum: SmartPlaylistConjugalEnum;
+    /** @enum {string} */
+    SortDirectionEnum: SortDirectionEnum;
     SuccessResponseDto: {
       /**
        * Format: constant
@@ -4622,9 +4626,9 @@ export type components = {
        *
        *     - asc
        *     - desc
-       * @enum {string}
+       * @default asc
        */
-      sortDirection?: UserListAlbumsQueryDtoSortDirection;
+      sortDirection: components['schemas']['SortDirectionEnum'];
       /**
        * @description Optional filter for the field to sort by, which will do an exact match against the field associated
        *     with an album.  The field must be one of the following values:
@@ -4637,9 +4641,9 @@ export type components = {
        *     - year
        *     - date_added
        *     - rating
-       * @enum {string}
+       * @default album
        */
-      sortField?: UserListAlbumsQueryDtoSortField;
+      sortField: components['schemas']['AlbumSortFieldEnum'];
       /**
        * @description Optional filter for the year of the album, which will do an exact match against the year associated
        *     with an album's release date.
@@ -5558,7 +5562,7 @@ export interface operations {
          *     - asc
          *     - desc
          */
-        sortDirection?: PathsApiUserListAlbumsGetParametersQuerySortDirection;
+        sortDirection?: components['schemas']['SortDirectionEnum'];
         /**
          * @description Optional filter for the field to sort by, which will do an exact match against the field associated
          *     with an album.  The field must be one of the following values:
@@ -5572,7 +5576,7 @@ export interface operations {
          *     - date_added
          *     - rating
          */
-        sortField?: PathsApiUserListAlbumsGetParametersQuerySortField;
+        sortField?: components['schemas']['AlbumSortFieldEnum'];
         /**
          * @description Optional filter for the year of the album, which will do an exact match against the year associated
          *     with an album's release date.
@@ -6275,21 +6279,6 @@ export interface operations {
     };
   };
 }
-export enum PathsApiUserListAlbumsGetParametersQuerySortDirection {
-  asc = 'asc',
-  desc = 'desc',
-}
-export enum PathsApiUserListAlbumsGetParametersQuerySortField {
-  album = 'album',
-  album_artist = 'album_artist',
-  artist = 'artist',
-  composer = 'composer',
-  date_added = 'date_added',
-  date_released = 'date_released',
-  genre = 'genre',
-  rating = 'rating',
-  year = 'year',
-}
 export enum AdminCreateAccountBadRequestErrorMessageEnum {
   invalid_role_error = 'invalid-role-error',
   invalid_user_role_error = 'invalid-user-role-error',
@@ -6351,6 +6340,17 @@ export enum AdminUpdateUserRolesBadRequestErrorMessageEnum {
 export enum AdminUpdateUserRolesNotFoundErrorMessageEnum {
   account_not_found_error = 'account-not-found-error',
 }
+export enum AlbumSortFieldEnum {
+  album = 'album',
+  album_artist = 'album_artist',
+  artist = 'artist',
+  composer = 'composer',
+  date_added = 'date_added',
+  date_released = 'date_released',
+  genre = 'genre',
+  rating = 'rating',
+  year = 'year',
+}
 export enum BadRequestErrorEnum {
   bad_request_error = 'bad-request-error',
 }
@@ -6385,6 +6385,10 @@ export enum ShoutcastItemTypeEnum {
 export enum SmartPlaylistConjugalEnum {
   and = 'and',
   or = 'or',
+}
+export enum SortDirectionEnum {
+  asc = 'asc',
+  desc = 'desc',
 }
 export enum SynologyApiEnum {
   SYNO_AudioStation_Album = 'SYNO.AudioStation.Album',
@@ -6483,21 +6487,6 @@ export enum UserListAlbumsBadRequestErrorMessages {
   invalid_sort_field_error = 'invalid-sort-field-error',
   invalid_sort_order_error = 'invalid-sort-order-error',
   invalid_year_error = 'invalid-year-error',
-}
-export enum UserListAlbumsQueryDtoSortDirection {
-  asc = 'asc',
-  desc = 'desc',
-}
-export enum UserListAlbumsQueryDtoSortField {
-  album = 'album',
-  album_artist = 'album_artist',
-  artist = 'artist',
-  composer = 'composer',
-  date_added = 'date_added',
-  date_released = 'date_released',
-  genre = 'genre',
-  rating = 'rating',
-  year = 'year',
 }
 export enum UserListIndexerLogsBadRequestErrorMessageEnum {
   invalid_account_id_error = 'invalid-account-id-error',

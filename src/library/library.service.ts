@@ -9,7 +9,7 @@ import {
   LinkedComposerEntity,
   LinkedGenreEntity,
 } from 'src/database/entities';
-import { AlbumSortFieldEnum, SortOrderEnum } from 'src/types/enums';
+import { AlbumSortFieldEnum, SortDirectionEnum } from 'src/types/enums';
 import { FindOptions, Includeable, Op } from 'sequelize';
 import { InjectModel } from '@nestjs/sequelize';
 import { Injectable } from '@nestjs/common';
@@ -262,7 +262,7 @@ export class LibraryService {
    * @param {number} offset Optional pagination offset
    * @param {number} limit Optional pagination limit
    * @param {AlbumSortFieldEnum} sortBy Optional field to sort the results by
-   * @param {SortOrderEnum} sortOrder Optional sort order specification
+   * @param {SortDirectionEnum} sortOrder Optional sort order specification
    * @returns {Promise<ListResult<LibraryAlbumDto>>} The filtered, sorted and paginated album list and total count.
    */
   async listAlbums(
@@ -271,7 +271,7 @@ export class LibraryService {
     offset: number,
     limit: number,
     sortBy?: AlbumSortFieldEnum,
-    sortOrder?: SortOrderEnum,
+    sortOrder?: SortDirectionEnum,
   ): Promise<ListResult<LibraryAlbumDto>> {
     let sortByColumn: string | undefined;
     switch (sortBy) {
@@ -325,7 +325,7 @@ export class LibraryService {
       where: {
         id: matchingAlbums,
       },
-      order: [[sortByColumn, sortOrder || SortOrderEnum.ASC]],
+      order: [[sortByColumn, sortOrder || SortDirectionEnum.ASC]],
       offset,
       limit,
     });

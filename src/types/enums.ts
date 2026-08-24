@@ -102,7 +102,7 @@ export enum SmartPlaylistFieldEnum {
   YEAR = 'year',
 }
 
-export enum SortOrderEnum {
+export enum SortDirectionEnum {
   ASC = 'asc',
   DESC = 'desc',
 }

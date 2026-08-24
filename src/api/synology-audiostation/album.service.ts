@@ -1,4 +1,4 @@
-import { AlbumSortFieldEnum, SortOrderEnum } from 'src/types/enums';
+import { AlbumSortFieldEnum, SortDirectionEnum } from 'src/types/enums';
 import { Injectable } from '@nestjs/common';
 import { LibraryAlbumDto } from 'src/library/library.album.dto';
 import { LibraryService } from 'src/library/library.service';
@@ -47,7 +47,7 @@ export class SynologyAlbumService {
       offset,
       limit,
       AlbumSortFieldEnum.ALBUM,
-      SortOrderEnum.ASC,
+      SortDirectionEnum.ASC,
     );
     return {
       albums: albums.items.map(albumToRow),
@@ -72,7 +72,7 @@ export class SynologyAlbumService {
       offset,
       limit,
       AlbumSortFieldEnum.ALBUM,
-      SortOrderEnum.ASC,
+      SortDirectionEnum.ASC,
     );
     return {
       albums: albums.items.map(albumToRow),
@@ -95,7 +95,7 @@ export class SynologyAlbumService {
       offset,
       limit,
       AlbumSortFieldEnum.ALBUM,
-      SortOrderEnum.ASC,
+      SortDirectionEnum.ASC,
     );
     return {
       albums: albums.items.map(albumToRow),
@@ -118,7 +118,7 @@ export class SynologyAlbumService {
       offset,
       limit,
       AlbumSortFieldEnum.ALBUM,
-      SortOrderEnum.ASC,
+      SortDirectionEnum.ASC,
     );
     return {
       albums: albums.items.map(albumToRow),
