@@ -1,4 +1,22 @@
 export enum ErrorCodes {
+  // music library
+  INVALID_ADDED_AFTER_ERROR = 'invalid-added-after-error',
+  INVALID_ADDED_BEFORE_ERROR = 'invalid-added-before-error',
+  INVALID_ARTIST_ERROR = 'invalid-artist-error',
+  INVALID_ARTIST_LENGTH_ERROR = 'invalid-artist-length-error',
+  INVALID_COMPOSER_ERROR = 'invalid-composer-error',
+  INVALID_COMPOSER_LENGTH_ERROR = 'invalid-composer-length-error',
+  INVALID_FILTER_ERROR = 'invalid-filter-error',
+  INVALID_FILTER_LENGTH_ERROR = 'invalid-filter-length-error',
+  INVALID_GENRE_ERROR = 'invalid-genre-error',
+  INVALID_GENRE_LENGTH_ERROR = 'invalid-genre-length-error',
+  INVALID_MAX_RATING_ERROR = 'invalid-max-rating-error',
+  INVALID_MIN_RATING_ERROR = 'invalid-min-rating-error',
+  INVALID_RELEASED_AFTER_ERROR = 'invalid-released-after-error',
+  INVALID_RELEASED_BEFORE_ERROR = 'invalid-released-before-error',
+  INVALID_SORT_FIELD_ERROR = 'invalid-sort-field-error',
+  INVALID_SORT_ORDER_ERROR = 'invalid-sort-order-error',
+  INVALID_YEAR_ERROR = 'invalid-year-error',
   // input validation errors
   INVALID_ACCOUNT_ERROR = 'invalid-account-error',
   INVALID_ENABLED_ERROR = 'invalid-enabled-error',

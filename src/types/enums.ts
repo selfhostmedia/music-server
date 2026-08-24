@@ -90,14 +90,31 @@ export enum SmartPlaylistIntervalTagEnum {
 }
 
 export enum SmartPlaylistFieldEnum {
-  ARTIST = 'artist',
   ALBUM = 'album',
   ALBUM_ARTIST = 'album_artist',
-  COMPOSER = 'composer',
-  GENRE = 'genre',
-  FILE_PATH = 'file_path',
-  YEAR = 'year',
+  ARTIST = 'artist',
   BIT_RATE = 'bit_rate',
+  COMPOSER = 'composer',
   DATE_ADDED = 'date_added',
+  FILE_PATH = 'file_path',
+  GENRE = 'genre',
   RATING = 'rating',
+  YEAR = 'year',
+}
+
+export enum SortDirectionEnum {
+  ASC = 'asc',
+  DESC = 'desc',
+}
+
+export enum AlbumSortFieldEnum {
+  ALBUM = 'album',
+  ALBUM_ARTIST = 'album_artist',
+  ARTIST = 'artist',
+  COMPOSER = 'composer',
+  DATE_ADDED = 'date_added',
+  DATE_RELEASED = 'date_released',
+  GENRE = 'genre',
+  RATING = 'rating',
+  YEAR = 'year',
 }

@@ -1,4 +1,5 @@
 import { APP_GUARD } from '@nestjs/core';
+import { LibraryModule } from 'src/library/library.module';
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { SynologyAlbumController } from './album.controller';
@@ -35,7 +36,7 @@ import { SynologyStreamService } from './stream.service';
 import { entitiesList } from 'src/database/entities';
 
 @Module({
-  imports: [SequelizeModule.forFeature(entitiesList)],
+  imports: [LibraryModule, SequelizeModule.forFeature(entitiesList)],
   controllers: [
     SynologyAlbumController,
     SynologyArtistController,

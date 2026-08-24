@@ -1,5 +1,6 @@
 import { USER_PASSWORD, USER_USERNAME, api } from './test-helper';
 import { guestApi } from './test-helper.api.guest';
+import { paths } from './types/api-schema';
 
 type RequestParams = {
   header: {
@@ -60,10 +61,22 @@ async function updatePassword(params: RequestParams, newPassword: string) {
   });
 }
 
+type ListAlbumsQueryDto = paths['/api/user/list-albums']['get']['parameters']['query'];
+
+async function listAlbums(params: RequestParams, query?: ListAlbumsQueryDto) {
+  return api.GET(`/api/user/list-albums`, {
+    params: {
+      ...params,
+      query,
+    },
+  });
+}
+
 export type UserApi = {
   createRootPath: (rootPath: string) => ReturnType<typeof createRootPath>;
   deleteRootPath: (rootPathId: number) => ReturnType<typeof deleteRootPath>;
   endSession: () => ReturnType<typeof endSession>;
+  listAlbums: (query?: ListAlbumsQueryDto) => ReturnType<typeof listAlbums>;
   listIndexerLogs: () => ReturnType<typeof listIndexerLogs>;
   listRootPaths: () => ReturnType<typeof listRootPaths>;
   regenerateSessionKey: () => ReturnType<typeof regenerateSessionKey>;
@@ -96,6 +109,9 @@ export async function createUserApi(username?: string, password?: string): Promi
     },
     async endSession() {
       return endSession(params);
+    },
+    async listAlbums(query?: ListAlbumsQueryDto) {
+      return listAlbums(params, query);
     },
     async listIndexerLogs() {
       return listIndexerLogs(params);
