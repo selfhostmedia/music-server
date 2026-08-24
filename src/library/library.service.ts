@@ -125,13 +125,27 @@ export class LibraryService {
     // and of course punctuation like & or + can be part of a singular name, eg:
     // - Florence + The Machine
     // - Nick Cave & The Bad Seeds
-    if (filters?.artist) {
+    if (filters?.artist || filters?.filter) {
+      const artistFilter = filters.artist
+        ? {
+            nameNormalized: {
+              [Op.or]: filters.artist.map((artist) => ({
+                [Op.like]: `%${normalizeString(artist)}%`,
+              })),
+            },
+          }
+        : {};
+      const searchFilter = filters.filter
+        ? {
+            nameNormalized: {
+              [Op.like]: normalizeString(filters.filter),
+            },
+          }
+        : {};
       const artists = await this.artistEntity.findAll({
         attributes: ['id', 'name'],
         where: {
-          nameNormalized: {
-            [Op.or]: filters.artist.map((artist) => ({ [Op.like]: `%${normalizeString(artist)}%` })),
-          },
+          [Op.or]: [artistFilter, searchFilter],
         },
         raw: true,
       });
@@ -142,29 +156,57 @@ export class LibraryService {
     // - Composer 1, Composer 2    -> [Composer 1, Composer 2]
     // - Composer 1 & Composer 2   -> [Composer 1 & Composer 2]
     // - Composer 1 ft. Composer 2 -> [Composer 1 ft. Composer 2]
-    if (filters?.composer) {
+    if (filters?.composer || filters?.filter) {
+      const composerFilter = filters.composer
+        ? {
+            nameNormalized: {
+              [Op.or]: filters.composer.map((composer) => ({
+                [Op.like]: `%${normalizeString(composer)}%`,
+              })),
+            },
+          }
+        : {};
+      const searchFilter = filters.filter
+        ? {
+            nameNormalized: {
+              [Op.like]: normalizeString(filters.filter),
+            },
+          }
+        : {};
       const composers = await this.composerEntity.findAll({
         attributes: ['id'],
         where: {
-          nameNormalized: {
-            [Op.or]: filters.composer.map((composer) => ({ [Op.like]: `%${normalizeString(composer)}%` })),
-          },
+          [Op.or]: [composerFilter, searchFilter],
         },
       });
       composerIds.push(...composers.map((composer) => composer.id));
     }
     // genres does an exact-match because there are many partial-matches like `Rock` vs `AlternRock`
+    // that should not be co-mingled
     if (filters?.genre) {
+      const genreFilter = filters.genre
+        ? {
+            nameNormalized: {
+              [Op.or]: filters.genre.map(normalizeString),
+            },
+          }
+        : {};
+      const searchFilter = filters.filter
+        ? {
+            nameNormalized: {
+              [Op.like]: normalizeString(filters.filter),
+            },
+          }
+        : {};
       const genres = await this.genreEntity.findAll({
         attributes: ['id'],
         where: {
           accountId,
-          nameNormalized: filters.genre.map(normalizeString),
+          [Op.or]: [genreFilter, searchFilter],
         },
       });
       genreIds.push(...genres.map((genre) => genre.id));
     }
-    const normalizedFilterString = filters?.filter ? normalizeString(filters.filter) : undefined;
     const joinedTables: Includeable[] = [];
     if (artistIds.length) {
       joinedTables.push({
@@ -193,19 +235,21 @@ export class LibraryService {
         },
       });
     }
+    const normalizedFilterString = filters?.filter ? normalizeString(filters.filter) : undefined;
+    if (normalizedFilterString) {
+      joinedTables.push({
+        model: AlbumEntity,
+        attributes: [],
+        where: {
+          accountId,
+          title: { [Op.like]: `%${normalizedFilterString}%` },
+        },
+      });
+    }
     return {
       include: joinedTables,
       where: {
         accountId,
-        ...(normalizedFilterString && {
-          [Op.or]: [
-            { title: { [Op.iLike]: `%${normalizedFilterString}%` } },
-            { artist: { [Op.iLike]: `%${normalizedFilterString}%` } },
-            { albumArtist: { [Op.iLike]: `%${normalizedFilterString}%` } },
-            { composer: { [Op.iLike]: `%${normalizedFilterString}%` } },
-            { genre: { [Op.iLike]: `%${normalizedFilterString}%` } },
-          ],
-        }),
         ...(filters?.year && {
           year: filters.year,
         }),
