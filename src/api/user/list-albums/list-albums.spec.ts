@@ -1,4 +1,4 @@
-import { ADMIN_PASSWORD, ADMIN_USERNAME, UserApi, createUserApi } from '../../../test-helper';
+import { ADMIN_PASSWORD, ADMIN_USERNAME, UserApi, api, createUserApi } from '../../../test-helper';
 import { AlbumSortFieldEnum, SortDirectionEnum } from '../../../types/api-schema';
 import { ErrorCodes } from '../../../constants/error-codes';
 import { beforeAll, describe, expect, it } from '@jest/globals';
@@ -8,6 +8,20 @@ describe('/users/list-albums', () => {
 
   beforeAll(async () => {
     userApi = await createUserApi(ADMIN_USERNAME, ADMIN_PASSWORD);
+  });
+
+  describe('authorized access', () => {
+    it('should reject guest access', async () => {
+      const { error } = await api.GET(`/api/user/list-albums`, {
+        params: {
+          header: {
+            Authorization: '',
+          },
+        },
+      });
+      const typedError = error as unknown as Record<string, string | string[]>;
+      expect(typedError?.error).toBe(ErrorCodes.FORBIDDEN_ERROR);
+    });
   });
 
   describe('errors', () => {
