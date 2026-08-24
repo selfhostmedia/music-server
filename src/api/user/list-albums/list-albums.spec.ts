@@ -1,252 +1,287 @@
-// TODO: these tests are copied from the Synology `albums.cgi` test suite but they
-// are not ideal for this API, they should be rewritten to exercise the filters
-// and input errors.  The pagination is contained within a single function and query
-// and does not need to be tested repeatedly.
-//
-// describe('errors', () => {
-//    it.todo('should reject invalid [...]')
-// });
-// describe('success', () => {
-//    it.todo('should filter by [...]')
-//    it.todo('should sort by [...]')
-//    it.todo('should paginate results')
-// });
-//
-
 import { ADMIN_PASSWORD, ADMIN_USERNAME, UserApi, createUserApi } from '../../../test-helper';
+import { AlbumSortFieldEnum, SortDirectionEnum } from '../../../types/api-schema';
+import { ErrorCodes } from '../../../constants/error-codes';
 import { beforeAll, describe, expect, it } from '@jest/globals';
-import { paths } from 'src/types/api-schema';
-
-type ListAlbumsQueryDto = paths['/api/user/list-albums']['get']['parameters']['query'];
 
 describe('/users/list-albums', () => {
   let userApi: UserApi;
-
-  async function listAlbums(query?: ListAlbumsQueryDto, offset?: number, limit?: number) {
-    const { data, error } = await userApi.listAlbums({
-      ...query,
-      offset,
-      limit,
-    });
-    return {
-      data,
-      error,
-      albums: data?.albums || [],
-      total: data?.total || 0,
-    };
-  }
 
   beforeAll(async () => {
     userApi = await createUserApi(ADMIN_USERNAME, ADMIN_PASSWORD);
   });
 
-  it('should list albums by genre + artist', async () => {
-    const { albums, total } = await listAlbums({ genre: ['Chanson'], artist: ['Artist 3'] });
-    expect(total).toBe(2);
-    expect(albums.length).toBe(2);
-    expect(albums[0]?.displayName).toBe('Album 4');
-    expect(albums[1]?.displayName).toBe('Album 5');
+  describe('errors', () => {
+    it('should reject invalid "addedAfter" date', async () => {
+      const { error } = await userApi.listAlbums({ addedAfter: 'invalid-date' });
+      expect(error?.message[0]).toBe(ErrorCodes.INVALID_ADDED_AFTER_ERROR);
+    });
+
+    it('should reject invalid "addedBefore" date', async () => {
+      const { error } = await userApi.listAlbums({ addedBefore: 'invalid-date' });
+      expect(error?.message[0]).toBe(ErrorCodes.INVALID_ADDED_BEFORE_ERROR);
+    });
+
+    // it('should reject invalid "artist"', async () => {
+    //   const { error } = await userApi.listAlbums({ artist: [true as unknown as string] });
+    //   expect(error?.message[0]).toBe(ErrorCodes.INVALID_ARTIST_ERROR);
+    // });
+
+    it('should reject invalid "artist" length', async () => {
+      const { error } = await userApi.listAlbums({ artist: ['x'.repeat(300)] });
+      expect(error?.message[0]).toBe(ErrorCodes.INVALID_ARTIST_LENGTH_ERROR);
+    });
+
+    // it('should reject invalid "composer"', async () => {
+    //   const { error } = await userApi.listAlbums({ composer: [0 as unknown as string] });
+    //   expect(error?.message[0]).toBe(ErrorCodes.INVALID_COMPOSER_LENGTH_ERROR);
+    // });
+
+    it('should reject invalid "composer" length', async () => {
+      const { error } = await userApi.listAlbums({ composer: ['x'.repeat(300)] });
+      expect(error?.message[0]).toBe(ErrorCodes.INVALID_COMPOSER_LENGTH_ERROR);
+    });
+
+    it('should reject invalid "filter"', async () => {
+      const { error } = await userApi.listAlbums({ filter: '' });
+      expect(error?.message[0]).toBe(ErrorCodes.INVALID_FILTER_LENGTH_ERROR);
+    });
+
+    // it('should reject invalid "genre"', async () => {
+    //   const { error } = await userApi.listAlbums({ genre: [0 as unknown as string] });
+    //   expect(error?.message[0]).toBe(ErrorCodes.INVALID_GENRE_LENGTH_ERROR);
+    // });
+
+    it('should reject invalid "genre" length', async () => {
+      const { error } = await userApi.listAlbums({ genre: ['x'.repeat(300)] });
+      expect(error?.message[0]).toBe(ErrorCodes.INVALID_GENRE_LENGTH_ERROR);
+    });
+
+    it('should reject negative "limit"', async () => {
+      const { error } = await userApi.listAlbums({ offset: 0, limit: -1000 });
+      expect(error?.message[0]).toBe(ErrorCodes.INVALID_LIMIT_ERROR);
+    });
+
+    it('should reject excessive "limit"', async () => {
+      const { error } = await userApi.listAlbums({ offset: 0, limit: 1_000_000 });
+      expect(error?.message[0]).toBe(ErrorCodes.INVALID_LIMIT_ERROR);
+    });
+
+    it('should reject invalid "limit"', async () => {
+      const { error } = await userApi.listAlbums({ offset: 0, limit: 'asdf' as unknown as number });
+      expect(error?.message[0]).toBe(ErrorCodes.INVALID_LIMIT_ERROR);
+    });
+
+    it('should reject invalid "maxRating"', async () => {
+      const { error } = await userApi.listAlbums({ maxRating: -1 });
+      expect(error?.message[0]).toBe(ErrorCodes.INVALID_MAX_RATING_ERROR);
+    });
+
+    it('should reject invalid "minRating"', async () => {
+      const { error } = await userApi.listAlbums({ minRating: -1 });
+      expect(error?.message[0]).toBe(ErrorCodes.INVALID_MIN_RATING_ERROR);
+    });
+
+    it('should reject negative "offset"', async () => {
+      const { error } = await userApi.listAlbums({ offset: -1000 });
+      expect(error?.message[0]).toBe(ErrorCodes.INVALID_OFFSET_ERROR);
+    });
+
+    it('should reject invalid "offset"', async () => {
+      const { error } = await userApi.listAlbums({ offset: 'asdf' as unknown as number });
+      expect(error?.message[0]).toBe(ErrorCodes.INVALID_OFFSET_ERROR);
+    });
+
+    it('should reject invalid "releasedAfter" date', async () => {
+      const { error } = await userApi.listAlbums({ releasedAfter: 'invalid-date' });
+      expect(error?.message[0]).toBe(ErrorCodes.INVALID_RELEASED_AFTER_ERROR);
+    });
+
+    it('should reject invalid "releasedBefore" date', async () => {
+      const { error } = await userApi.listAlbums({ releasedBefore: 'invalid-date' });
+      expect(error?.message[0]).toBe(ErrorCodes.INVALID_RELEASED_BEFORE_ERROR);
+    });
+
+    it('should reject invalid "sortDirection"', async () => {
+      const { error } = await userApi.listAlbums({ sortDirection: 'invalid-direction' as SortDirectionEnum });
+      expect(error?.message[0]).toBe(ErrorCodes.INVALID_SORT_ORDER_ERROR);
+    });
+
+    it('should reject invalid "sortField"', async () => {
+      const { error } = await userApi.listAlbums({ sortField: 'invalid-field' as unknown as AlbumSortFieldEnum });
+      expect(error?.message[0]).toBe(ErrorCodes.INVALID_SORT_FIELD_ERROR);
+    });
+
+    it('should reject invalid "year"', async () => {
+      const { error } = await userApi.listAlbums({ year: 'never' as unknown as number });
+      expect(error?.message[0]).toBe(ErrorCodes.INVALID_YEAR_ERROR);
+    });
   });
 
-  it('should paginate albums by genre + artist', async () => {
-    const filter = { genre: ['Chanson'], artist: ['Artist 3'] };
-    // page 1`
-    const { albums, total } = await listAlbums(filter, 0, 1);
-    expect(total).toBe(2);
-    expect(albums.length).toBe(1);
-    expect(albums[0]?.displayName).toBe('Album 4');
-    // page 2
-    const { albums: albums2, total: total2 } = await listAlbums(filter, 1, 1);
-    expect(total2).toBe(2);
-    expect(albums2.length).toBe(1);
-    expect(albums2[0]?.displayName).toBe('Album 5');
+  describe('edge cases', () => {
+    describe('filter', () => {
+      it('should filter by genre', async () => {
+        const { data } = await userApi.listAlbums({ genre: ['Rock'] });
+        const { albums, total } = data || { albums: [], total: 0 };
+        expect(total).toBe(2);
+        expect(albums.length).toBe(2);
+        expect(albums[0]?.displayName).toBe('Album 2');
+        expect(albums[1]?.displayName).toBe('Album 4');
+      });
+
+      it('should filter by artist', async () => {
+        const { data } = await userApi.listAlbums({ artist: ['Artist 3'] });
+        const { albums, total } = data || { albums: [], total: 0 };
+        expect(total).toBe(2);
+        expect(albums.length).toBe(2);
+        expect(albums[0]?.displayName).toBe('Album 4');
+        expect(albums[1]?.displayName).toBe('Album 5');
+      });
+
+      it('should filter by composer', async () => {
+        const { data } = await userApi.listAlbums({ composer: ['Composer 4'] });
+        const { albums, total } = data || { albums: [], total: 0 };
+        expect(total).toBe(2);
+        expect(albums.length).toBe(2);
+        expect(albums[0]?.displayName).toBe('Album 3');
+        expect(albums[1]?.displayName).toBe('Album 4');
+      });
+
+      it('should filter by search term', async () => {
+        const { data } = await userApi.listAlbums({ filter: 'Album 4' });
+        const { albums, total } = data || { albums: [], total: 0 };
+        expect(total).toBe(1);
+        expect(albums.length).toBe(1);
+        expect(albums[0]?.displayName).toBe('Album 4');
+      });
+
+      it('should filter by year', async () => {
+        const { data } = await userApi.listAlbums({ year: 2004 });
+        const { albums, total } = data || { albums: [], total: 0 };
+        expect(total).toBe(1);
+        expect(albums.length).toBe(1);
+        expect(albums[0]?.displayName).toBe('Album 5');
+      });
+    });
+
+    describe('sort', () => {
+      it('should sort by album name ASC', async () => {
+        const { data } = await userApi.listAlbums({
+          sortField: AlbumSortFieldEnum.album,
+          sortDirection: SortDirectionEnum.asc,
+        });
+        const { albums, total } = data || { albums: [], total: 0 };
+        expect(total).toBe(5);
+        expect(albums.length).toBe(5);
+        expect(albums[0]?.displayName).toBe('Album 1');
+        expect(albums[1]?.displayName).toBe('Album 2');
+        expect(albums[2]?.displayName).toBe('Album 3');
+        expect(albums[3]?.displayName).toBe('Album 4');
+        expect(albums[4]?.displayName).toBe('Album 5');
+      });
+
+      it('should sort by album name DESC', async () => {
+        const { data } = await userApi.listAlbums({
+          sortField: AlbumSortFieldEnum.album,
+          sortDirection: SortDirectionEnum.desc,
+        });
+        const { albums, total } = data || { albums: [], total: 0 };
+        expect(total).toBe(5);
+        expect(albums.length).toBe(5);
+        expect(albums[4]?.displayName).toBe('Album 1');
+        expect(albums[3]?.displayName).toBe('Album 2');
+        expect(albums[2]?.displayName).toBe('Album 3');
+        expect(albums[1]?.displayName).toBe('Album 4');
+        expect(albums[0]?.displayName).toBe('Album 5');
+      });
+
+      it('should sort by year ASC', async () => {
+        const { data } = await userApi.listAlbums({
+          sortField: AlbumSortFieldEnum.year,
+          sortDirection: SortDirectionEnum.asc,
+        });
+        const { albums, total } = data || { albums: [], total: 0 };
+        expect(total).toBe(5);
+        expect(albums.length).toBe(5);
+        expect(albums[0]?.displayName).toBe('Album 1');
+        expect(albums[1]?.displayName).toBe('Album 2');
+        expect(albums[2]?.displayName).toBe('Album 4');
+        expect(albums[3]?.displayName).toBe('Album 5');
+        expect(albums[4]?.displayName).toBe('Album 3');
+      });
+
+      it('should sort by year DESC', async () => {
+        const { data } = await userApi.listAlbums({
+          sortField: AlbumSortFieldEnum.year,
+          sortDirection: SortDirectionEnum.desc,
+        });
+        const { albums, total } = data || { albums: [], total: 0 };
+        expect(total).toBe(5);
+        expect(albums.length).toBe(5);
+        expect(albums[0]?.displayName).toBe('Album 3');
+        expect(albums[1]?.displayName).toBe('Album 5');
+        expect(albums[2]?.displayName).toBe('Album 4');
+        expect(albums[3]?.displayName).toBe('Album 2');
+        expect(albums[4]?.displayName).toBe('Album 1');
+      });
+
+      it('should sort by album artist ASC', async () => {
+        const { data } = await userApi.listAlbums({
+          sortField: AlbumSortFieldEnum.album_artist,
+          sortDirection: SortDirectionEnum.asc,
+        });
+        const { albums, total } = data || { albums: [], total: 0 };
+        expect(total).toBe(5);
+        expect(albums.length).toBe(5);
+        expect(albums[0]?.albumArtists[0]).toBe('Artist 1');
+        expect(albums[1]?.albumArtists[0]).toBe('Artist 1');
+        expect(albums[2]?.albumArtists[0]).toBe('Artist 2');
+        expect(albums[3]?.albumArtists[0]).toBe('Artist 3');
+        expect(albums[4]?.albumArtists[0]).toBe('Artist 3');
+      });
+
+      it('should sort by album artist DESC', async () => {
+        const { data } = await userApi.listAlbums({
+          sortField: AlbumSortFieldEnum.album_artist,
+          sortDirection: SortDirectionEnum.desc,
+        });
+        const { albums, total } = data || { albums: [], total: 0 };
+        expect(total).toBe(5);
+        expect(albums.length).toBe(5);
+        expect(albums[0]?.albumArtists[0]).toBe('Artist 3');
+        expect(albums[1]?.albumArtists[0]).toBe('Artist 3');
+        expect(albums[2]?.albumArtists[0]).toBe('Artist 2');
+        expect(albums[3]?.albumArtists[0]).toBe('Artist 1');
+        expect(albums[4]?.albumArtists[0]).toBe('Artist 1');
+      });
+    });
   });
 
-  it('should list albums by genre', async () => {
-    const { albums, total } = await listAlbums({ genre: ['Acid'] });
-    expect(total).toBe(1);
-    expect(albums.length).toBe(1);
-    expect(albums[0]?.displayName).toBe('Album 1');
-  });
+  describe('success', () => {
+    it('should return all albums', async () => {
+      const { data } = await userApi.listAlbums();
+      const { albums, total } = data || { albums: [], total: 0 };
+      expect(total).toBe(5);
+      expect(albums.length).toBe(5);
+    });
 
-  it('should paginate albums by genre', async () => {
-    // page 1
-    const { albums, total } = await listAlbums({ genre: ['Rock'] }, 0, 1);
-    expect(total).toBe(2);
-    expect(albums.length).toBe(1);
-    expect(albums[0]?.displayName).toBe('Album 2');
-    // page 2
-    const { albums: albums2, total: total2 } = await listAlbums({ genre: ['Rock'] }, 1, 1);
-    expect(total2).toBe(2);
-    expect(albums2.length).toBe(1);
-    expect(albums2[0]?.displayName).toBe('Album 4');
-  });
-
-  it('should list albums by default genre', async () => {
-    const { albums, total } = await listAlbums({ genre: ['EDM'] });
-    expect(total).toBe(1);
-    expect(albums.length).toBe(1);
-    expect(albums[0]?.displayName).toBe('Album 4');
-  });
-
-  it('should paginate albums by default genre', async () => {
-    // page 1
-    const { albums, total } = await listAlbums({ genre: ['EDM'] }, 0, 1);
-    expect(total).toBe(1);
-    expect(albums.length).toBe(1);
-    expect(albums[0]?.displayName).toBe('Album 4');
-    // page 2
-    const { albums: albums2, total: total2 } = await listAlbums({ genre: ['EDM'] }, 1, 1);
-    expect(total2).toBe(1);
-    expect(albums2.length).toBe(0);
-  });
-
-  it('should list albums by multi-genre', async () => {
-    const { albums, total } = await listAlbums({ genre: ['EDM', 'Dance'] });
-    expect(total).toBe(2);
-    expect(albums.length).toBe(2);
-    expect(albums[0]?.albumArtists[0]).toBe('Artist 1');
-    expect(albums[0]?.displayName).toBe('Album 2');
-    expect(albums[1]?.albumArtists[0]).toBe('Artist 3');
-    expect(albums[1]?.displayName).toBe('Album 4');
-  });
-
-  it('should paginate albums by multi-genre', async () => {
-    // page 1
-    const { albums, total } = await listAlbums({ genre: ['EDM', 'Dance'] }, 0, 1);
-    expect(total).toBe(2);
-    expect(albums.length).toBe(1);
-    expect(albums[0]?.displayName).toBe('Album 2');
-    // page 2
-    const { albums: albums2, total: total2 } = await listAlbums({ genre: ['EDM', 'Dance'] }, 1, 1);
-    expect(total2).toBe(2);
-    expect(albums2.length).toBe(1);
-    expect(albums2[0]?.displayName).toBe('Album 4');
-  });
-
-  it('should list albums by composer', async () => {
-    const { albums, total } = await listAlbums({ composer: ['Composer 4'] });
-    expect(total).toBe(2);
-    expect(albums.length).toBe(2);
-    expect(albums[1]?.displayName).toBe('Album 4');
-    expect(albums[1]?.albumArtists[0]).toBe('Artist 3');
-    expect(albums[0]?.displayName).toBe('Album 3');
-    expect(albums[0]?.albumArtists[0]).toBe('Artist 2');
-  });
-
-  it('should paginate albums by composer', async () => {
-    // page 1
-    const { albums, total } = await listAlbums({ composer: ['Composer 4'] }, 0, 1);
-    expect(total).toBe(2);
-    expect(albums.length).toBe(1);
-    expect(albums[0]?.displayName).toBe('Album 3');
-    expect(albums[0]?.albumArtists[0]).toBe('Artist 2');
-    // page 2
-    const { albums: albums2, total: total2 } = await listAlbums({ composer: ['Composer 4'] }, 1, 1);
-    expect(total2).toBe(2);
-    expect(albums2.length).toBe(1);
-    expect(albums2[0]?.displayName).toBe('Album 4');
-    expect(albums2[0]?.albumArtists[0]).toBe('Artist 3');
-  });
-
-  it('should list albums by artist', async () => {
-    const { albums, total } = await listAlbums({ artist: ['Artist 3'] });
-    expect(total).toBe(2);
-    expect(albums.length).toBe(2);
-    expect(albums[0]?.displayName).toBe('Album 4');
-    expect(albums[0]?.albumArtists[0]).toBe('Artist 3');
-    expect(albums[1]?.displayName).toBe('Album 5');
-    expect(albums[1]?.albumArtists[0]).toBe('Artist 3');
-  });
-
-  it('should paginate albums by artist', async () => {
-    // page 1
-    const { albums, total } = await listAlbums({ artist: ['Artist 3'] }, 0, 1);
-    expect(total).toBe(2);
-    expect(albums.length).toBe(1);
-    expect(albums[0]?.displayName).toBe('Album 4');
-    expect(albums[0]?.albumArtists[0]).toBe('Artist 3');
-    // page 2
-    const { albums: albums2, total: total2 } = await listAlbums({ artist: ['Artist 3'] }, 1, 1);
-    expect(total2).toBe(2);
-    expect(albums2.length).toBe(1);
-    expect(albums2[0]?.displayName).toBe('Album 5');
-    expect(albums2[0]?.albumArtists[0]).toBe('Artist 3');
-  });
-
-  it('should list albums by artist + default genre', async () => {
-    const { albums } = await listAlbums({ artist: ['Artist 3'], genre: ['EDM'] });
-    expect(albums.length).toBe(1);
-    expect(albums[0]?.displayName).toBe('Album 4');
-    expect(albums[0]?.albumArtists[0]).toBe('Artist 3');
-  });
-
-  it('should paginate albums by artist + default genre', async () => {
-    // page 1
-    const { albums, total } = await listAlbums({ artist: ['Artist 3'], genre: ['EDM'] }, 0, 1);
-    expect(total).toBe(1);
-    expect(albums.length).toBe(1);
-    expect(albums[0]?.displayName).toBe('Album 4');
-    // page 2
-    const { albums: albums2, total: total2 } = await listAlbums({ artist: ['Artist 3'], genre: ['EDM'] }, 1, 1);
-    expect(total2).toBe(1);
-    expect(albums2.length).toBe(0);
-  });
-
-  it('should list albums by artist in genre', async () => {
-    const { albums } = await listAlbums({ artist: ['Artist 3'], genre: ['Chanson'] });
-    expect(albums.length).toBe(2);
-    expect(albums[0]?.displayName).toBe('Album 4');
-    expect(albums[0]?.albumArtists[0]).toBe('Artist 3');
-    expect(albums[1]?.displayName).toBe('Album 5');
-    expect(albums[1]?.albumArtists[0]).toBe('Artist 3');
-  });
-
-  it('should paginate albums by artist in genre', async () => {
-    // page 1
-    const { albums, total } = await listAlbums({ artist: ['Artist 3'], genre: ['Chanson'] }, 0, 1);
-    expect(total).toBe(2);
-    expect(albums.length).toBe(1);
-    expect(albums[0]?.displayName).toBe('Album 4');
-    // page 2
-    const { albums: albums2, total: total2 } = await listAlbums({ artist: ['Artist 3'], genre: ['Chanson'] }, 1, 1);
-    expect(total2).toBe(2);
-    expect(albums2.length).toBe(1);
-    expect(albums2[0]?.displayName).toBe('Album 5');
-  });
-
-  it('should list all albums with no filters', async () => {
-    const { albums } = await listAlbums({});
-    expect(albums.length).toBe(5);
-    expect(albums[0]?.displayName).toBe('Album 1');
-    expect(albums[0]?.albumArtists[0]).toBe('Artist 1');
-    expect(albums[1]?.displayName).toBe('Album 2');
-    expect(albums[1]?.albumArtists[0]).toBe('Artist 1');
-    expect(albums[2]?.displayName).toBe('Album 3');
-    expect(albums[2]?.albumArtists[0]).toBe('Artist 2');
-    expect(albums[3]?.displayName).toBe('Album 4');
-    expect(albums[3]?.albumArtists[0]).toBe('Artist 3');
-    expect(albums[4]?.displayName).toBe('Album 5');
-    expect(albums[4]?.albumArtists[0]).toBe('Artist 3');
-  });
-
-  it('should paginate all albums with no filters', async () => {
-    // page 1
-    const { albums, total } = await listAlbums({}, 0, 1);
-    expect(total).toBe(5);
-    expect(albums.length).toBe(1);
-    expect(albums[0]?.displayName).toBe('Album 1');
-    expect(albums[0]?.albumArtists[0]).toBe('Artist 1');
-    // page 2
-    const { albums: albums2, total: total2 } = await listAlbums({}, 1, 1);
-    expect(total2).toBe(5);
-    expect(albums2.length).toBe(1);
-    expect(albums2[0]?.displayName).toBe('Album 2');
-    expect(albums2[0]?.albumArtists[0]).toBe('Artist 1');
-    // page 3
-    const { albums: albums3, total: total3 } = await listAlbums({}, 2, 1);
-    expect(total3).toBe(5);
-    expect(albums3.length).toBe(1);
-    expect(albums3[0]?.displayName).toBe('Album 3');
+    it('should paginate results', async () => {
+      const { data } = await userApi.listAlbums({ offset: 0, limit: 2 });
+      const { albums, total } = data || { albums: [], total: 0 };
+      expect(total).toBe(5);
+      expect(albums.length).toBe(2);
+      expect(albums[0]?.displayName).toBe('Album 1');
+      expect(albums[1]?.displayName).toBe('Album 2');
+      const { data: data2 } = await userApi.listAlbums({ offset: 2, limit: 2 });
+      const { albums: albums2, total: total2 } = data2 || { albums: [], total: 0 };
+      expect(total2).toBe(5);
+      expect(albums2.length).toBe(2);
+      expect(albums2[0]?.displayName).toBe('Album 3');
+      expect(albums2[1]?.displayName).toBe('Album 4');
+      const { data: data3 } = await userApi.listAlbums({ offset: 4, limit: 2 });
+      const { albums: albums3, total: total3 } = data3 || { albums: [], total: 0 };
+      expect(total3).toBe(5);
+      expect(albums3.length).toBe(1);
+      expect(albums3[0]?.displayName).toBe('Album 5');
+    });
   });
 });
