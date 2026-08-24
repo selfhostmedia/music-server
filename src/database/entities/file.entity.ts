@@ -50,9 +50,6 @@ export class FileEntity extends Model<FileEntity> {
   @BelongsTo(() => AlbumEntity)
   declare album?: AlbumEntity;
 
-  @HasMany(() => LinkedArtistEntity)
-  declare artists?: LinkedArtistEntity[];
-
   @Column(DataType.INTEGER)
   declare bitRate: number;
 
