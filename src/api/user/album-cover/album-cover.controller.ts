@@ -7,7 +7,7 @@ import { JWT_TOKEN, USER_APIS } from 'src/constants/swagger';
 import { User } from 'src/api/user.decorator';
 import { UserAlbumCoverQueryDto } from './album-cover.dto';
 import { UserAlbumCoverService } from './album-cover.service';
-import { UserRoleEnum } from 'src/constants/enums';
+import { UserRoleEnum } from 'src/types/enums';
 import { createReadStream } from 'fs';
 import { join } from 'path';
 

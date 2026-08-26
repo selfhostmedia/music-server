@@ -10,7 +10,7 @@ import {
   UserListAlbumsWithTracksResponseDto,
 } from './list-albums-with-tracks.dto';
 import { UserListAlbumsWithTracksService } from './list-albums-with-tracks.service';
-import { UserRoleEnum } from 'src/constants/enums';
+import { UserRoleEnum } from 'src/types/enums';
 
 @Controller({
   path: '/api/user',

@@ -6,7 +6,7 @@ import { JWT_TOKEN, USER_APIS } from 'src/constants/swagger';
 import { User } from 'src/api/user.decorator';
 import { UserRegenerateSessionKeyResponseDto } from './regenerate-session-key.dto';
 import { UserRegenerateSessionKeyService } from './regenerate-session-key.service';
-import { UserRoleEnum } from 'src/constants/enums';
+import { UserRoleEnum } from 'src/types/enums';
 
 @Controller({
   path: '/api/user',

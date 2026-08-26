@@ -1,3 +1,8 @@
+export enum UserRoleEnum {
+  USER = 'user',
+  ADMIN = 'admin',
+}
+
 export enum SessionRestrictionEnum {
   SYNOLOGY_AUDIOSTATION = 'synology-audiostation',
   WEB_UI = 'web-ui',
@@ -117,4 +122,9 @@ export enum AlbumSortFieldEnum {
   GENRE = 'genre',
   RATING = 'rating',
   YEAR = 'year',
+}
+
+export enum ArtistSortFieldEnum {
+  ARTIST = 'artist',
+  DATE_ADDED = 'date_added',
 }

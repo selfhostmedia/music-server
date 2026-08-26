@@ -10,7 +10,7 @@ import {
   UserRetrieveAlbumResponseDto,
 } from './retrieve-album.dto';
 import { UserRetrieveAlbumService } from './retrieve-album.service';
-import { UserRoleEnum } from 'src/constants/enums';
+import { UserRoleEnum } from 'src/types/enums';
 
 @Controller({
   path: '/api/user',
