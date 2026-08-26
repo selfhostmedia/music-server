@@ -380,7 +380,7 @@ export class LibraryService {
       where: {
         id: matchingAlbums,
       },
-      order: [[Sequelize.fn('lower', Sequelize.col(sortByColumn)), 'ASC']],
+      order: [[Sequelize.fn('lower', Sequelize.col(sortByColumn)), sortOrder || 'ASC']],
       offset,
       limit,
     });
