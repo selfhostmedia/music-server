@@ -12,7 +12,7 @@ import {
 } from 'src/database/entities';
 import { AlbumSortFieldEnum, SortDirectionEnum } from 'src/types/enums';
 import { ErrorCodes } from 'src/constants/error-codes';
-import { FindOptions, Includeable, Op } from 'sequelize';
+import { FindOptions, Includeable, Op, Sequelize } from 'sequelize';
 import { InjectModel } from '@nestjs/sequelize';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { LibraryAlbumDto, LibraryAlbumWithTracksDto } from './library.album.dto';
@@ -380,7 +380,7 @@ export class LibraryService {
       where: {
         id: matchingAlbums,
       },
-      order: [[sortByColumn, sortOrder || SortDirectionEnum.ASC]],
+      order: [[Sequelize.fn('lower', Sequelize.col(sortByColumn)), 'ASC']],
       offset,
       limit,
     });
@@ -456,7 +456,7 @@ export class LibraryService {
           duration: track.trackDuration,
           fileId: track.fileId,
           genres: track.trackGenres.map(replaceDoubleQuotes),
-          id: track.id,
+          id: track.fileId,
           rating: track.trackRating,
           title: replaceDoubleQuotes(track.trackTitle),
           trackNumber: track.trackNumber,
