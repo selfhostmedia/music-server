@@ -7,6 +7,14 @@ CREATE VIEW collated_albums_data AS
 SELECT 
 	albums.id,
 	albums.account_id,
+  albums.created_at,
+	albums.cover_image_mime_type,
+	albums.cover_image_vibrant,
+	albums.cover_image_dark_vibrant,
+	albums.cover_image_light_vibrant,
+	albums.cover_image_muted,
+	albums.cover_image_dark_muted,
+	albums.cover_image_light_muted,
 	albums.title,
 	albums.year,
 	(
