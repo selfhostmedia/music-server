@@ -83,7 +83,6 @@ async function updatePassword(params: RequestParams, newPassword: string) {
   });
 }
 
-
 export type UserApi = {
   createRootPath: (rootPath: string) => ReturnType<typeof createRootPath>;
   deleteRootPath: (rootPathId: number) => ReturnType<typeof deleteRootPath>;

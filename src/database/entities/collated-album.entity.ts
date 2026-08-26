@@ -1,15 +1,5 @@
-// import { AlbumEntity } from './album.entity';
 import { AccountEntity } from './account.entity';
-import {
-  BelongsTo,
-  Column,
-  DataType,
-  ForeignKey,
-  // ForeignKey,
-  Model,
-  Sequelize,
-  Table,
-} from 'sequelize-typescript';
+import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript';
 
 /**
  * The CollatedAlbumEntity selects data from a view that collates album information

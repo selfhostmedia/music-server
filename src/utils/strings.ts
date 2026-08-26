@@ -1,4 +1,4 @@
-import { FileTypeEnum } from "src/types/enums";
+import { FileTypeEnum } from 'src/types/enums';
 
 /* eslint-disable @typescript-eslint/quotes */
 const splitDelimiters: string[] = [',', ';', '/', ' & '];
