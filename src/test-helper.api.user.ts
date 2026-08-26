@@ -34,6 +34,28 @@ async function endSession(params: RequestParams) {
   });
 }
 
+type ListAlbumsQueryDto = paths['/api/user/list-albums']['get']['parameters']['query'];
+
+async function listAlbums(params: RequestParams, query?: ListAlbumsQueryDto) {
+  return api.GET(`/api/user/list-albums`, {
+    params: {
+      ...params,
+      query,
+    },
+  });
+}
+
+type ListAlbumsWithTracksQueryDto = paths['/api/user/list-albums-with-tracks']['get']['parameters']['query'];
+
+async function listAlbumsWithTracks(params: RequestParams, query?: ListAlbumsWithTracksQueryDto) {
+  return api.GET(`/api/user/list-albums-with-tracks`, {
+    params: {
+      ...params,
+      query,
+    },
+  });
+}
+
 async function listIndexerLogs(params: RequestParams) {
   return api.GET(`/api/user/list-indexer-logs`, {
     params,
@@ -61,22 +83,13 @@ async function updatePassword(params: RequestParams, newPassword: string) {
   });
 }
 
-type ListAlbumsQueryDto = paths['/api/user/list-albums']['get']['parameters']['query'];
-
-async function listAlbums(params: RequestParams, query?: ListAlbumsQueryDto) {
-  return api.GET(`/api/user/list-albums`, {
-    params: {
-      ...params,
-      query,
-    },
-  });
-}
 
 export type UserApi = {
   createRootPath: (rootPath: string) => ReturnType<typeof createRootPath>;
   deleteRootPath: (rootPathId: number) => ReturnType<typeof deleteRootPath>;
   endSession: () => ReturnType<typeof endSession>;
   listAlbums: (query?: ListAlbumsQueryDto) => ReturnType<typeof listAlbums>;
+  listAlbumsWithTracks: (query?: ListAlbumsWithTracksQueryDto) => ReturnType<typeof listAlbumsWithTracks>;
   listIndexerLogs: () => ReturnType<typeof listIndexerLogs>;
   listRootPaths: () => ReturnType<typeof listRootPaths>;
   regenerateSessionKey: () => ReturnType<typeof regenerateSessionKey>;
@@ -112,6 +125,9 @@ export async function createUserApi(username?: string, password?: string): Promi
     },
     async listAlbums(query?: ListAlbumsQueryDto) {
       return listAlbums(params, query);
+    },
+    async listAlbumsWithTracks(query?: ListAlbumsWithTracksQueryDto) {
+      return listAlbumsWithTracks(params, query);
     },
     async listIndexerLogs() {
       return listIndexerLogs(params);
