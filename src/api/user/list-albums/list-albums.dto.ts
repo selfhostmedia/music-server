@@ -223,26 +223,22 @@ export class UserListAlbumsResponseDto extends SuccessResponseDto {
   declare albums: LibraryAlbumDto[];
 
   /**
+   * The offset of the first album in the albums array, which may be greater than 0 if
+   * pagination is applied.
+   */
+  @IsInt()
+  declare offset: number;
+
+  /**
    * The total number of albums that match the query parameters, which may be greater
    * than the number of albums returned in the albums array if pagination is applied.
    */
   @IsInt()
   declare total: number;
-
-  /**
-   * The query parameters that were used to retrieve the list of albums, which may include filters
-   * and pagination.
-   */
-  @ApiProperty({
-    type: UserListAlbumsQueryDto,
-  })
-  declare query: UserListAlbumsQueryDto;
 }
 
 const UserListAlbumsBadRequestErrorMessages = [
   ErrorCodes.INVALID_ADDED_AFTER_ERROR,
-  ErrorCodes.INVALID_ADDED_AFTER_ERROR,
-  ErrorCodes.INVALID_ADDED_BEFORE_ERROR,
   ErrorCodes.INVALID_ADDED_BEFORE_ERROR,
   ErrorCodes.INVALID_ARTIST_ERROR,
   ErrorCodes.INVALID_ARTIST_LENGTH_ERROR,
@@ -255,8 +251,6 @@ const UserListAlbumsBadRequestErrorMessages = [
   ErrorCodes.INVALID_MAX_RATING_ERROR,
   ErrorCodes.INVALID_MIN_RATING_ERROR,
   ErrorCodes.INVALID_RELEASED_AFTER_ERROR,
-  ErrorCodes.INVALID_RELEASED_AFTER_ERROR,
-  ErrorCodes.INVALID_RELEASED_BEFORE_ERROR,
   ErrorCodes.INVALID_RELEASED_BEFORE_ERROR,
   ErrorCodes.INVALID_SORT_FIELD_ERROR,
   ErrorCodes.INVALID_SORT_ORDER_ERROR,

@@ -43,9 +43,7 @@ export class UserListAlbumsController {
     const data = await this.listAlbumsService.listAlbums(user.id, query);
     return {
       success: true,
-      albums: data.albums,
-      total: data.total,
-      query,
+      ...data,
     };
   }
 }
