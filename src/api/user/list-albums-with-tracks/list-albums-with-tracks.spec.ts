@@ -25,52 +25,52 @@ describe('/users/list-albums-with-tracks', () => {
   });
 
   describe('errors', () => {
-    it('should reject invalid "addedAfter" date', async () => {
+    it('should reject invalid addedAfter date', async () => {
       const { error } = await userApi.listAlbumsWithTracks({ addedAfter: 'invalid-date' });
       expect(error?.message[0]).toBe(ErrorCodes.INVALID_ADDED_AFTER_ERROR);
     });
 
-    it('should reject invalid "addedBefore" date', async () => {
+    it('should reject invalid addedBefore date', async () => {
       const { error } = await userApi.listAlbumsWithTracks({ addedBefore: 'invalid-date' });
       expect(error?.message[0]).toBe(ErrorCodes.INVALID_ADDED_BEFORE_ERROR);
     });
 
-    // it('should reject invalid "artist"', async () => {
+    // it('should reject invalid artist', async () => {
     //   const { error } = await userApi.listAlbumsWithTracks({ artist: [true as unknown as string] });
     //   expect(error?.message[0]).toBe(ErrorCodes.INVALID_ARTIST_ERROR);
     // });
 
-    it('should reject invalid "artist" length', async () => {
+    it('should reject invalid artist length', async () => {
       const { error } = await userApi.listAlbumsWithTracks({ artist: ['x'.repeat(300)] });
       expect(error?.message[0]).toBe(ErrorCodes.INVALID_ARTIST_LENGTH_ERROR);
     });
 
-    // it('should reject invalid "composer"', async () => {
+    // it('should reject invalid composer', async () => {
     //   const { error } = await userApi.listAlbumsWithTracks({ composer: [0 as unknown as string] });
     //   expect(error?.message[0]).toBe(ErrorCodes.INVALID_COMPOSER_LENGTH_ERROR);
     // });
 
-    it('should reject invalid "composer" length', async () => {
+    it('should reject invalid composer length', async () => {
       const { error } = await userApi.listAlbumsWithTracks({ composer: ['x'.repeat(300)] });
       expect(error?.message[0]).toBe(ErrorCodes.INVALID_COMPOSER_LENGTH_ERROR);
     });
 
-    it('should reject invalid "filter"', async () => {
+    it('should reject invalid filter', async () => {
       const { error } = await userApi.listAlbumsWithTracks({ filter: '' });
       expect(error?.message[0]).toBe(ErrorCodes.INVALID_FILTER_LENGTH_ERROR);
     });
 
-    // it('should reject invalid "genre"', async () => {
+    // it('should reject invalid genre', async () => {
     //   const { error } = await userApi.listAlbumsWithTracks({ genre: [0 as unknown as string] });
     //   expect(error?.message[0]).toBe(ErrorCodes.INVALID_GENRE_LENGTH_ERROR);
     // });
 
-    it('should reject invalid "genre" length', async () => {
+    it('should reject invalid genre length', async () => {
       const { error } = await userApi.listAlbumsWithTracks({ genre: ['x'.repeat(300)] });
       expect(error?.message[0]).toBe(ErrorCodes.INVALID_GENRE_LENGTH_ERROR);
     });
 
-    it('should reject negative "limit"', async () => {
+    it('should reject negative limit', async () => {
       const { error } = await userApi.listAlbumsWithTracks({ offset: 0, limit: -1000 });
       expect(error?.message[0]).toBe(ErrorCodes.INVALID_LIMIT_ERROR);
     });
@@ -80,54 +80,54 @@ describe('/users/list-albums-with-tracks', () => {
       expect(error?.message[0]).toBe(ErrorCodes.INVALID_LIMIT_ERROR);
     });
 
-    it('should reject invalid "limit"', async () => {
+    it('should reject invalid limit', async () => {
       const { error } = await userApi.listAlbumsWithTracks({ offset: 0, limit: 'asdf' as unknown as number });
       expect(error?.message[0]).toBe(ErrorCodes.INVALID_LIMIT_ERROR);
     });
 
-    it('should reject invalid "maxRating"', async () => {
+    it('should reject invalid maxRating', async () => {
       const { error } = await userApi.listAlbumsWithTracks({ maxRating: -1 });
       expect(error?.message[0]).toBe(ErrorCodes.INVALID_MAX_RATING_ERROR);
     });
 
-    it('should reject invalid "minRating"', async () => {
+    it('should reject invalid minRating', async () => {
       const { error } = await userApi.listAlbumsWithTracks({ minRating: -1 });
       expect(error?.message[0]).toBe(ErrorCodes.INVALID_MIN_RATING_ERROR);
     });
 
-    it('should reject negative "offset"', async () => {
+    it('should reject negative offset', async () => {
       const { error } = await userApi.listAlbumsWithTracks({ offset: -1000 });
       expect(error?.message[0]).toBe(ErrorCodes.INVALID_OFFSET_ERROR);
     });
 
-    it('should reject invalid "offset"', async () => {
+    it('should reject invalid offset', async () => {
       const { error } = await userApi.listAlbumsWithTracks({ offset: 'asdf' as unknown as number });
       expect(error?.message[0]).toBe(ErrorCodes.INVALID_OFFSET_ERROR);
     });
 
-    it('should reject invalid "releasedAfter" date', async () => {
+    it('should reject invalid releasedAfter date', async () => {
       const { error } = await userApi.listAlbumsWithTracks({ releasedAfter: 'invalid-date' });
       expect(error?.message[0]).toBe(ErrorCodes.INVALID_RELEASED_AFTER_ERROR);
     });
 
-    it('should reject invalid "releasedBefore" date', async () => {
+    it('should reject invalid releasedBefore date', async () => {
       const { error } = await userApi.listAlbumsWithTracks({ releasedBefore: 'invalid-date' });
       expect(error?.message[0]).toBe(ErrorCodes.INVALID_RELEASED_BEFORE_ERROR);
     });
 
-    it('should reject invalid "sortDirection"', async () => {
+    it('should reject invalid sortDirection', async () => {
       const { error } = await userApi.listAlbumsWithTracks({ sortDirection: 'invalid-direction' as SortDirectionEnum });
       expect(error?.message[0]).toBe(ErrorCodes.INVALID_SORT_ORDER_ERROR);
     });
 
-    it('should reject invalid "sortField"', async () => {
+    it('should reject invalid sortField', async () => {
       const { error } = await userApi.listAlbumsWithTracks({
         sortField: 'invalid-field' as unknown as AlbumSortFieldEnum,
       });
       expect(error?.message[0]).toBe(ErrorCodes.INVALID_SORT_FIELD_ERROR);
     });
 
-    it('should reject invalid "year"', async () => {
+    it('should reject invalid year', async () => {
       const { error } = await userApi.listAlbumsWithTracks({ year: 'never' as unknown as number });
       expect(error?.message[0]).toBe(ErrorCodes.INVALID_YEAR_ERROR);
     });

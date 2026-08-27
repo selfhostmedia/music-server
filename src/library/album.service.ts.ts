@@ -9,11 +9,11 @@ import {
   LinkedGenreEntity,
 } from 'src/database/entities';
 import { AlbumFilters } from './types/album-filter';
+import { AlbumSortFieldEnum } from 'src/types/enums';
 import { FindOptions, Includeable, Op } from 'sequelize';
 import { InjectModel } from '@nestjs/sequelize';
 import { Injectable } from '@nestjs/common';
 import { normalizeString } from 'src/utils/strings';
-import { AlbumSortFieldEnum } from 'src/types/enums';
 
 @Injectable()
 export class LibraryAlbumService {

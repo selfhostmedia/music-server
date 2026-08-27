@@ -56,6 +56,28 @@ async function listAlbumsWithTracks(params: RequestParams, query?: ListAlbumsWit
   });
 }
 
+type ListAlbumArtistsQueryDto = paths['/api/user/list-album-artists']['get']['parameters']['query'];
+
+async function listAlbumArtists(params: RequestParams, query?: ListAlbumArtistsQueryDto) {
+  return api.GET(`/api/user/list-album-artists`, {
+    params: {
+      ...params,
+      query,
+    },
+  });
+}
+
+type ListAlbumArtistsWithTracksQueryDto =
+  paths['/api/user/list-album-artists-with-tracks']['get']['parameters']['query'];
+
+async function listAlbumArtistsWithTracks(params: RequestParams, query?: ListAlbumArtistsWithTracksQueryDto) {
+  return api.GET(`/api/user/list-album-artists-with-tracks`, {
+    params: {
+      ...params,
+      query,
+    },
+  });
+}
 async function listIndexerLogs(params: RequestParams) {
   return api.GET(`/api/user/list-indexer-logs`, {
     params,
@@ -89,6 +111,10 @@ export type UserApi = {
   endSession: () => ReturnType<typeof endSession>;
   listAlbums: (query?: ListAlbumsQueryDto) => ReturnType<typeof listAlbums>;
   listAlbumsWithTracks: (query?: ListAlbumsWithTracksQueryDto) => ReturnType<typeof listAlbumsWithTracks>;
+  listAlbumArtists: (query?: ListAlbumArtistsQueryDto) => ReturnType<typeof listAlbumArtists>;
+  listAlbumArtistsWithTracks: (
+    query?: ListAlbumArtistsWithTracksQueryDto,
+  ) => ReturnType<typeof listAlbumArtistsWithTracks>;
   listIndexerLogs: () => ReturnType<typeof listIndexerLogs>;
   listRootPaths: () => ReturnType<typeof listRootPaths>;
   regenerateSessionKey: () => ReturnType<typeof regenerateSessionKey>;
@@ -124,6 +150,12 @@ export async function createUserApi(username?: string, password?: string): Promi
     },
     async listAlbums(query?: ListAlbumsQueryDto) {
       return listAlbums(params, query);
+    },
+    async listAlbumArtists(query?: ListAlbumArtistsQueryDto) {
+      return listAlbumArtists(params, query);
+    },
+    async listAlbumArtistsWithTracks(query?: ListAlbumArtistsWithTracksQueryDto) {
+      return listAlbumArtistsWithTracks(params, query);
     },
     async listAlbumsWithTracks(query?: ListAlbumsWithTracksQueryDto) {
       return listAlbumsWithTracks(params, query);

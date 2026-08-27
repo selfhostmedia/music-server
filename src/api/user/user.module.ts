@@ -5,6 +5,9 @@ import { UserAlbumCoverModule } from './album-cover/album-cover.module';
 import { UserCreateRootPathModule } from './create-root-path/create-root-path.module';
 import { UserDeleteRootPathModule } from './delete-root-path/delete-root-path.module';
 import { UserEndSessionModule } from './end-session/end-session.module';
+import { UserListAlbumArtistsModule } from './list-album-artists/list-album-artists.module';
+// eslint-disable-next-line max-len
+import { UserListAlbumArtistsWithTracksModule } from './list-album-artists-with-tracks/list-album-artists-with-tracks.module';
 import { UserListAlbumsModule } from './list-albums/list-albums.module';
 import { UserListAlbumsWithTracksModule } from './list-albums-with-tracks/list-albums-with-tracks.module';
 import { UserListIndexerLogsModule } from './list-indexer-logs/list-indexer-logs.module';
@@ -21,6 +24,8 @@ import { UserUpdatePasswordModule } from './update-password/update-password.modu
     UserEndSessionModule,
     UserListAlbumsModule,
     UserListAlbumsWithTracksModule,
+    UserListAlbumArtistsModule,
+    UserListAlbumArtistsWithTracksModule,
     UserListIndexerLogsModule,
     UserListRootPathsModule,
     UserRetrieveAlbumModule,
