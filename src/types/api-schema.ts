@@ -337,6 +337,23 @@ export type paths = {
     patch?: never;
     trace?: never;
   };
+  '/api/user/artist-cover': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Cover images for albums */
+    get: operations['UserArtistCoverController_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/user/create-root-path': {
     parameters: {
       query?: never;
@@ -5673,6 +5690,34 @@ export interface operations {
     parameters: {
       query: {
         /** @description The ID of the album */
+        id: number;
+        /** @description The width/height size of the image in pixels */
+        size: number;
+      };
+      header: {
+        Authorization: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'image/jpeg': string;
+          'image/png': string;
+          'image/webp': string;
+        };
+      };
+    };
+  };
+  UserArtistCoverController_get: {
+    parameters: {
+      query: {
+        /** @description The ID of the artist */
         id: number;
         /** @description The width/height size of the image in pixels */
         size: number;
