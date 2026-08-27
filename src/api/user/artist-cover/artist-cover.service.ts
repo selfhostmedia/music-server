@@ -32,7 +32,6 @@ export class UserArtistCoverService {
         [Op.and]: [where(col('coverImage'), Op.not, null), where(col('coverImageMimeType'), Op.not, null)],
       },
     });
-    console.log("got cover image", artistId, albumCover);
     if (!albumCover) {
       throw new NotFoundException(ErrorCodes.ALBUM_NOT_FOUND_ERROR);
     }
