@@ -1,6 +1,7 @@
 /* eslint-disable max-classes-per-file */
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDate, IsInt, IsString } from 'class-validator';
+import { LibraryTrackDto } from './library.track.dto';
 
 export class LibraryAlbumDto {
   /**

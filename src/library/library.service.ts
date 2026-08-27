@@ -1,101 +1,17 @@
-import {
-  AlbumEntity,
-  ArtistEntity,
-  CollatedAlbumEntity,
-  CollatedArtistEntity,
-  CollatedTrackEntity,
-  ComposerEntity,
-  FileEntity,
-  GenreEntity,
-  LinkedArtistEntity,
-  LinkedComposerEntity,
-  LinkedGenreEntity,
-} from 'src/database/entities';
+import { AlbumEntity, ArtistEntity, CollatedAlbumEntity, CollatedTrackEntity } from 'src/database/entities';
 import { AlbumSortFieldEnum, ArtistSortFieldEnum, SortDirectionEnum } from 'src/types/enums';
 import { ErrorCodes } from 'src/constants/error-codes';
-import { FindOptions, Includeable, Op, Sequelize } from 'sequelize';
 import { InjectModel } from '@nestjs/sequelize';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { LibraryAlbumDto, LibraryAlbumWithTracksDto } from './dtos/library.album.dto';
-import { LibraryArtistDto } from './dtos/library.artist.dto';
+import { LibraryAlbumService } from './album.service.ts';
+import { LibraryArtistDto, LibraryArtistWithTracksDto } from './dtos/library.artist.dto';
+import { LibraryArtistService } from './artist.service';
+import { Op, Sequelize } from 'sequelize';
 import { normalizeString, replaceDoubleQuotes } from 'src/utils/strings';
-
-/**
- * The filters that can be applied when querying for albums in the library.
- */
-type AlbumFilters = {
-  /*
-   * Optional filter for the date the album was added to the library, which will do an exact match against
-   * the date the album was added to the library.  The date must be in ISO 8601 format (YYYY-MM-DD).
-   */
-  addedAfter?: Date;
-  /**
-   * Optional filter for the date the album was added to the library, which will do an exact match against
-   * the date the album was added to the library.  The date must be in ISO 8601 format (YYYY-MM-DD).
-   */
-  addedBefore?: Date;
-  /**
-   * Optional filter for the artist(s), which will do a case-insensitive match against the
-   * artists associated with an album.
-   */
-  artist?: string[];
-  /**
-   * Optional filter for the composer(s), which will do a case-insensitive match against the
-   * composers associated with an album.
-   */
-  composer?: string[];
-  /**
-   * Optional filter for the genre(s), which will do a case-insensitive match against the
-   * genres associated with an album.
-   */
-  genre?: string[];
-  /**
-   * Optional filter for the maximum rating value, which will do an exact match against the
-   * aggregate rating of an album's tracks.
-   */
-  maxRating?: number;
-  /**
-   * Optional filter for the minimum rating value, which will do an exact match against the
-   * aggregate rating of an album's tracks.
-   */
-  minRating?: number;
-  /**
-   * Optional filter for a case-insensitive partial-match against album, artist, composer, or genre.
-   */
-  filter?: string;
-  /**
-   * Optional filter for the release year, which will do an exact match against the
-   */
-  year?: number;
-};
-
-type ArtistFilters = {
-  /**
-   * Optional filter for the date the artist was added to the library, which will do an exact match against
-   * the date the artist was added to the library.  The date must be in ISO 8601 format (YYYY-MM-DD).
-   */
-  addedAfter?: Date;
-  /**
-   * Optional filter for the date the artist was added to the library, which will do an exact match against
-   * the date the artist was added to the library.  The date must be in ISO 8601 format (YYYY-MM-DD).
-   */
-  addedBefore?: Date;
-  /**
-   * Optional filter for a case-insensitive partial-match against the artist's name.
-   */
-  filter?: string;
-};
-
-type ListResult<T> = {
-  /**
-   * The total number of items that match the query filter which may be greater than the items in the current page.
-   */
-  total: number;
-  /**
-   * The list of items returned for the current page, which may be empty if there are no matching items.
-   */
-  items: T[];
-};
+import type { AlbumFilters } from './types/album-filter';
+import type { ArtistFilters } from './types/artist-filter';
+import type { ListResult } from './types/list-result';
 
 @Injectable()
 export class LibraryService {
@@ -104,234 +20,24 @@ export class LibraryService {
     private readonly albumEntity: typeof AlbumEntity,
     @InjectModel(ArtistEntity)
     private readonly artistEntity: typeof ArtistEntity,
-    @InjectModel(ComposerEntity)
-    private readonly composerEntity: typeof ComposerEntity,
-    @InjectModel(FileEntity)
-    private readonly fileEntity: typeof FileEntity,
-    @InjectModel(GenreEntity)
-    private readonly genreEntity: typeof GenreEntity,
     @InjectModel(CollatedAlbumEntity)
     private readonly collatedAlbumEntity: typeof CollatedAlbumEntity,
-    @InjectModel(CollatedArtistEntity)
-    private readonly collatedArtistEntity: typeof CollatedArtistEntity,
     @InjectModel(CollatedTrackEntity)
     private readonly collatedTrackEntity: typeof CollatedTrackEntity,
+
+    private readonly albumService: LibraryAlbumService,
+    private readonly artistService: LibraryArtistService,
   ) {}
-
-  /**
-   * Builds a Sequelize where clause for filtering albums based on the provided parameters.  It
-   * is encapsulated into a function because it needs to be used for requesting paginated results
-   * and again for counting total results, and because the filtering by names involves several
-   * queries to identify the IDs of the artists, composers, and genres that match the provided filters.
-   * @param {number} accountId The account ID to retrieve albums for.
-   * @param {string[]} filter.artistFilter Optional case-insensitive partial-match filter for the artist(s)
-   * @param {string[]} filter.composerFilter Optional case-insensitive partial-match filter for the composer(s)
-   * @param {string[]} filter.genreFilter Optional case-insensitive partial-match filter for the genre(s)
-   * @param {string} filter.searchFilter Optional case-insensitive partial-match filter for album, artist,
-   * composer, or genre.
-   * @param {number} filter.yearFilter Optional exact-match filter for the release year.
-   * @param {number} filter.minRating Optional minimum rating value 0-5
-   * @param {number} filter.maxRating Optional maximum rating value 0-5
-   * @param {Date} filter.addedBefore Optional filter for the date the album was added to the library
-   * @param {Date} filter.addedAfter Optional filter for the date the album was added to the library
-   * @returns {Promise<FindOptions<FileEntity>>} A Sequelize where clause object for filtering albums.
-   */
-  private async createAlbumQueryFilter(accountId: number, filters?: AlbumFilters): Promise<FindOptions<FileEntity>> {
-    const artistIds: number[] = [];
-    const composerIds: number[] = [];
-    const genreIds: number[] = [];
-    // artists does a partial-match because the data may be expressed inconsistently like:
-    // - Artist 1              -> [Artist 1]
-    // - Artist 1, Artist 2    -> [Artist 1, Artist 2]
-    // - Artist 1 & Artist 2   -> [Artist 1 & Artist 2]
-    // - Artist 1 ft. Artist 2 -> [Artist 1 ft. Artist 2]
-    // - Artist 1 + Artist 2   -> [Artist 1 + Artist 2]
-    // - Artist 1 and Artist 2 -> [Artist 1 + Artist 2]
-    // and of course punctuation like & or + can be part of a singular name, eg:
-    // - Florence + The Machine
-    // - Nick Cave & The Bad Seeds
-    if (filters?.artist || filters?.filter) {
-      const artistFilter = filters.artist
-        ? {
-            nameNormalized: {
-              [Op.or]: filters.artist.map((artist) => ({
-                [Op.like]: `%${normalizeString(artist)}%`,
-              })),
-            },
-          }
-        : {};
-      const searchFilter = filters.filter
-        ? {
-            nameNormalized: {
-              [Op.like]: normalizeString(filters.filter),
-            },
-          }
-        : {};
-      const artists = await this.artistEntity.findAll({
-        attributes: ['id', 'name'],
-        where: {
-          [Op.or]: [artistFilter, searchFilter],
-        },
-        raw: true,
-      });
-      artistIds.push(...artists.map((artist) => artist.id));
-    }
-    // composers does a partial-match because the data may be expressed inconsistently like:
-    // - Composer 1                -> [Composer 1]
-    // - Composer 1, Composer 2    -> [Composer 1, Composer 2]
-    // - Composer 1 & Composer 2   -> [Composer 1 & Composer 2]
-    // - Composer 1 ft. Composer 2 -> [Composer 1 ft. Composer 2]
-    if (filters?.composer || filters?.filter) {
-      const composerFilter = filters.composer
-        ? {
-            nameNormalized: {
-              [Op.or]: filters.composer.map((composer) => ({
-                [Op.like]: `%${normalizeString(composer)}%`,
-              })),
-            },
-          }
-        : {};
-      const searchFilter = filters.filter
-        ? {
-            nameNormalized: {
-              [Op.like]: normalizeString(filters.filter),
-            },
-          }
-        : {};
-      const composers = await this.composerEntity.findAll({
-        attributes: ['id'],
-        where: {
-          [Op.or]: [composerFilter, searchFilter],
-        },
-      });
-      composerIds.push(...composers.map((composer) => composer.id));
-    }
-    // genres does an exact-match because there are many partial-matches like `Rock` vs `AlternRock`
-    // that should not be co-mingled
-    if (filters?.genre) {
-      const genreFilter = filters.genre
-        ? {
-            nameNormalized: {
-              [Op.or]: filters.genre.map(normalizeString),
-            },
-          }
-        : {};
-      const searchFilter = filters.filter
-        ? {
-            nameNormalized: {
-              [Op.like]: normalizeString(filters.filter),
-            },
-          }
-        : {};
-      const genres = await this.genreEntity.findAll({
-        attributes: ['id'],
-        where: {
-          accountId,
-          [Op.or]: [genreFilter, searchFilter],
-        },
-      });
-      genreIds.push(...genres.map((genre) => genre.id));
-    }
-    const joinedTables: Includeable[] = [];
-    if (artistIds.length) {
-      joinedTables.push({
-        model: LinkedArtistEntity,
-        attributes: [],
-        where: {
-          artistId: { [Op.in]: artistIds },
-        },
-      });
-    }
-    if (composerIds.length) {
-      joinedTables.push({
-        model: LinkedComposerEntity,
-        attributes: [],
-        where: {
-          composerId: { [Op.in]: composerIds },
-        },
-      });
-    }
-    if (genreIds.length) {
-      joinedTables.push({
-        model: LinkedGenreEntity,
-        attributes: [],
-        where: {
-          genreId: { [Op.in]: genreIds },
-        },
-      });
-    }
-    const normalizedFilterString = filters?.filter ? normalizeString(filters.filter) : undefined;
-    if (normalizedFilterString) {
-      joinedTables.push({
-        model: AlbumEntity,
-        attributes: [],
-        where: {
-          accountId,
-          title: { [Op.like]: `%${normalizedFilterString}%` },
-        },
-      });
-    }
-    return {
-      include: joinedTables,
-      where: {
-        accountId,
-        ...(filters?.year && {
-          year: filters.year,
-        }),
-        ...(filters?.minRating !== undefined && {
-          rating: { [Op.gte]: filters.minRating },
-        }),
-        ...(filters?.maxRating !== undefined && {
-          rating: {
-            [Op.lte]: filters.maxRating,
-          },
-        }),
-        ...(filters?.addedBefore && {
-          createdAt: {
-            [Op.lt]: filters.addedBefore,
-          },
-        }),
-        ...(filters?.addedAfter && {
-          createdAt: {
-            [Op.gt]: filters.addedAfter,
-          },
-        }),
-      },
-    };
-  }
-
-  /**
-   * Identifies the album IDs that are going to be returned in raw, unpaginated form based on the
-   * query filtering parameters.
-   * @param {FindOptions<FileEntity>} queryFilter The Sequelize find options for filtering albums
-   * @returns {Promise<number[]>} The list of album IDs that match the query filter.
-   */
-  private async findMatchingAlbumIds(queryFilter: FindOptions<FileEntity>): Promise<number[]> {
-    const matchingAlbums = await this.fileEntity.findAll({
-      ...queryFilter,
-      attributes: [
-        'albumId',
-        [
-          this.albumEntity.sequelize!.literal(
-            `(SELECT ROUND(SUM(rating) / COUNT(rating)) FROM files WHERE album_id = id)`,
-          ),
-          'rating',
-        ],
-      ],
-      group: ['albumId'],
-    });
-    return matchingAlbums.map((album) => album.albumId);
-  }
 
   /**
    * Returns a list of albums belonging to an account, optionally paginated, filtered and sorted by the
    * specified parameters.
-   * @param {FindOptions<CollatedAlbumEntity>} queryFilter The Sequelize where clause for filtering albums
-   * this should be constructed using the `createAlbumQueryFilter` method.
+   * @param {number} accountId The user performing the search
+   * @param {AlbumFilters} filters The search parameters for the albums
    * @param {number} offset Optional pagination offset
    * @param {number} limit Optional pagination limit
-   * @param {AlbumSortFieldEnum} sortBy Optional field to sort the results by
-   * @param {SortDirectionEnum} sortOrder Optional sort order specification
+   * @param {AlbumSortFieldEnum} sortField Optional field to sort the results by
+   * @param {SortDirectionEnum} sortDirection Optional sort order specification
    * @returns {Promise<ListResult<LibraryAlbumDto>>} The album list and total record count.
    */
   async listAlbums(
@@ -339,43 +45,12 @@ export class LibraryService {
     filter: AlbumFilters,
     offset: number,
     limit: number,
-    sortBy?: AlbumSortFieldEnum,
-    sortOrder?: SortDirectionEnum,
+    sortField?: AlbumSortFieldEnum,
+    sortDirection?: SortDirectionEnum,
   ): Promise<ListResult<LibraryAlbumDto>> {
-    let sortByColumn: string | undefined;
-    switch (sortBy) {
-      case AlbumSortFieldEnum.ALBUM:
-        sortByColumn = 'title';
-        break;
-      case AlbumSortFieldEnum.YEAR:
-        sortByColumn = 'year';
-        break;
-      case AlbumSortFieldEnum.RATING:
-        sortByColumn = 'rating';
-        break;
-      case AlbumSortFieldEnum.DATE_ADDED:
-        sortByColumn = 'createdAt';
-        break;
-      case AlbumSortFieldEnum.DATE_RELEASED:
-        sortByColumn = 'year';
-        break;
-      case AlbumSortFieldEnum.ARTIST:
-        sortByColumn = 'artists';
-        break;
-      case AlbumSortFieldEnum.ALBUM_ARTIST:
-        sortByColumn = 'artists';
-        break;
-      case AlbumSortFieldEnum.COMPOSER:
-        sortByColumn = 'composers';
-        break;
-      case AlbumSortFieldEnum.GENRE:
-        sortByColumn = 'genres';
-        break;
-      default:
-        sortByColumn = 'title';
-    }
-    const queryFilter = await this.createAlbumQueryFilter(accountId, filter);
-    const matchingAlbums = await this.findMatchingAlbumIds(queryFilter);
+    const sortFieldColumn = this.albumService.sortFieldToColumn(sortField);
+    const queryFilter = await this.albumService.createAlbumQueryFilter(accountId, filter);
+    const matchingAlbums = await this.albumService.findMatchingAlbumIds(queryFilter);
     const albums = await this.collatedAlbumEntity.findAndCountAll({
       attributes: [
         'artists',
@@ -401,7 +76,7 @@ export class LibraryService {
       where: {
         id: matchingAlbums,
       },
-      order: [[Sequelize.fn('lower', Sequelize.col(sortByColumn)), sortOrder || 'ASC']],
+      order: [[Sequelize.fn('lower', Sequelize.col(sortFieldColumn)), sortDirection || 'ASC']],
       offset,
       limit,
     });
@@ -433,23 +108,23 @@ export class LibraryService {
    * Returns a list of albums belonging to an account, optionally paginated, filtered and sorted by the
    * specified parameters and bundling track lists for all albums.  If the track lists are not required
    * then the `listAlbums` method will provide better performance.
-   * @param {FindOptions<CollatedAlbumEntity>} queryFilter The Sequelize where clause for filtering albums
-   * this should be constructed using the `createAlbumQueryFilter` method.
+   * @param {number} accountId The user performing the search
+   * @param {AlbumFilters} filters The search parameters for the albums
    * @param {number} offset Optional pagination offset
    * @param {number} limit Optional pagination limit
-   * @param {AlbumSortFieldEnum} sortBy Optional field to sort the results by
-   * @param {SortDirectionEnum} sortOrder Optional sort order specification
+   * @param {AlbumSortFieldEnum} sortField Optional field to sort the results by
+   * @param {SortDirectionEnum} sortDirection Optional sort order specification
    * @returns {Promise<ListResult<LibraryAlbumWithTracksDto>>} The album list with tracks and total record count.
    */
   async listAlbumsWithTracks(
     accountId: number,
-    filter: AlbumFilters,
+    filters: AlbumFilters,
     offset: number,
     limit: number,
-    sortBy?: AlbumSortFieldEnum,
-    sortOrder?: SortDirectionEnum,
+    sortField?: AlbumSortFieldEnum,
+    sortDirection?: SortDirectionEnum,
   ): Promise<ListResult<LibraryAlbumWithTracksDto>> {
-    const albums = await this.listAlbums(accountId, filter, offset, limit, sortBy, sortOrder);
+    const albums = await this.listAlbums(accountId, filters, offset, limit, sortField, sortDirection);
     const allTracks = await this.collatedTrackEntity.findAll({
       where: {
         albumId: albums.items.map((album) => album.id),
@@ -489,33 +164,33 @@ export class LibraryService {
   }
 
   /**
-   * Lists all artists along with their albums and tracks for a given account.
-   * @param accountId The ID of the account for which to list artists.
-   * @returns {Promise<LibraryArtistDto>} The list of artists with their albums and tracks.
+   * Lists all artists along with their albums for a given account, optionally paginated, filtered and
+   * sorted by the specified parameters.
+   * @param {number} accountId The user performing the search
+   * @param {ArtistFilters} filters The search parameters for the artists
+   * @param {number} offset The number of items to skip before starting to collect the result set
+   * @param {number} limit The maximum number of items to return
+   * @param {ArtistSortFieldEnum} [sortField] The field by which to sort the artists
+   * @param {SortDirectionEnum} [sortDirection] The direction in which to sort the artists
+   * @returns {Promise<ListResult<LibraryArtistDto>>} The list of artists with their albums and tracks.
    */
-  async listArtists(
+  async listAlbumArtists(
     accountId: number,
     filters: ArtistFilters,
     offset: number,
     limit: number,
-    sortBy?: ArtistSortFieldEnum,
-    sortOrder?: SortDirectionEnum,
-  ): Promise<LibraryArtistDto[]> {
-    let sortByColumn: string | undefined;
-    switch (sortBy) {
-      case ArtistSortFieldEnum.DATE_ADDED:
-        sortByColumn = 'createdAt';
-        break;
-      case ArtistSortFieldEnum.ARTIST:
-      default:
-        sortByColumn = 'name';
-    }
+    sortField?: ArtistSortFieldEnum,
+    sortDirection?: SortDirectionEnum,
+  ): Promise<ListResult<LibraryArtistDto>> {
+    const sortFieldColumn = this.artistService.sortFieldToColumn(sortField);
     const normalizedFilterString = filters?.filter ? normalizeString(filters.filter) : undefined;
-    const artists = await this.collatedArtistEntity.findAll({
+    const queryFilter = await this.artistService.createArtistQueryFilter(accountId, filters);
+    const artistIds = await this.artistService.findMatchingArtistIds(queryFilter);
+    const artists = await this.artistEntity.findAndCountAll({
       attributes: ['id', 'name', 'createdAt'],
       where: {
-        accountId,
-        ...(normalizedFilterString && {
+        id: artistIds,
+        ...(filters?.filter && {
           name: { [Op.like]: `%${normalizedFilterString}%` },
         }),
         ...(filters?.addedBefore && {
@@ -529,26 +204,43 @@ export class LibraryService {
           },
         }),
       },
-      order: [[Sequelize.fn('lower', Sequelize.col(sortByColumn)), sortOrder || 'ASC']],
+      order: [[Sequelize.fn('LOWER', Sequelize.col(sortFieldColumn)), sortDirection || 'ASC']],
       offset,
       limit,
     });
-    return artists.map((artist) => ({
-      createdAt: artist.createdAt,
-      id: artist.id,
-      name: replaceDoubleQuotes(artist.name),
-    }));
+    return {
+      total: artists.count,
+      items: artists.rows.map((artist) => {
+        return {
+          id: artist.id,
+          createdAt: artist.createdAt,
+          name: replaceDoubleQuotes(artist.name || ''),
+        };
+      }),
+    };
   }
 
-  async listArtistsWithTracks(
+  /**
+   * Lists all artists along with their albums for a given account, optionally paginated, filtered and
+   * sorted by the specified parameters and bundling track lists for all albums.  If the track lists are
+   * not required then the `listArtists` method will provide better performance.
+   * @param {number} accountId The user performing the search
+   * @param {ArtistFilters} filters The search parameters for the artists
+   * @param {number} offset The number of items to skip before starting to collect the result set
+   * @param {number} limit The maximum number of items to return
+   * @param {ArtistSortFieldEnum} [sortField] The field by which to sort the artists
+   * @param {SortDirectionEnum} [sortDirection] The direction in which to sort the artists
+   * @returns {Promise<ListResult<LibraryArtistDto>>} The list of artists with their albums and tracks.
+   */
+  async listAlbumArtistsWithTracks(
     accountId: number,
     filters: ArtistFilters,
     offset: number,
     limit: number,
-    sortBy?: ArtistSortFieldEnum,
-    sortOrder?: SortDirectionEnum,
-  ) {
-    const artists = await this.listArtists(accountId, filters, offset, limit, sortBy, sortOrder);
+    sortField?: ArtistSortFieldEnum,
+    sortDirection?: SortDirectionEnum,
+  ): Promise<ListResult<LibraryArtistWithTracksDto>> {
+    const artists = await this.listAlbumArtists(accountId, filters, offset, limit, sortField, sortDirection);
     const albums = await this.listAlbumsWithTracks(
       accountId,
       filters?.filter
@@ -589,29 +281,32 @@ export class LibraryService {
       },
       {} as Record<number, typeof allTracks>,
     );
-    return artists.map((artist) => ({
-      id: artist.id,
-      createdAt: artist.createdAt,
-      name: replaceDoubleQuotes(artist.name),
-      albums: (albumIndex[artist.name] || []).map((partialAlbum) => {
-        const album = partialAlbum as LibraryAlbumWithTracksDto;
-        const tracks = tracksByAlbumId[album.id]?.filter((track) => track.trackArtists.includes(artist.name)) || [];
-        album.tracks = tracks.map((track) => ({
-          artists: track.trackArtists.map(replaceDoubleQuotes),
-          composers: track.trackComposers.map(replaceDoubleQuotes),
-          discNumber: track.trackDiscNumber,
-          duration: track.trackDuration,
-          fileId: track.fileId,
-          genres: track.trackGenres.map(replaceDoubleQuotes),
-          id: track.fileId,
-          rating: track.trackRating,
-          title: replaceDoubleQuotes(track.trackTitle),
-          trackNumber: track.trackNumber,
-          year: track.trackYear,
-        }));
-        return album;
-      }),
-    }));
+    return {
+      total: artists.total,
+      items: artists.items.map((artist) => ({
+        id: artist.id,
+        createdAt: artist.createdAt,
+        name: replaceDoubleQuotes(artist.name),
+        albums: (albumIndex[artist.name] || []).map((partialAlbum) => {
+          const album = partialAlbum as LibraryAlbumWithTracksDto;
+          const tracks = tracksByAlbumId[album.id]?.filter((track) => track.trackArtists.includes(artist.name)) || [];
+          album.tracks = tracks.map((track) => ({
+            artists: track.trackArtists.map(replaceDoubleQuotes),
+            composers: track.trackComposers.map(replaceDoubleQuotes),
+            discNumber: track.trackDiscNumber,
+            duration: track.trackDuration,
+            fileId: track.fileId,
+            genres: track.trackGenres.map(replaceDoubleQuotes),
+            id: track.fileId,
+            rating: track.trackRating,
+            title: replaceDoubleQuotes(track.trackTitle),
+            trackNumber: track.trackNumber,
+            year: track.trackYear,
+          }));
+          return album;
+        }),
+      })),
+    };
   }
 
   async retrieveAlbum(accountId: number, albumId: number): Promise<LibraryAlbumWithTracksDto> {
