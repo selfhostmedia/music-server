@@ -2,7 +2,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ErrorCodes } from 'src/constants/error-codes';
 import { IsInt, Min } from 'class-validator';
-import { LibraryAlbumWithTracksDto } from 'src/library/library.album.dto';
+import { LibraryAlbumWithTracksDto } from 'src/library/dtos/library.album.dto';
 import { NotFoundResponseDto, SuccessResponseDto } from 'src/api/response.dto';
 
 export class UserRetrieveAlbumQueryDto {

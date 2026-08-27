@@ -4,7 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { BadRequestResponseDto, SuccessResponseDto } from 'src/api/response.dto';
 import { ErrorCodes } from 'src/constants/error-codes';
 import { IsDate, IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, Length, Max, Min } from 'class-validator';
-import { LibraryAlbumWithTracksDto } from 'src/library/library.album.dto';
+import { LibraryAlbumWithTracksDto } from 'src/library/dtos/library.album.dto';
 import { PaginationQueryDto } from 'src/api/request.dto';
 import { Transform } from 'class-transformer';
 
