@@ -11,6 +11,7 @@ import {
 } from '../database/entities';
 import { LibraryAlbumService } from './album.service.ts';
 import { LibraryArtistService } from './artist.service';
+import { LibraryComposerService } from './composer.service';
 import { LibraryService } from './library.service';
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
@@ -29,7 +30,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
       GenreEntity,
     ]),
   ],
-  providers: [LibraryService, LibraryArtistService, LibraryAlbumService],
+  providers: [LibraryService, LibraryAlbumService, LibraryArtistService, LibraryComposerService],
   exports: [LibraryService],
 })
 export class LibraryModule {}

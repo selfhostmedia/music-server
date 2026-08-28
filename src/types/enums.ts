@@ -128,3 +128,8 @@ export enum ArtistSortFieldEnum {
   ARTIST = 'artist',
   DATE_ADDED = 'date_added',
 }
+
+export enum ComposerSortFieldEnum {
+  COMPOSER = 'composer',
+  DATE_ADDED = 'date_added',
+}

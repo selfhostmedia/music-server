@@ -78,6 +78,29 @@ async function listAlbumArtistsWithTracks(params: RequestParams, query?: ListAlb
     },
   });
 }
+
+type ListComposersQueryDto = paths['/api/user/list-composers']['get']['parameters']['query'];
+
+async function listComposers(params: RequestParams, query?: ListComposersQueryDto) {
+  return api.GET(`/api/user/list-composers`, {
+    params: {
+      ...params,
+      query,
+    },
+  });
+}
+
+type ListComposersWithTracksQueryDto = paths['/api/user/list-composers-with-tracks']['get']['parameters']['query'];
+
+async function listComposersWithTracks(params: RequestParams, query?: ListComposersWithTracksQueryDto) {
+  return api.GET(`/api/user/list-composers-with-tracks`, {
+    params: {
+      ...params,
+      query,
+    },
+  });
+}
+
 async function listIndexerLogs(params: RequestParams) {
   return api.GET(`/api/user/list-indexer-logs`, {
     params,
@@ -115,6 +138,8 @@ export type UserApi = {
   listAlbumArtistsWithTracks: (
     query?: ListAlbumArtistsWithTracksQueryDto,
   ) => ReturnType<typeof listAlbumArtistsWithTracks>;
+  listComposers: (query?: ListComposersQueryDto) => ReturnType<typeof listComposers>;
+  listComposersWithTracks: (query?: ListComposersWithTracksQueryDto) => ReturnType<typeof listComposersWithTracks>;
   listIndexerLogs: () => ReturnType<typeof listIndexerLogs>;
   listRootPaths: () => ReturnType<typeof listRootPaths>;
   regenerateSessionKey: () => ReturnType<typeof regenerateSessionKey>;
@@ -159,6 +184,12 @@ export async function createUserApi(username?: string, password?: string): Promi
     },
     async listAlbumsWithTracks(query?: ListAlbumsWithTracksQueryDto) {
       return listAlbumsWithTracks(params, query);
+    },
+    async listComposers(query?: ListComposersQueryDto) {
+      return listComposers(params, query);
+    },
+    async listComposersWithTracks(query?: ListComposersWithTracksQueryDto) {
+      return listComposersWithTracks(params, query);
     },
     async listIndexerLogs() {
       return listIndexerLogs(params);
