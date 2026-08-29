@@ -18,6 +18,8 @@ import { UserListTrackArtistsModule } from './list-track-artists/list-track-arti
 import { UserListTrackArtistsWithTracksModule } from './list-track-artists-with-tracks/list-track-artists-with-tracks.module';
 import { UserListTrackComposersModule } from './list-track-composers/list-track-composers.module';
 import { UserListTrackComposersWithTracksModule } from './list-track-composers-with-tracks/list-track-composers-with-tracks.module';
+import { UserListTrackGenresModule } from './list-track-genres/list-track-genres.module';
+import { UserListTrackGenresWithTracksModule } from './list-track-genres-with-tracks/list-track-genres-with-tracks.module';
 import { UserRegenerateSessionKeyModule } from './regenerate-session-key/regenerate-session-key.module';
 import { UserRetrieveAlbumModule } from './retrieve-album/retrieve-album.module';
 import { UserUpdatePasswordModule } from './update-password/update-password.module';
@@ -34,6 +36,8 @@ import { UserUpdatePasswordModule } from './update-password/update-password.modu
     UserListAlbumsWithTracksModule,
     UserListAlbumArtistsModule,
     UserListAlbumArtistsWithTracksModule,
+    UserListTrackGenresModule,
+    UserListTrackGenresWithTracksModule,
     UserListTrackArtistsModule,
     UserListTrackArtistsWithTracksModule,
     UserListTrackComposersModule,

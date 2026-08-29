@@ -4,8 +4,15 @@ import {
   CollatedAlbumEntity,
   CollatedTrackEntity,
   ComposerEntity,
+  GenreEntity,
 } from 'src/database/entities';
-import { AlbumSortFieldEnum, ArtistSortFieldEnum, ComposerSortFieldEnum, SortDirectionEnum } from 'src/types/enums';
+import {
+  AlbumSortFieldEnum,
+  ArtistSortFieldEnum,
+  ComposerSortFieldEnum,
+  GenreSortFieldEnum,
+  SortDirectionEnum,
+} from 'src/types/enums';
 import { ComposerFilters } from './types/composer-filter';
 import { ErrorCodes } from 'src/constants/error-codes';
 import { InjectModel } from '@nestjs/sequelize';
@@ -16,6 +23,7 @@ import { LibraryArtistDto, LibraryArtistWithTracksDto } from './dtos/library.art
 import { LibraryArtistService } from './artist.service';
 import { LibraryComposerDto, LibraryComposerWithTracksDto } from './dtos';
 import { LibraryComposerService } from './composer.service';
+import { LibraryGenreDto, LibraryGenreWithTracksDto } from './dtos/library.genre.dto';
 import { Op, Sequelize } from 'sequelize';
 import { normalizeString, replaceDoubleQuotes } from 'src/utils/strings';
 import type { AlbumFilters } from './types/album-filter';
@@ -39,6 +47,8 @@ export class LibraryService {
     private readonly albumService: LibraryAlbumService,
     private readonly artistService: LibraryArtistService,
     private readonly composerService: LibraryComposerService,
+    @InjectModel(GenreEntity)
+    private readonly genreEntity: typeof GenreEntity,
   ) {}
 
   /**
@@ -144,10 +154,7 @@ export class LibraryService {
     });
     const tracksByAlbumId = allTracks.reduce(
       (acc, track) => {
-        if (!acc[track.albumId]) {
-          acc[track.albumId] = [];
-        }
-        acc[track.albumId]?.push(track);
+        (acc[track.albumId] ??= []).push(track);
         return acc;
       },
       {} as Record<number, typeof allTracks>,
@@ -264,59 +271,24 @@ export class LibraryService {
       100_000,
     );
     const albumIndex = {};
-    for (let i = 0; i < albums.items.length; i += 1) {
+    for (let i = 0, len = albums.items.length; i < len; i += 1) {
       const album = albums.items[i];
       if (album) {
-        for (let j = 0; j < album.albumArtists.length; j += 1) {
+        for (let j = 0, jLen = album.albumArtists.length; j < jLen; j += 1) {
           const artist = album.albumArtists[j];
           if (artist) {
-            if (!albumIndex[artist]) {
-              albumIndex[artist] = [];
-            }
-            albumIndex[artist].push(album);
+            (albumIndex[artist] ??= []).push(album);
           }
         }
       }
     }
-    const allTracks = await this.collatedTrackEntity.findAll({
-      where: {
-        albumId: albums.items.map((album) => album.id),
-      },
-    });
-    const tracksByAlbumId = allTracks.reduce(
-      (acc, track) => {
-        if (!acc[track.albumId]) {
-          acc[track.albumId] = [];
-        }
-        acc[track.albumId]?.push(track);
-        return acc;
-      },
-      {} as Record<number, typeof allTracks>,
-    );
     return {
       total: artists.total,
       items: artists.items.map((artist) => ({
         id: artist.id,
         createdAt: artist.createdAt,
         name: replaceDoubleQuotes(artist.name),
-        albums: (albumIndex[artist.name] || []).map((partialAlbum) => {
-          const album = partialAlbum as LibraryAlbumWithTracksDto;
-          const tracks = tracksByAlbumId[album.id]?.filter((track) => track.trackArtists.includes(artist.name)) || [];
-          album.tracks = tracks.map((track) => ({
-            artists: track.trackArtists.map(replaceDoubleQuotes),
-            composers: track.trackComposers.map(replaceDoubleQuotes),
-            discNumber: track.trackDiscNumber,
-            duration: track.trackDuration,
-            fileId: track.fileId,
-            genres: track.trackGenres.map(replaceDoubleQuotes),
-            id: track.fileId,
-            rating: track.trackRating,
-            title: replaceDoubleQuotes(track.trackTitle),
-            trackNumber: track.trackNumber,
-            year: track.trackYear,
-          }));
-          return album;
-        }),
+        albums: albumIndex[artist.name] || [],
       })),
     };
   }
@@ -411,16 +383,13 @@ export class LibraryService {
       0,
       100_000,
     );
-    for (let i = 0; i < albums.items.length; i += 1) {
+    for (let i = 0, len = albums.items.length; i < len; i += 1) {
       const album = albums.items[i];
       if (album) {
-        for (let j = 0; j < album.albumComposers.length; j += 1) {
+        for (let j = 0, jLen = album.albumComposers.length; j < jLen; j += 1) {
           const composer = album.albumComposers[j];
           if (composer) {
-            if (!albumIndex[composer]) {
-              albumIndex[composer] = [];
-            }
-            albumIndex[composer].push(album);
+            (albumIndex[composer] ??= []).push(album);
           }
         }
       }
@@ -432,10 +401,7 @@ export class LibraryService {
     });
     const tracksByAlbumId = allTracks.reduce(
       (acc, track) => {
-        if (!acc[track.albumId]) {
-          acc[track.albumId] = [];
-        }
-        acc[track.albumId]?.push(track);
+        (acc[track.albumId] ??= []).push(track);
         return acc;
       },
       {} as Record<number, typeof allTracks>,
@@ -562,36 +528,18 @@ export class LibraryService {
       0,
       100_000,
     );
-    for (let i = 0; i < albums.items.length; i += 1) {
+    for (let i = 0, len = albums.items.length; i < len; i += 1) {
       const album = albums.items[i];
       if (album) {
         const trackArtists = album.tracks.map((track) => track.artists).flat();
-        for (let j = 0; j < trackArtists.length; j += 1) {
+        for (let j = 0, jLen = trackArtists.length; j < jLen; j += 1) {
           const artist = trackArtists[j];
           if (artist) {
-            if (!albumIndex[artist]) {
-              albumIndex[artist] = [];
-            }
-            albumIndex[artist].push(album);
+            (albumIndex[artist] ??= []).push(album);
           }
         }
       }
     }
-    const allTracks = await this.collatedTrackEntity.findAll({
-      where: {
-        albumId: albums.items.map((album) => album.id),
-      },
-    });
-    const tracksByAlbumId = allTracks.reduce(
-      (acc, track) => {
-        if (!acc[track.albumId]) {
-          acc[track.albumId] = [];
-        }
-        acc[track.albumId]?.push(track);
-        return acc;
-      },
-      {} as Record<number, typeof allTracks>,
-    );
     return {
       total: artists.total,
       items: artists.items.map((artist) => {
@@ -599,27 +547,77 @@ export class LibraryService {
           id: artist.id,
           createdAt: artist.createdAt,
           name: replaceDoubleQuotes(artist.name || ''),
-          albums: (albumIndex[artist.name] || []).map((partialAlbum) => {
-            const album = partialAlbum as LibraryAlbumWithTracksDto;
-            const tracks =
-              tracksByAlbumId[album.id]?.filter((track) => track.trackComposers.includes(artist.name)) || [];
-            album.tracks = tracks.map((track) => ({
-              artists: track.trackArtists.map(replaceDoubleQuotes),
-              composers: track.trackComposers.map(replaceDoubleQuotes),
-              discNumber: track.trackDiscNumber,
-              duration: track.trackDuration,
-              fileId: track.fileId,
-              genres: track.trackGenres.map(replaceDoubleQuotes),
-              id: track.fileId,
-              rating: track.trackRating,
-              title: replaceDoubleQuotes(track.trackTitle),
-              trackNumber: track.trackNumber,
-              year: track.trackYear,
-            }));
-            return album;
-          }),
+          albums: albumIndex[artist.name] || [],
         };
       }),
+    };
+  }
+
+  async listTrackGenres(
+    accountId: number,
+    offset: number,
+    limit: number,
+    sortField?: GenreSortFieldEnum,
+    sortDirection?: SortDirectionEnum,
+  ): Promise<ListResult<LibraryGenreDto>> {
+    let sortFieldColumn: string;
+    switch (sortField) {
+      case GenreSortFieldEnum.GENRE:
+      default:
+        sortFieldColumn = 'name';
+        break;
+    }
+    const genres = await this.genreEntity.findAndCountAll({
+      where: {
+        accountId,
+        isDefault: false,
+      },
+      attributes: ['id', 'name'],
+      order: [[Sequelize.fn('LOWER', Sequelize.col(sortFieldColumn)), sortDirection || 'ASC']],
+      offset,
+      limit,
+    });
+    return {
+      items: genres.rows.map((genre) => {
+        return {
+          id: genre.id,
+          name: genre.name,
+        };
+      }),
+      total: genres.count,
+    };
+  }
+
+  async listTrackGenresWithTracks(
+    accountId: number,
+    offset: number,
+    limit: number,
+    sortField?: GenreSortFieldEnum,
+    sortDirection?: SortDirectionEnum,
+  ): Promise<ListResult<LibraryGenreWithTracksDto>> {
+    const genres = await this.listTrackGenres(accountId, offset, limit, sortField, sortDirection);
+    const albumIndex = {};
+    const albums = await this.listAlbumsWithTracks(accountId, {}, 0, 100_000);
+    for (let i = 0, len = albums.items.length; i < len; i += 1) {
+      const album = albums.items[i];
+      if (album) {
+        for (let j = 0, jLen = album.albumGenres.length; j < jLen; j += 1) {
+          const genre = album.albumGenres[j];
+          if (genre) {
+            (albumIndex[genre] ??= []).push(album);
+          }
+        }
+      }
+    }
+    return {
+      items: genres.items.map((genre) => {
+        return {
+          id: genre.id,
+          name: genre.name,
+          albums: albumIndex[genre.name] || [],
+        };
+      }),
+      total: genres.total,
     };
   }
 

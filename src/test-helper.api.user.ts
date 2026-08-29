@@ -137,6 +137,28 @@ async function listTrackComposersWithTracks(params: RequestParams, query?: ListT
   });
 }
 
+type ListTrackGenresQueryDto = paths['/api/user/list-track-genres']['get']['parameters']['query'];
+
+async function listTrackGenres(params: RequestParams, query?: ListTrackGenresQueryDto) {
+  return api.GET(`/api/user/list-track-genres`, {
+    params: {
+      ...params,
+      query,
+    },
+  });
+}
+
+type ListTrackGenresWithTracksQueryDto = paths['/api/user/list-track-genres-with-tracks']['get']['parameters']['query'];
+
+async function listTrackGenresWithTracks(params: RequestParams, query?: ListTrackGenresWithTracksQueryDto) {
+  return api.GET(`/api/user/list-track-genres-with-tracks`, {
+    params: {
+      ...params,
+      query,
+    },
+  });
+}
+
 async function regenerateSessionKey(params: RequestParams) {
   return api.POST(`/api/user/regenerate-session-key`, {
     params,
@@ -170,6 +192,10 @@ export type UserApi = {
   listTrackComposersWithTracks: (
     query?: ListTrackComposersWithTracksQueryDto,
   ) => ReturnType<typeof listTrackComposersWithTracks>;
+  listTrackGenres: (query?: ListTrackGenresQueryDto) => ReturnType<typeof listTrackGenres>;
+  listTrackGenresWithTracks: (
+    query?: ListTrackGenresWithTracksQueryDto,
+  ) => ReturnType<typeof listTrackGenresWithTracks>;
   listIndexerLogs: () => ReturnType<typeof listIndexerLogs>;
   listRootPaths: () => ReturnType<typeof listRootPaths>;
   regenerateSessionKey: () => ReturnType<typeof regenerateSessionKey>;
@@ -232,6 +258,12 @@ export async function createUserApi(username?: string, password?: string): Promi
     },
     async listTrackComposersWithTracks(query?: ListTrackComposersWithTracksQueryDto) {
       return listTrackComposersWithTracks(params, query);
+    },
+    async listTrackGenres(query?: ListTrackGenresQueryDto) {
+      return listTrackGenres(params, query);
+    },
+    async listTrackGenresWithTracks(query?: ListTrackGenresWithTracksQueryDto) {
+      return listTrackGenresWithTracks(params, query);
     },
     async regenerateSessionKey() {
       return regenerateSessionKey(params);

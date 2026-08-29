@@ -71,12 +71,7 @@ export class UserListTrackArtistsQueryDto extends PaginationQueryDto {
   genre?: string[];
 
   /**
-   * Optional filter for the direction to sort the results by, which will sort the results in either
-   * ascending or descending order based on the field specified in the sortField parameter.  The
-   * direction must be one of the following values:
-   *
-   * - asc
-   * - desc
+   * Optional filter for the direction to sort the results by.
    */
   @ApiProperty({
     enum: SortDirectionEnum,
@@ -88,17 +83,7 @@ export class UserListTrackArtistsQueryDto extends PaginationQueryDto {
   sortDirection?: SortDirectionEnum;
 
   /**
-   * Optional filter for the field to sort by, which will do an exact match against the field associated
-   * with an artist.  The field must be one of the following values:
-   *
-   * - album
-   * - artist
-   * - album_artist
-   * - composer
-   * - genre
-   * - year
-   * - date_added
-   * - rating
+   * Optional filter for the field to sort results by.
    */
   @ApiProperty({
     enum: ArtistSortFieldEnum,
@@ -142,6 +127,10 @@ const UserListTrackArtistsBadRequestErrorMessages = [
   ErrorCodes.INVALID_FILTER_LENGTH_ERROR,
   ErrorCodes.INVALID_GENRE_ERROR,
   ErrorCodes.INVALID_GENRE_LENGTH_ERROR,
+  ErrorCodes.INVALID_LIMIT_ERROR,
+  ErrorCodes.INVALID_LIMIT_RANGE_ERROR,
+  ErrorCodes.INVALID_OFFSET_ERROR,
+  ErrorCodes.INVALID_OFFSET_RANGE_ERROR,
   ErrorCodes.INVALID_SORT_FIELD_ERROR,
   ErrorCodes.INVALID_SORT_ORDER_ERROR,
 ];
