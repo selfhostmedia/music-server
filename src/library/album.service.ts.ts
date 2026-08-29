@@ -228,31 +228,22 @@ export class LibraryAlbumService {
     switch (sortField) {
       case AlbumSortFieldEnum.ALBUM:
         return 'title';
-        break;
       case AlbumSortFieldEnum.YEAR:
         return 'year';
-        break;
       case AlbumSortFieldEnum.RATING:
         return 'rating';
-        break;
       case AlbumSortFieldEnum.DATE_ADDED:
         return 'createdAt';
-        break;
       case AlbumSortFieldEnum.DATE_RELEASED:
         return 'year';
-        break;
       case AlbumSortFieldEnum.ARTIST:
         return 'artists';
-        break;
       case AlbumSortFieldEnum.ALBUM_ARTIST:
         return 'artists';
-        break;
       case AlbumSortFieldEnum.COMPOSER:
         return 'composers';
-        break;
       case AlbumSortFieldEnum.GENRE:
         return 'genres';
-        break;
       default:
         return 'title';
     }
