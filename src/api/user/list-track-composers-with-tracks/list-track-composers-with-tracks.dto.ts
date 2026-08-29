@@ -4,13 +4,13 @@ import { IsInt } from 'class-validator';
 import { LibraryComposerWithTracksDto } from 'src/library/dtos/library.composer.dto';
 import { SuccessResponseDto } from 'src/api/response.dto';
 import {
-  UserListComposersBadRequestResponseDto,
-  UserListComposersQueryDto,
-} from '../list-composers/list-composers.dto';
+  UserListTrackComposersBadRequestResponseDto,
+  UserListTrackComposersQueryDto,
+} from '../list-track-composers/list-track-composers.dto';
 
-export class UserListComposersWithTracksQueryDto extends UserListComposersQueryDto {}
+export class UserListTrackComposersWithTracksQueryDto extends UserListTrackComposersQueryDto {}
 
-export class UserListComposersWithTracksResponseDto extends SuccessResponseDto {
+export class UserListTrackComposersWithTracksResponseDto extends SuccessResponseDto {
   /**
    * The list of composers that match the query parameters, which may be limited by pagination.
    */
@@ -35,4 +35,4 @@ export class UserListComposersWithTracksResponseDto extends SuccessResponseDto {
   declare total: number;
 }
 
-export class UserListComposersWithTracksBadRequestResponseDto extends UserListComposersBadRequestResponseDto {}
+export class UserListTrackComposersWithTracksBadRequestResponseDto extends UserListTrackComposersBadRequestResponseDto {}

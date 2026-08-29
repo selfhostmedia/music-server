@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { LibraryService } from 'src/library/library.service';
-import { UserListComposersQueryDto } from './list-composers.dto';
+import { UserListTrackArtistsWithTracksQueryDto } from './list-track-artists-with-tracks.dto';
 
 @Injectable()
-export class UserListComposersService {
+export class UserListTrackArtistsWithTracksService {
   constructor(private readonly libraryService: LibraryService) {}
 
-  async listComposers(accountId: number, query: UserListComposersQueryDto) {
-    const composers = await this.libraryService.listComposers(
+  async listArtists(accountId: number, query: UserListTrackArtistsWithTracksQueryDto) {
+    const data = await this.libraryService.listTrackArtistsWithTracks(
       accountId,
       query,
       query.offset || 0,
@@ -16,9 +16,9 @@ export class UserListComposersService {
       query.sortDirection,
     );
     return {
-      composers: composers.items,
+      artists: data.items,
       offset: query.offset || 0,
-      total: composers.total,
+      total: data.total,
     };
   }
 }

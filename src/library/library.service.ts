@@ -196,7 +196,7 @@ export class LibraryService {
   ): Promise<ListResult<LibraryArtistDto>> {
     const sortFieldColumn = this.artistService.sortFieldToColumn(sortField);
     const normalizedFilterString = filters?.filter ? normalizeString(filters.filter) : undefined;
-    const queryFilter = await this.artistService.createArtistQueryFilter(accountId, filters);
+    const queryFilter = await this.artistService.createAlbumArtistQueryFilter(accountId, filters);
     const artistIds = await this.artistService.findMatchingArtistIds(queryFilter);
     const artists = await this.artistEntity.findAndCountAll({
       attributes: ['id', 'name', 'createdAt'],
@@ -379,6 +379,18 @@ export class LibraryService {
     };
   }
 
+  /**
+   * Lists all composers along with their albums for a given account, optionally paginated, filtered and
+   * sorted by the specified parameters and bundling track lists for all albums.  If the track lists are
+   * not required then the `listComposers` method will provide better performance.
+   * @param {number} accountId The user performing the search
+   * @param {ComposerFilters} filters The search parameters for the composers
+   * @param {number} offset The number of items to skip before starting to collect the result set
+   * @param {number} limit The maximum number of items to return
+   * @param {ComposerSortFieldEnum} [sortField] The field by which to sort the composers
+   * @param {SortDirectionEnum} [sortDirection] The direction in which to sort the composers
+   * @returns {Promise<ListResult<LibraryComposerDto>>} The list of composers with their albums and tracks.
+   */
   async listComposersWithTracks(
     accountId: number,
     filters: ComposerFilters,
@@ -439,6 +451,158 @@ export class LibraryService {
             const album = partialAlbum as LibraryAlbumWithTracksDto;
             const tracks =
               tracksByAlbumId[album.id]?.filter((track) => track.trackComposers.includes(composer.name)) || [];
+            album.tracks = tracks.map((track) => ({
+              artists: track.trackArtists.map(replaceDoubleQuotes),
+              composers: track.trackComposers.map(replaceDoubleQuotes),
+              discNumber: track.trackDiscNumber,
+              duration: track.trackDuration,
+              fileId: track.fileId,
+              genres: track.trackGenres.map(replaceDoubleQuotes),
+              id: track.fileId,
+              rating: track.trackRating,
+              title: replaceDoubleQuotes(track.trackTitle),
+              trackNumber: track.trackNumber,
+              year: track.trackYear,
+            }));
+            return album;
+          }),
+        };
+      }),
+    };
+  }
+
+  /**
+   * Lists all artists along with their albums for a given account, optionally paginated, filtered and
+   * sorted by the specified parameters.  The difference between this and "album" artists is these
+   * names are compiled from track artists information.
+   * @param {number} accountId The user performing the search
+   * @param {ArtistFilters} filters The search parameters for the track artists
+   * @param {number} offset The number of items to skip before starting to collect the result set
+   * @param {number} limit The maximum number of items to return
+   * @param {ArtistSortFieldEnum} [sortField] The field by which to sort the track artists
+   * @param {SortDirectionEnum} [sortDirection] The direction in which to sort the track artists
+   * @returns {Promise<ListResult<LibraryArtistDto>>} The list of track artists with their albums and tracks.
+   */
+  async listTrackArtists(
+    accountId: number,
+    filters: ArtistFilters,
+    offset: number,
+    limit: number,
+    sortField?: ArtistSortFieldEnum,
+    sortDirection?: SortDirectionEnum,
+  ): Promise<ListResult<LibraryArtistDto>> {
+    const sortFieldColumn = this.artistService.sortFieldToColumn(sortField);
+    const normalizedFilterString = filters?.filter ? normalizeString(filters.filter) : undefined;
+    const queryFilter = await this.artistService.createArtistQueryFilter(accountId, filters);
+    const artistIds = await this.artistService.findMatchingArtistIds(queryFilter);
+    const artists = await this.artistEntity.findAndCountAll({
+      attributes: ['id', 'name', 'createdAt'],
+      where: {
+        id: artistIds,
+        ...(filters?.filter && {
+          name: { [Op.like]: `%${normalizedFilterString}%` },
+        }),
+        ...(filters?.addedBefore && {
+          createdAt: {
+            [Op.lt]: filters.addedBefore,
+          },
+        }),
+        ...(filters?.addedAfter && {
+          createdAt: {
+            [Op.gt]: filters.addedAfter,
+          },
+        }),
+      },
+      subQuery: false,
+      order: [[Sequelize.fn('LOWER', Sequelize.col(sortFieldColumn)), sortDirection || 'ASC']],
+      offset,
+      limit,
+    });
+    return {
+      total: artists.count,
+      items: artists.rows.map((artist) => {
+        return {
+          id: artist.id,
+          createdAt: artist.createdAt,
+          name: replaceDoubleQuotes(artist.name || ''),
+        };
+      }),
+    };
+  }
+
+  /**
+   * Lists all track artists along with their albums for a given account, optionally paginated, filtered
+   * and sorted by the specified parameters and bundling track lists for all albums.  If the track lists
+   * are not required then the `listTrackArtists` method will provide better performance.
+   * @param {number} accountId The user performing the search
+   * @param {ArtistFilters} filters The search parameters for the track artists
+   * @param {number} offset The number of items to skip before starting to collect the result set
+   * @param {number} limit The maximum number of items to return
+   * @param {ArtistSortFieldEnum} [sortField] The field by which to sort the track artists
+   * @param {SortDirectionEnum} [sortDirection] The direction in which to sort the composers
+   * @returns {Promise<ListResult<LibraryArtistDto>>} The list of track artists with their albums and tracks.
+   */
+  async listTrackArtistsWithTracks(
+    accountId: number,
+    filters: ArtistFilters,
+    offset: number,
+    limit: number,
+    sortField?: ArtistSortFieldEnum,
+    sortDirection?: SortDirectionEnum,
+  ): Promise<ListResult<LibraryArtistWithTracksDto>> {
+    const artists = await this.listTrackArtists(accountId, filters, offset, limit, sortField, sortDirection);
+    const albumIndex = {};
+    const albums = await this.listAlbumsWithTracks(
+      accountId,
+      filters?.filter
+        ? {
+            artist: [filters?.filter],
+          }
+        : {},
+      0,
+      100_000,
+    );
+    for (let i = 0; i < albums.items.length; i += 1) {
+      const album = albums.items[i];
+      if (album) {
+        const trackArtists = album.tracks.map((track) => track.artists).flat();
+        for (let j = 0; j < trackArtists.length; j += 1) {
+          const artist = trackArtists[j];
+          if (artist) {
+            if (!albumIndex[artist]) {
+              albumIndex[artist] = [];
+            }
+            albumIndex[artist].push(album);
+          }
+        }
+      }
+    }
+    const allTracks = await this.collatedTrackEntity.findAll({
+      where: {
+        albumId: albums.items.map((album) => album.id),
+      },
+    });
+    const tracksByAlbumId = allTracks.reduce(
+      (acc, track) => {
+        if (!acc[track.albumId]) {
+          acc[track.albumId] = [];
+        }
+        acc[track.albumId]?.push(track);
+        return acc;
+      },
+      {} as Record<number, typeof allTracks>,
+    );
+    return {
+      total: artists.total,
+      items: artists.items.map((artist) => {
+        return {
+          id: artist.id,
+          createdAt: artist.createdAt,
+          name: replaceDoubleQuotes(artist.name || ''),
+          albums: (albumIndex[artist.name] || []).map((partialAlbum) => {
+            const album = partialAlbum as LibraryAlbumWithTracksDto;
+            const tracks =
+              tracksByAlbumId[album.id]?.filter((track) => track.trackComposers.includes(artist.name)) || [];
             album.tracks = tracks.map((track) => ({
               artists: track.trackArtists.map(replaceDoubleQuotes),
               composers: track.trackComposers.map(replaceDoubleQuotes),

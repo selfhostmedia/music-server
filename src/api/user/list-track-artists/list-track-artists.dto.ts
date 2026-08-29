@@ -1,14 +1,14 @@
 /* eslint-disable max-classes-per-file */
 import { ApiProperty } from '@nestjs/swagger';
-import { BadRequestResponseDto, SuccessResponseDto } from 'src/api/response.dto';
-import { ComposerSortFieldEnum, SortDirectionEnum } from 'src/types/enums';
+import { ArtistSortFieldEnum, SortDirectionEnum } from 'src/types/enums';
+import { BadRequestResponseDto, NotFoundResponseDto, SuccessResponseDto } from 'src/api/response.dto';
 import { ErrorCodes } from 'src/constants/error-codes';
 import { IsDate, IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, Length, Max, Min } from 'class-validator';
-import { LibraryComposerDto } from 'src/library/dtos/library.composer.dto';
 import { PaginationQueryDto } from 'src/api/request.dto';
 import { Transform } from 'class-transformer';
+import { LibraryArtistDto } from 'src/library/dtos';
 
-export class UserListComposersQueryDto extends PaginationQueryDto {
+export class UserListTrackArtistsQueryDto extends PaginationQueryDto {
   /**
    * Optional filter for the date the album was added to the library, which will do an exact match against
    * the date the album was added to the library.  The date must be in ISO 8601 format (YYYY-MM-DD).
@@ -28,8 +28,8 @@ export class UserListComposersQueryDto extends PaginationQueryDto {
   addedAfter?: Date;
 
   /**
-   * Optional filter for the date the composer was added to the library, which will do an exact match against
-   * the date the composer was added to the library.  The date must be in ISO 8601 format (YYYY-MM-DD).
+   * Optional filter for the date the artist was added to the library, which will do an exact match against
+   * the date the artist was added to the library.  The date must be in ISO 8601 format (YYYY-MM-DD).
    */
   @ApiProperty({
     type: 'string',
@@ -46,8 +46,8 @@ export class UserListComposersQueryDto extends PaginationQueryDto {
   addedBefore?: Date;
 
   /**
-   * Optional search filter that will do a case-insensitive partial-match against the composer
-   * name, artist name, album name, or genre.
+   * Optional search filter that will do a case-insensitive partial-match against the artist
+   * name, album name, composer name, or genre.
    */
   @IsString({ message: ErrorCodes.INVALID_FILTER_ERROR })
   @Length(1, 100, { message: ErrorCodes.INVALID_FILTER_LENGTH_ERROR })
@@ -56,7 +56,7 @@ export class UserListComposersQueryDto extends PaginationQueryDto {
 
   /**
    * Optional filter for the genre name, which will do a case-insensitive partial-match against the
-   * genres associated with a composer.
+   * genres associated with an artist.
    */
   @ApiProperty({
     type: 'string',
@@ -89,7 +89,7 @@ export class UserListComposersQueryDto extends PaginationQueryDto {
 
   /**
    * Optional filter for the field to sort by, which will do an exact match against the field associated
-   * with an album.  The field must be one of the following values:
+   * with an artist.  The field must be one of the following values:
    *
    * - album
    * - artist
@@ -101,41 +101,41 @@ export class UserListComposersQueryDto extends PaginationQueryDto {
    * - rating
    */
   @ApiProperty({
-    enum: ComposerSortFieldEnum,
-    default: ComposerSortFieldEnum.COMPOSER,
-    enumName: 'ComposerSortFieldEnum',
+    enum: ArtistSortFieldEnum,
+    default: ArtistSortFieldEnum.ARTIST,
+    enumName: 'ArtistSortFieldEnum',
   })
-  @IsEnum(ComposerSortFieldEnum, { message: ErrorCodes.INVALID_SORT_FIELD_ERROR })
+  @IsEnum(ArtistSortFieldEnum, { message: ErrorCodes.INVALID_SORT_FIELD_ERROR })
   @IsOptional()
-  sortField?: ComposerSortFieldEnum;
+  sortField?: ArtistSortFieldEnum;
 }
 
-export class UserListComposersResponseDto extends SuccessResponseDto {
+export class UserListTrackArtistsResponseDto extends SuccessResponseDto {
   /**
-   * The list of composers that match the query parameters, which may be limited by pagination.
+   * The list of artists that match the query parameters, which may be limited by pagination.
    */
   @ApiProperty({
-    type: LibraryComposerDto,
+    type: LibraryArtistDto,
     isArray: true,
   })
-  declare composers: LibraryComposerDto[];
+  declare artists: LibraryArtistDto[];
 
   /**
-   * The offset of the first composer in the composers array, which may be greater than 0 if
+   * The offset of the first artist in the artists array, which may be greater than 0 if
    * pagination is applied.
    */
   @IsInt()
   declare offset: number;
 
   /**
-   * The total number of composers that match the query parameters, which may be greater
-   * than the number of composers returned in the composers array if pagination is applied.
+   * The total number of artists that match the query parameters, which may be greater
+   * than the number of artists returned in the artists array if pagination is applied.
    */
   @IsInt()
   declare total: number;
 }
 
-const UserListComposersBadRequestErrorMessages = [
+const UserListTrackArtistsBadRequestErrorMessages = [
   ErrorCodes.INVALID_ADDED_AFTER_ERROR,
   ErrorCodes.INVALID_ADDED_BEFORE_ERROR,
   ErrorCodes.INVALID_FILTER_ERROR,
@@ -146,16 +146,16 @@ const UserListComposersBadRequestErrorMessages = [
   ErrorCodes.INVALID_SORT_ORDER_ERROR,
 ];
 
-export class UserListComposersBadRequestResponseDto extends BadRequestResponseDto {
+export class UserListTrackArtistsBadRequestResponseDto extends BadRequestResponseDto {
   /**
    * The error message(s) that occurred during the validation of the request data or additional requirements
    * applied during the execution of the request
    */
   @ApiProperty({
     isArray: true,
-    enum: UserListComposersBadRequestErrorMessages,
-    enumName: 'UserListComposersBadRequestErrorMessages',
-    default: UserListComposersBadRequestErrorMessages[0],
+    enum: UserListTrackArtistsBadRequestErrorMessages,
+    enumName: 'UserListTrackArtistsBadRequestErrorMessage',
+    default: UserListTrackArtistsBadRequestErrorMessages[0],
   })
   declare message: ErrorCodes[];
 }

@@ -3,7 +3,7 @@ import { ComposerSortFieldEnum, SortDirectionEnum } from '../../../types/api-sch
 import { ErrorCodes } from '../../../constants/error-codes';
 import { beforeAll, describe, expect, it } from '@jest/globals';
 
-describe('/users/list-composers', () => {
+describe('/users/list-track-composers-with-tracks', () => {
   let userApi: UserApi;
 
   beforeAll(async () => {
@@ -12,7 +12,7 @@ describe('/users/list-composers', () => {
 
   describe('authorized access', () => {
     it('should reject guest access', async () => {
-      const { error } = await api.GET(`/api/user/list-composers`, {
+      const { error } = await api.GET(`/api/user/list-track-composers-with-tracks`, {
         params: {
           header: {
             Authorization: '',
@@ -26,64 +26,64 @@ describe('/users/list-composers', () => {
 
   describe('errors', () => {
     it('should reject invalid addedAfter date', async () => {
-      const { error } = await userApi.listComposers({ addedAfter: 'invalid-date' });
+      const { error } = await userApi.listTrackComposersWithTracks({ addedAfter: 'invalid-date' });
       expect(error?.message[0]).toBe(ErrorCodes.INVALID_ADDED_AFTER_ERROR);
     });
 
     it('should reject invalid addedBefore date', async () => {
-      const { error } = await userApi.listComposers({ addedBefore: 'invalid-date' });
+      const { error } = await userApi.listTrackComposersWithTracks({ addedBefore: 'invalid-date' });
       expect(error?.message[0]).toBe(ErrorCodes.INVALID_ADDED_BEFORE_ERROR);
     });
 
     it('should reject invalid filter', async () => {
-      const { error } = await userApi.listComposers({ filter: '' });
+      const { error } = await userApi.listTrackComposersWithTracks({ filter: '' });
       expect(error?.message[0]).toBe(ErrorCodes.INVALID_FILTER_LENGTH_ERROR);
     });
 
     // it('should reject invalid genre', async () => {
-    //   const { error } = await userApi.listComposers({ genre: [0 as unknown as string] });
+    //   const { error } = await userApi.listTrackComposersWithTracks({ genre: [0 as unknown as string] });
     //   expect(error?.message[0]).toBe(ErrorCodes.INVALID_GENRE_LENGTH_ERROR);
     // });
 
     it('should reject invalid genre length', async () => {
-      const { error } = await userApi.listComposers({ genre: ['x'.repeat(300)] });
+      const { error } = await userApi.listTrackComposersWithTracks({ genre: ['x'.repeat(300)] });
       expect(error?.message[0]).toBe(ErrorCodes.INVALID_GENRE_LENGTH_ERROR);
     });
 
     it('should reject negative limit', async () => {
-      const { error } = await userApi.listComposers({ offset: 0, limit: -1000 });
+      const { error } = await userApi.listTrackComposersWithTracks({ offset: 0, limit: -1000 });
       expect(error?.message[0]).toBe(ErrorCodes.INVALID_LIMIT_ERROR);
     });
 
     it('should reject excessive "limit"', async () => {
-      const { error } = await userApi.listComposers({ offset: 0, limit: 1_000_000 });
+      const { error } = await userApi.listTrackComposersWithTracks({ offset: 0, limit: 1_000_000 });
       expect(error?.message[0]).toBe(ErrorCodes.INVALID_LIMIT_ERROR);
     });
 
     it('should reject invalid limit', async () => {
-      const { error } = await userApi.listComposers({ offset: 0, limit: 'asdf' as unknown as number });
+      const { error } = await userApi.listTrackComposersWithTracks({ offset: 0, limit: 'asdf' as unknown as number });
       expect(error?.message[0]).toBe(ErrorCodes.INVALID_LIMIT_ERROR);
     });
 
     it('should reject negative offset', async () => {
-      const { error } = await userApi.listComposers({ offset: -1000 });
+      const { error } = await userApi.listTrackComposersWithTracks({ offset: -1000 });
       expect(error?.message[0]).toBe(ErrorCodes.INVALID_OFFSET_ERROR);
     });
 
     it('should reject invalid offset', async () => {
-      const { error } = await userApi.listComposers({ offset: 'asdf' as unknown as number });
+      const { error } = await userApi.listTrackComposersWithTracks({ offset: 'asdf' as unknown as number });
       expect(error?.message[0]).toBe(ErrorCodes.INVALID_OFFSET_ERROR);
     });
 
     it('should reject invalid sortDirection', async () => {
-      const { error } = await userApi.listComposers({
+      const { error } = await userApi.listTrackComposersWithTracks({
         sortDirection: 'invalid-direction' as SortDirectionEnum,
       });
       expect(error?.message[0]).toBe(ErrorCodes.INVALID_SORT_ORDER_ERROR);
     });
 
     it('should reject invalid sortField', async () => {
-      const { error } = await userApi.listComposers({
+      const { error } = await userApi.listTrackComposersWithTracks({
         sortField: 'invalid-field' as unknown as ComposerSortFieldEnum,
       });
       expect(error?.message[0]).toBe(ErrorCodes.INVALID_SORT_FIELD_ERROR);
@@ -93,7 +93,7 @@ describe('/users/list-composers', () => {
   describe('edge cases', () => {
     describe('filter', () => {
       it('should filter by genre', async () => {
-        const { data } = await userApi.listComposers({ genre: ['Chanson'] });
+        const { data } = await userApi.listTrackComposersWithTracks({ genre: ['Chanson'] });
         const { composers, total } = data || { composers: [], total: 0 };
         expect(total).toBe(3);
         expect(composers.length).toBe(3);
@@ -103,7 +103,7 @@ describe('/users/list-composers', () => {
       });
 
       it('should filter by search term', async () => {
-        const { data } = await userApi.listComposers({ filter: '3' });
+        const { data } = await userApi.listTrackComposersWithTracks({ filter: '3' });
         const { composers, total } = data || { composers: [], total: 0 };
         expect(total).toBe(2);
         expect(composers.length).toBe(2);
@@ -114,7 +114,7 @@ describe('/users/list-composers', () => {
 
     describe('sort', () => {
       it('should sort by composer ASC', async () => {
-        const { data } = await userApi.listComposers({
+        const { data } = await userApi.listTrackComposersWithTracks({
           sortField: ComposerSortFieldEnum.composer,
           sortDirection: SortDirectionEnum.asc,
         });
@@ -134,7 +134,7 @@ describe('/users/list-composers', () => {
       });
 
       it('should sort by composer DESC', async () => {
-        const { data } = await userApi.listComposers({
+        const { data } = await userApi.listTrackComposersWithTracks({
           sortField: ComposerSortFieldEnum.composer,
           sortDirection: SortDirectionEnum.desc,
         });
@@ -157,14 +157,14 @@ describe('/users/list-composers', () => {
 
   describe('success', () => {
     it('should return all composers', async () => {
-      const { data } = await userApi.listComposers();
+      const { data } = await userApi.listTrackComposersWithTracks();
       const { composers, total } = data || { composers: [], total: 0 };
       expect(total).toBe(10);
       expect(composers.length).toBe(10);
     });
 
     it('should paginate results', async () => {
-      const { data } = await userApi.listComposers({ offset: 0, limit: 4 });
+      const { data } = await userApi.listTrackComposersWithTracks({ offset: 0, limit: 4 });
       const { composers, total } = data || { composers: [], total: 0 };
       expect(total).toBe(10);
       expect(composers.length).toBe(4);
@@ -172,7 +172,7 @@ describe('/users/list-composers', () => {
       expect(composers[1]?.name).toBe('Artist 2');
       expect(composers[2]?.name).toBe('Artist 3');
       expect(composers[3]?.name).toBe('Composer 1');
-      const { data: data2 } = await userApi.listComposers({ offset: 4, limit: 4 });
+      const { data: data2 } = await userApi.listTrackComposersWithTracks({ offset: 4, limit: 4 });
       const { composers: composers2, total: total2 } = data2 || { composers: [], total: 0 };
       expect(total2).toBe(10);
       expect(composers2.length).toBe(4);
@@ -180,7 +180,7 @@ describe('/users/list-composers', () => {
       expect(composers2[1]?.name).toBe('Composer 3');
       expect(composers2[2]?.name).toBe('Composer 4');
       expect(composers2[3]?.name).toBe('Composer 5');
-      const { data: data3 } = await userApi.listComposers({ offset: 8, limit: 4 });
+      const { data: data3 } = await userApi.listTrackComposersWithTracks({ offset: 8, limit: 4 });
       const { composers: composers3, total: total3 } = data3 || { composers: [], total: 0 };
       expect(total3).toBe(10);
       expect(composers3.length).toBe(2);

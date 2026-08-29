@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { LibraryService } from 'src/library/library.service';
-import { UserListComposersWithTracksQueryDto } from './list-composers-with-tracks.dto';
+import { UserListTrackComposersQueryDto } from './list-track-composers.dto';
 
 @Injectable()
-export class UserListComposersWithTracksService {
+export class UserListTrackComposersService {
   constructor(private readonly libraryService: LibraryService) {}
 
-  async listComposersWithTracks(accountId: number, query: UserListComposersWithTracksQueryDto) {
-    const composers = await this.libraryService.listComposersWithTracks(
+  async listComposers(accountId: number, query: UserListTrackComposersQueryDto) {
+    const composers = await this.libraryService.listComposers(
       accountId,
       query,
       query.offset || 0,

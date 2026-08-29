@@ -5,21 +5,21 @@ import { Controller, Get, Query } from '@nestjs/common';
 import { JWT_TOKEN, USER_APIS } from 'src/constants/swagger';
 import { User } from 'src/api/user.decorator';
 import {
-  UserListComposersWithTracksBadRequestResponseDto,
-  UserListComposersWithTracksQueryDto,
-  UserListComposersWithTracksResponseDto,
-} from './list-composers-with-tracks.dto';
-import { UserListComposersWithTracksService } from './list-composers-with-tracks.service';
+  UserListTrackComposersWithTracksBadRequestResponseDto,
+  UserListTrackComposersWithTracksQueryDto,
+  UserListTrackComposersWithTracksResponseDto,
+} from './list-track-composers-with-tracks.dto';
+import { UserListTrackComposersWithTracksService } from './list-track-composers-with-tracks.service';
 import { UserRoleEnum } from 'src/types/enums';
 
 @Controller({
   path: '/api/user',
 })
 @ApiTags(USER_APIS)
-export class UserListComposersWithTracksController {
-  constructor(private readonly listComposersWithTracksService: UserListComposersWithTracksService) {}
+export class UserListTrackComposersWithTracksController {
+  constructor(private readonly listComposersWithTracksService: UserListTrackComposersWithTracksService) {}
 
-  @Get('list-composers-with-tracks')
+  @Get('list-track-composers-with-tracks')
   @ApiOperation({
     summary: 'List composers',
     description: `Retrieves a list of composers for the user based on the provided query parameters.`,
@@ -33,16 +33,16 @@ export class UserListComposersWithTracksController {
   })
   @ApiOkResponse({
     description: 'Successfully retrieved the list of composers for the user.',
-    type: UserListComposersWithTracksResponseDto,
+    type: UserListTrackComposersWithTracksResponseDto,
   })
   @ApiBadRequestResponse({
     description: 'The request was invalid or missing required parameters.',
-    type: UserListComposersWithTracksBadRequestResponseDto,
+    type: UserListTrackComposersWithTracksBadRequestResponseDto,
   })
   async get(
     @User() user: AccountEntity,
-    @Query() query: UserListComposersWithTracksQueryDto,
-  ): Promise<UserListComposersWithTracksResponseDto> {
+    @Query() query: UserListTrackComposersWithTracksQueryDto,
+  ): Promise<UserListTrackComposersWithTracksResponseDto> {
     const data = await this.listComposersWithTracksService.listComposersWithTracks(user.id, query);
     return {
       success: true,
