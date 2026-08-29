@@ -277,7 +277,14 @@ export class LibraryService {
         for (let j = 0, jLen = album.albumArtists.length; j < jLen; j += 1) {
           const artist = album.albumArtists[j];
           if (artist) {
-            (albumIndex[artist] ??= []).push(album);
+            albumIndex[artist] = albumIndex[artist] || [];
+            const existing = albumIndex[artist].find((item) => item.id === album.id);
+            if (!existing) {
+              albumIndex[artist].push({
+                ...album,
+                tracks: album.tracks.filter((track) => track.artists.includes(artist)),
+              });
+            }
           }
         }
       }
@@ -389,23 +396,18 @@ export class LibraryService {
         for (let j = 0, jLen = album.albumComposers.length; j < jLen; j += 1) {
           const composer = album.albumComposers[j];
           if (composer) {
-            (albumIndex[composer] ??= []).push(album);
+            albumIndex[composer] = albumIndex[composer] || [];
+            const existing = albumIndex[composer].find((item) => item.id === album.id);
+            if (!existing) {
+              albumIndex[composer].push({
+                ...album,
+                tracks: album.tracks.filter((track) => track.composers.includes(composer)),
+              });
+            }
           }
         }
       }
     }
-    const allTracks = await this.collatedTrackEntity.findAll({
-      where: {
-        albumId: albums.items.map((album) => album.id),
-      },
-    });
-    const tracksByAlbumId = allTracks.reduce(
-      (acc, track) => {
-        (acc[track.albumId] ??= []).push(track);
-        return acc;
-      },
-      {} as Record<number, typeof allTracks>,
-    );
     return {
       total: composers.total,
       items: composers.items.map((composer) => {
@@ -413,25 +415,7 @@ export class LibraryService {
           id: composer.id,
           createdAt: composer.createdAt,
           name: replaceDoubleQuotes(composer.name || ''),
-          albums: (albumIndex[composer.name] || []).map((partialAlbum) => {
-            const album = partialAlbum as LibraryAlbumWithTracksDto;
-            const tracks =
-              tracksByAlbumId[album.id]?.filter((track) => track.trackComposers.includes(composer.name)) || [];
-            album.tracks = tracks.map((track) => ({
-              artists: track.trackArtists.map(replaceDoubleQuotes),
-              composers: track.trackComposers.map(replaceDoubleQuotes),
-              discNumber: track.trackDiscNumber,
-              duration: track.trackDuration,
-              fileId: track.fileId,
-              genres: track.trackGenres.map(replaceDoubleQuotes),
-              id: track.fileId,
-              rating: track.trackRating,
-              title: replaceDoubleQuotes(track.trackTitle),
-              trackNumber: track.trackNumber,
-              year: track.trackYear,
-            }));
-            return album;
-          }),
+          albums: albumIndex[composer.name] || [],
         };
       }),
     };
@@ -535,7 +519,14 @@ export class LibraryService {
         for (let j = 0, jLen = trackArtists.length; j < jLen; j += 1) {
           const artist = trackArtists[j];
           if (artist) {
-            (albumIndex[artist] ??= []).push(album);
+            albumIndex[artist] = albumIndex[artist] || [];
+            const existing = albumIndex[artist].find((item) => item.id === album.id);
+            if (!existing) {
+              albumIndex[artist].push({
+                ...album,
+                tracks: album.tracks.filter((track) => track.artists.includes(artist)),
+              });
+            }
           }
         }
       }
@@ -604,7 +595,14 @@ export class LibraryService {
         for (let j = 0, jLen = album.albumGenres.length; j < jLen; j += 1) {
           const genre = album.albumGenres[j];
           if (genre) {
-            (albumIndex[genre] ??= []).push(album);
+            albumIndex[genre] = albumIndex[genre] || [];
+            const existing = albumIndex[genre].find((item) => item.id === album.id);
+            if (!existing) {
+              albumIndex[genre].push({
+                ...album,
+                tracks: album.tracks.filter((track) => track.genres.includes(genre)),
+              });
+            }
           }
         }
       }
