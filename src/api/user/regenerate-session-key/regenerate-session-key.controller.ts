@@ -1,7 +1,7 @@
 import { AccountEntity } from 'src/database/entities';
 import { AllowedRoles } from 'src/api/role.guard';
 import { ApiBearerAuth, ApiHeader, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Controller, Post } from '@nestjs/common';
+import { Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { JWT_TOKEN, USER_APIS } from 'src/constants/swagger';
 import { User } from 'src/api/user.decorator';
 import { UserRegenerateSessionKeyResponseDto } from './regenerate-session-key.dto';
@@ -16,6 +16,7 @@ export class UserRegenerateSessionKeyController {
   constructor(private readonly regenerateSessionKeyService: UserRegenerateSessionKeyService) {}
 
   @Post('regenerate-session-key')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: `Invalidate a user's sessions`,
     description:
