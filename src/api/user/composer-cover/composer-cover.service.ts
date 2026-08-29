@@ -1,8 +1,7 @@
 import { AlbumArtistEntity, AlbumEntity } from 'src/database/entities';
 import { CoverImage } from 'src/types/cover-image';
-import { ErrorCodes } from 'src/constants/error-codes';
 import { InjectModel } from '@nestjs/sequelize';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Op, col, where } from 'sequelize';
 import sharp from 'sharp';
 
@@ -21,7 +20,7 @@ export class UserComposerCoverService {
           attributes: ['albumId', 'composerId'],
           model: AlbumArtistEntity,
           where: {
-            composerId: composerId,
+            composerId,
           },
           required: true,
         },

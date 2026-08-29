@@ -97,8 +97,6 @@ export class LibraryArtistService {
     return queryFilter;
   }
 
-
-
   /**
    * Builds a Sequelize where clause for filtering track artists based on the provided parameters.
    * @param {number} accountId The account ID to retrieve composers for.

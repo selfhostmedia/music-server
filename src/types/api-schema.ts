@@ -361,7 +361,7 @@ export type paths = {
             path?: never;
             cookie?: never;
         };
-        /** Cover images for albums */
+        /** Cover images for composers */
         get: operations["UserComposerCoverController_get"];
         put?: never;
         post?: never;
@@ -426,6 +426,23 @@ export type paths = {
          * @description Ends a user session and invalidates the associated JWT token.
          */
         delete: operations["UserEndSessionController_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/user/genre-cover": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Cover images for genres */
+        get: operations["UserGenreCoverController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -6147,7 +6164,7 @@ export interface operations {
     UserComposerCoverController_get: {
         parameters: {
             query: {
-                /** @description The ID of the album */
+                /** @description The ID of the composer */
                 id: number;
                 /** @description The width/height size of the image in pixels */
                 size: number;
@@ -6285,6 +6302,34 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SuccessResponseDto"];
+                };
+            };
+        };
+    };
+    UserGenreCoverController_get: {
+        parameters: {
+            query: {
+                /** @description The ID of the genre */
+                id: number;
+                /** @description The width/height size of the image in pixels */
+                size: number;
+            };
+            header: {
+                Authorization: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/jpeg": string;
+                    "image/png": string;
+                    "image/webp": string;
                 };
             };
         };
@@ -6986,14 +7031,6 @@ export interface operations {
         responses: {
             /** @description Session key regenerated successfully */
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UserRegenerateSessionKeyResponseDto"];
-                };
-            };
-            201: {
                 headers: {
                     [name: string]: unknown;
                 };

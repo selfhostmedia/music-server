@@ -23,7 +23,7 @@ export class UserComposerCoverController {
   @Get('composer-cover')
   @AllowedRoles([UserRoleEnum.USER, UserRoleEnum.ADMIN])
   @ApiOperation({
-    summary: 'Cover images for albums',
+    summary: 'Cover images for composers',
   })
   @ApiBearerAuth(JWT_TOKEN)
   @ApiHeader({

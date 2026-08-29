@@ -35,4 +35,5 @@ export class UserListTrackComposersWithTracksResponseDto extends SuccessResponse
   declare total: number;
 }
 
+// eslint-disable-next-line max-len
 export class UserListTrackComposersWithTracksBadRequestResponseDto extends UserListTrackComposersBadRequestResponseDto {}

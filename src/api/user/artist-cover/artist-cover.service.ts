@@ -1,9 +1,8 @@
 import { AlbumArtistEntity } from 'src/database/entities';
 import { AlbumEntity } from 'src/database/entities/album.entity';
 import { CoverImage } from 'src/types/cover-image';
-import { ErrorCodes } from 'src/constants/error-codes';
 import { InjectModel } from '@nestjs/sequelize/dist/common/sequelize.decorators';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Op, col, where } from 'sequelize';
 import sharp from 'sharp';
 

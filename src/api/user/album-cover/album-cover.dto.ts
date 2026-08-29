@@ -12,8 +12,8 @@ export class UserAlbumCoverQueryDto {
   /**
    * The width/height size of the image in pixels
    */
-  @IsInt({ message: ErrorCodes.INVALID_ALBUM_COVER_SIZE_ERROR })
-  @Min(100, { message: ErrorCodes.INVALID_ALBUM_COVER_SIZE_ERROR })
-  @Max(1000, { message: ErrorCodes.INVALID_ALBUM_COVER_SIZE_ERROR })
+  @IsInt({ message: ErrorCodes.INVALID_COVER_SIZE_ERROR })
+  @Min(100, { message: ErrorCodes.INVALID_COVER_SIZE_ERROR })
+  @Max(1000, { message: ErrorCodes.INVALID_COVER_SIZE_ERROR })
   declare size: number;
 }

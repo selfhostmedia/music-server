@@ -3,7 +3,7 @@ export enum ErrorCodes {
   INVALID_ADDED_AFTER_ERROR = 'invalid-added-after-error',
   INVALID_ADDED_BEFORE_ERROR = 'invalid-added-before-error',
   INVALID_ALBUM_ID_ERROR = 'invalid-album-id-error',
-  INVALID_ALBUM_COVER_SIZE_ERROR = 'invalid-album-cover-size-error',
+  INVALID_COVER_SIZE_ERROR = 'invalid-album-cover-size-error',
   INVALID_ARTIST_ERROR = 'invalid-artist-error',
   INVALID_ARTIST_LENGTH_ERROR = 'invalid-artist-length-error',
   INVALID_COMPOSER_ERROR = 'invalid-composer-error',
@@ -50,6 +50,8 @@ export enum ErrorCodes {
   SESSION_NOT_FOUND_ERROR = 'session-not-found-error',
   ROOT_PATH_NOT_FOUND_ERROR = 'root-path-not-found-error',
   INVALID_ACCOUNT_ID_ERROR = 'invalid-account-id-error',
+  INVALID_COMPOSER_ID_ERROR = 'invalid-composer-id-error',
+  INVALID_GENRE_ID_ERROR = 'invalid-genre-id-error',
   INVALID_ROOT_PATH_ID_ERROR = 'invalid-root-path-id-error',
   INVALID_SESSION_ID_ERROR = 'invalid-session-id-error',
   // misc

@@ -137,4 +137,3 @@ export enum ComposerSortFieldEnum {
 export enum GenreSortFieldEnum {
   GENRE = 'genre',
 }
-

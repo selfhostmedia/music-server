@@ -1,12 +1,12 @@
 /* eslint-disable max-classes-per-file */
 import { ApiProperty } from '@nestjs/swagger';
 import { ArtistSortFieldEnum, SortDirectionEnum } from 'src/types/enums';
-import { BadRequestResponseDto, NotFoundResponseDto, SuccessResponseDto } from 'src/api/response.dto';
+import { BadRequestResponseDto, SuccessResponseDto } from 'src/api/response.dto';
 import { ErrorCodes } from 'src/constants/error-codes';
 import { IsDate, IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, Length, Max, Min } from 'class-validator';
+import { LibraryArtistDto } from 'src/library/dtos';
 import { PaginationQueryDto } from 'src/api/request.dto';
 import { Transform } from 'class-transformer';
-import { LibraryArtistDto } from 'src/library/dtos';
 
 export class UserListTrackArtistsQueryDto extends PaginationQueryDto {
   /**
