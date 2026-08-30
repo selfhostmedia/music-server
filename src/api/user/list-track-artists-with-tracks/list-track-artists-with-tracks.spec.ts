@@ -149,7 +149,6 @@ describe('/users/list-track-artists-with-tracks', () => {
     it.only('should return all artists', async () => {
       const { data } = await userApi.listTrackArtistsWithTracks();
       const { artists, total } = data || { artists: [], total: 0 };
-      console.log('artists', artists, 'total', total);
       expect(total).toBe(5);
       expect(artists.length).toBe(5);
       for (let i = 0; i < artists.length; i += 1) {
