@@ -5529,6 +5529,7 @@ export type components = {
             file?: string;
             folder?: string;
             fullPath: string;
+            id: number;
         };
         /**
          * @description The error message(s) that occurred during the validation of the request data or additional requirements

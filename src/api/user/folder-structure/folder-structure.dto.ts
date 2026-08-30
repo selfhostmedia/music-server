@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { IsInt, IsOptional, IsString } from 'class-validator';
 import { SuccessResponseDto } from 'src/api/response.dto';
 
 export class UserTreeItemDto {
@@ -14,6 +14,9 @@ export class UserTreeItemDto {
 
   @IsString()
   declare fullPath: string;
+
+  @IsInt()
+  declare id: number;
 
   @ApiProperty({
     type: UserTreeItemDto,
