@@ -161,6 +161,18 @@ describe('/users/list-track-composers-with-tracks', () => {
       const { composers, total } = data || { composers: [], total: 0 };
       expect(total).toBe(10);
       expect(composers.length).toBe(10);
+      for (let i = 0; i < composers.length; i += 1) {
+        const composer = composers[i];
+        expect(composer).toBeDefined();
+        expect(composer?.albums).toBeDefined();
+        expect(composer?.albums.length).toBeGreaterThan(0);
+        for (let j = 0; j < (composer?.albums || []).length; j += 1) {
+          const album = composer?.albums[j];
+          expect(album).toBeDefined();
+          expect(album?.tracks).toBeDefined();
+          expect(album?.tracks.length).toBeGreaterThan(0);
+        }
+      }
     });
 
     it('should paginate results', async () => {

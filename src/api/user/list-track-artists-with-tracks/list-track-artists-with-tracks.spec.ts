@@ -146,11 +146,24 @@ describe('/users/list-track-artists-with-tracks', () => {
   });
 
   describe('success', () => {
-    it('should return all artists', async () => {
+    it.only('should return all artists', async () => {
       const { data } = await userApi.listTrackArtistsWithTracks();
       const { artists, total } = data || { artists: [], total: 0 };
+      console.log('artists', artists, 'total', total);
       expect(total).toBe(5);
       expect(artists.length).toBe(5);
+      for (let i = 0; i < artists.length; i += 1) {
+        const artist = artists[i];
+        expect(artist).toBeDefined();
+        expect(artist?.albums).toBeDefined();
+        expect(artist?.albums.length).toBeGreaterThan(0);
+        for (let j = 0; j < (artist?.albums || []).length; j += 1) {
+          const album = artist?.albums[j];
+          expect(album).toBeDefined();
+          expect(album?.tracks).toBeDefined();
+          expect(album?.tracks.length).toBeGreaterThan(0);
+        }
+      }
     });
 
     it('should paginate results', async () => {

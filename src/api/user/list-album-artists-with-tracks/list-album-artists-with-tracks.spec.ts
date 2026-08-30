@@ -145,6 +145,18 @@ describe('/users/list-album-artists-with-tracks', () => {
       const { artists, total } = data || { artists: [], total: 0 };
       expect(total).toBe(3);
       expect(artists.length).toBe(3);
+      for (let i = 0; i < artists.length; i += 1) {
+        const artist = artists[i];
+        expect(artist).toBeDefined();
+        expect(artist?.albums).toBeDefined();
+        expect(artist?.albums.length).toBeGreaterThan(0);
+        for (let j = 0; j < (artist?.albums || []).length; j += 1) {
+          const album = artist?.albums[j];
+          expect(album).toBeDefined();
+          expect(album?.tracks).toBeDefined();
+          expect(album?.tracks.length).toBeGreaterThan(0);
+        }
+      }
     });
 
     it('should paginate results', async () => {

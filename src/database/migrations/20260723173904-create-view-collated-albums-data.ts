@@ -18,14 +18,6 @@ SELECT
 	albums.title,
 	albums.year,
 	(
-		SELECT name 
-		FROM artists 
-		INNER JOIN album_artists ON 
-				album_artists.album_id=albums.id AND 
-				album_artists.artist_id=artists.id 
-		ORDER BY album_artists.id desc limit 1
-		) AS artist,
-	(
 		SELECT group_concat(unique_artists.name, ', ') 
 		FROM (
 			SELECT DISTINCT(name)  as name

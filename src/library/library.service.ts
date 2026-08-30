@@ -287,16 +287,32 @@ export class LibraryService {
             }
           }
         }
+        // index as combined artists
+        const combined = album.albumArtists.join(', ');
+        if (album.albumArtists.length > 1) {
+          albumIndex[combined] = albumIndex[combined] || [];
+          const existingCombined = albumIndex[combined].find((item) => item.id === album.id);
+          if (!existingCombined) {
+            albumIndex[combined].push({
+              ...album,
+              tracks: album.tracks.filter(
+                (track) => track.artists.includes(combined) || track.artists.join(', ') === combined,
+              ),
+            });
+          }
+        }
       }
     }
     return {
       total: artists.total,
-      items: artists.items.map((artist) => ({
-        id: artist.id,
-        createdAt: artist.createdAt,
-        name: replaceDoubleQuotes(artist.name),
-        albums: albumIndex[artist.name] || [],
-      })),
+      items: artists.items
+        .map((artist) => ({
+          id: artist.id,
+          createdAt: artist.createdAt,
+          name: replaceDoubleQuotes(artist.name),
+          albums: albumIndex[artist.name] || [],
+        }))
+        .filter((item) => item.albums.filter((album) => album.tracks && album.tracks.length > 0).length > 0),
     };
   }
 
@@ -384,7 +400,7 @@ export class LibraryService {
       accountId,
       filters?.filter
         ? {
-            artist: [filters?.filter],
+            composer: [filters?.filter],
           }
         : {},
       0,
@@ -406,18 +422,34 @@ export class LibraryService {
             }
           }
         }
+        // index as combined composers
+        if (album.albumComposers.length > 1) {
+          const combined = album.albumComposers.join(', ');
+          albumIndex[combined] = albumIndex[combined] || [];
+          const existingCombined = albumIndex[combined].find((item) => item.id === album.id);
+          if (!existingCombined) {
+            albumIndex[combined].push({
+              ...album,
+              tracks: album.tracks.filter(
+                (track) => track.artists.includes(combined) || track.artists.join(', ') === combined,
+              ),
+            });
+          }
+        }
       }
     }
     return {
       total: composers.total,
-      items: composers.items.map((composer) => {
-        return {
-          id: composer.id,
-          createdAt: composer.createdAt,
-          name: replaceDoubleQuotes(composer.name || ''),
-          albums: albumIndex[composer.name] || [],
-        };
-      }),
+      items: composers.items
+        .map((composer) => {
+          return {
+            id: composer.id,
+            createdAt: composer.createdAt,
+            name: replaceDoubleQuotes(composer.name || ''),
+            albums: albumIndex[composer.name] || [],
+          };
+        })
+        .filter((item) => item.albums.filter((album) => album.tracks && album.tracks.length > 0).length > 0),
     };
   }
 
@@ -515,7 +547,8 @@ export class LibraryService {
     for (let i = 0, len = albums.items.length; i < len; i += 1) {
       const album = albums.items[i];
       if (album) {
-        const trackArtists = album.tracks.map((track) => track.artists).flat();
+        const trackArtists = Array.from(new Set(album.tracks.map((track) => track.artists).flat()));
+        // get unique track artists for this album
         for (let j = 0, jLen = trackArtists.length; j < jLen; j += 1) {
           const artist = trackArtists[j];
           if (artist) {
@@ -529,18 +562,35 @@ export class LibraryService {
             }
           }
         }
+        // index as combined artists
+        if (trackArtists.length > 1) {
+          const combined = trackArtists.join(', ');
+          albumIndex[combined] = albumIndex[combined] || [];
+          const existing = albumIndex[combined].find((item) => item.id === album.id);
+          if (!existing) {
+            albumIndex[combined] = albumIndex[combined] || [];
+            albumIndex[combined].push({
+              ...album,
+              tracks: album.tracks.filter((track) => {
+                return track.artists.includes(combined) || track.artists.join(', ') === combined;
+              }),
+            });
+          }
+        }
       }
     }
     return {
       total: artists.total,
-      items: artists.items.map((artist) => {
-        return {
-          id: artist.id,
-          createdAt: artist.createdAt,
-          name: replaceDoubleQuotes(artist.name || ''),
-          albums: albumIndex[artist.name] || [],
-        };
-      }),
+      items: artists.items
+        .map((artist) => {
+          return {
+            id: artist.id,
+            createdAt: artist.createdAt,
+            name: replaceDoubleQuotes(artist.name || ''),
+            albums: albumIndex[artist.name] || [],
+          };
+        })
+        .filter((item) => item.albums.filter((album) => album.tracks && album.tracks.length > 0).length > 0),
     };
   }
 
@@ -605,16 +655,32 @@ export class LibraryService {
             }
           }
         }
+        // index as combined genres
+        if (album.albumGenres.length > 1) {
+          const combined = album.albumGenres.join(', ');
+          albumIndex[combined] = albumIndex[combined] || [];
+          const existingCombined = albumIndex[combined].find((item) => item.id === album.id);
+          if (!existingCombined) {
+            albumIndex[combined].push({
+              ...album,
+              tracks: album.tracks.filter(
+                (track) => track.genres.includes(combined) || track.genres.join(', ') === combined,
+              ),
+            });
+          }
+        }
       }
     }
     return {
-      items: genres.items.map((genre) => {
-        return {
-          id: genre.id,
-          name: genre.name,
-          albums: albumIndex[genre.name] || [],
-        };
-      }),
+      items: genres.items
+        .map((genre) => {
+          return {
+            id: genre.id,
+            name: genre.name,
+            albums: albumIndex[genre.name] || [],
+          };
+        })
+        .filter((item) => item.albums.filter((album) => album.tracks && album.tracks.length > 0).length > 0),
       total: genres.total,
     };
   }

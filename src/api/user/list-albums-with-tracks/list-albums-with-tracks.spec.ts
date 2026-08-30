@@ -278,6 +278,12 @@ describe('/users/list-albums-with-tracks', () => {
       const { albums, total } = data || { albums: [], total: 0 };
       expect(total).toBe(5);
       expect(albums.length).toBe(5);
+      for (let i = 0; i < albums.length; i += 1) {
+        const album = albums[i];
+        expect(album).toBeDefined();
+        expect(album?.tracks).toBeDefined();
+        expect(album?.tracks.length).toBeGreaterThan(0);
+      }
     });
 
     it('should paginate results', async () => {

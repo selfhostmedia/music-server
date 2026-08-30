@@ -109,6 +109,18 @@ describe('/users/list-track-genres-with-tracks', () => {
       const { genres, total } = data || { genres: [], total: 0 };
       expect(total).toBe(7);
       expect(genres.length).toBe(7);
+      for (let i = 0; i < genres.length; i += 1) {
+        const genre = genres[i];
+        expect(genre).toBeDefined();
+        expect(genre?.albums).toBeDefined();
+        expect(genre?.albums.length).toBeGreaterThan(0);
+        for (let j = 0; j < (genre?.albums || []).length; j += 1) {
+          const album = genre?.albums[j];
+          expect(album).toBeDefined();
+          expect(album?.tracks).toBeDefined();
+          expect(album?.tracks.length).toBeGreaterThan(0);
+        }
+      }
     });
 
     it('should paginate results', async () => {
