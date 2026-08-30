@@ -431,6 +431,26 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/api/user/folder-structure": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieve library folder structure
+         * @description Returns the folder and file structure of the library.
+         */
+        get: operations["UserFolderStructureController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/user/genre-cover": {
         parameters: {
             query?: never;
@@ -4976,6 +4996,15 @@ export type components = {
              */
             success: boolean;
         };
+        UserFolderStructureResponseDto: {
+            items: components["schemas"]["UserTreeItemDto"][];
+            /**
+             * Format: constant
+             * @description The success being "true" indicates that the request completed.
+             * @default true
+             */
+            success: boolean;
+        };
         UserListAlbumArtistsBadRequestResponseDto: {
             /** @description General description of the error class */
             error: string;
@@ -5494,6 +5523,12 @@ export type components = {
              *     if the row has never been updated
              */
             updatedAt?: string;
+        };
+        UserTreeItemDto: {
+            children?: components["schemas"]["UserTreeItemDto"][];
+            file?: string;
+            folder?: string;
+            fullPath: string;
         };
         /**
          * @description The error message(s) that occurred during the validation of the request data or additional requirements
@@ -6302,6 +6337,29 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SuccessResponseDto"];
+                };
+            };
+        };
+    };
+    UserFolderStructureController_get: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Bearer token for authentication */
+                Authorization: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successfully retrieved the tree of folders and file contents. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserFolderStructureResponseDto"];
                 };
             };
         };

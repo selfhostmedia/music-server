@@ -79,6 +79,12 @@ async function listAlbumArtistsWithTracks(params: RequestParams, query?: ListAlb
   });
 }
 
+async function folderStructure(params: RequestParams) {
+  return api.GET(`/api/user/folder-structure`, {
+    params,
+  });
+}
+
 async function listIndexerLogs(params: RequestParams) {
   return api.GET(`/api/user/list-indexer-logs`, {
     params,
@@ -184,6 +190,7 @@ export type UserApi = {
   listAlbumArtistsWithTracks: (
     query?: ListAlbumArtistsWithTracksQueryDto,
   ) => ReturnType<typeof listAlbumArtistsWithTracks>;
+  folderStructure: () => ReturnType<typeof folderStructure>;
   listTrackArtists: (query?: ListTrackArtistsQueryDto) => ReturnType<typeof listTrackArtists>;
   listTrackArtistsWithTracks: (
     query?: ListTrackArtistsWithTracksQueryDto,
@@ -240,6 +247,9 @@ export async function createUserApi(username?: string, password?: string): Promi
     },
     async listAlbumArtistsWithTracks(query?: ListAlbumArtistsWithTracksQueryDto) {
       return listAlbumArtistsWithTracks(params, query);
+    },
+    async folderStructure() {
+      return folderStructure(params);
     },
     async listIndexerLogs() {
       return listIndexerLogs(params);
