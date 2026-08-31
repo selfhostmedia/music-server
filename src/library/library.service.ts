@@ -2,10 +2,12 @@ import {
   AlbumEntity,
   ArtistEntity,
   CollatedAlbumEntity,
-  CollatedTrackEntity,
   ComposerEntity,
   FileEntity,
   GenreEntity,
+  LinkedArtistEntity,
+  LinkedComposerEntity,
+  LinkedGenreEntity,
 } from 'src/database/entities';
 import {
   AlbumSortFieldEnum,
@@ -27,7 +29,7 @@ import { LibraryComposerDto, LibraryComposerWithTracksDto, LibraryTrackExtendedD
 import { LibraryComposerService } from './composer.service';
 import { LibraryGenreDto, LibraryGenreWithTracksDto } from './dtos/library.genre.dto';
 import { LibraryTrackService } from './track.service';
-import { Includeable, Op, OrderItem, Sequelize } from 'sequelize';
+import { Op, Sequelize, WhereOptions } from 'sequelize';
 import { TrackFilters } from './types/track-filter';
 import { normalizeString, replaceDoubleQuotes } from 'src/utils/strings';
 import type { AlbumFilters } from './types/album-filter';
@@ -43,8 +45,6 @@ export class LibraryService {
     private readonly artistEntity: typeof ArtistEntity,
     @InjectModel(CollatedAlbumEntity)
     private readonly collatedAlbumEntity: typeof CollatedAlbumEntity,
-    @InjectModel(CollatedTrackEntity)
-    private readonly collatedTrackEntity: typeof CollatedTrackEntity,
     @InjectModel(ComposerEntity)
     private readonly composerEntity: typeof ComposerEntity,
 
@@ -57,6 +57,51 @@ export class LibraryService {
     private readonly fileEntity: typeof FileEntity,
     private readonly trackService: LibraryTrackService,
   ) {}
+
+  private async listAllTrackData(whereOptions?: WhereOptions<FileEntity>): Promise<FileEntity[]> {
+    return this.fileEntity.findAll({
+      attributes: ['id', 'albumId', 'discNumber', 'trackNumber', 'title', 'rating', 'year', 'duration'],
+      where: whereOptions,
+      include: [
+        {
+          attributes: ['artistId'],
+          model: LinkedArtistEntity,
+          include: [
+            {
+              attributes: ['name'],
+              model: ArtistEntity,
+              required: true,
+            },
+          ],
+          required: true,
+        },
+        {
+          attributes: ['composerId'],
+          model: LinkedComposerEntity,
+          include: [
+            {
+              attributes: ['name'],
+              model: ComposerEntity,
+              required: true,
+            },
+          ],
+          required: true,
+        },
+        {
+          attributes: ['genreId'],
+          model: LinkedGenreEntity,
+          include: [
+            {
+              attributes: ['name'],
+              model: GenreEntity,
+              required: true,
+            },
+          ],
+          required: true,
+        },
+      ],
+    });
+  }
 
   async listTracks(
     accountId: number,
@@ -71,49 +116,65 @@ export class LibraryService {
       attributes: ['id'],
       ...queryFilter,
     });
-    const sortFieldColumn = this.trackService.sortFieldToColumn(sortField);
-    const order: OrderItem[] = [];
-    if (sortFieldColumn) {
-      order.push([Sequelize.fn('lower', Sequelize.col(sortFieldColumn)), sortDirection || 'ASC']);
-    } else {
-      order.push(
-        [Sequelize.fn('lower', Sequelize.col('albumTitle')), 'ASC'],
-        [Sequelize.fn('lower', Sequelize.col('trackDiscNumber')), 'ASC'],
-        [Sequelize.fn('lower', Sequelize.col('trackNumber')), 'ASC'],
-      );
-    }
-    const tracks = await this.collatedTrackEntity.findAndCountAll({
-      where: {
-        fileId: { [Op.in]: fileIds.map((file) => file.id) },
-      },
-      order,
-      offset,
-      limit,
-      subQuery: false,
-    });
+    const tracks = await this.trackService.listTracks(
+      fileIds.map((file) => file.id),
+      offset || 0,
+      limit || 100_000,
+      sortField,
+      sortDirection,
+    );
     return {
       total: tracks.count,
       items: tracks.rows.map((track) => ({
-        albumTitle: track.albumTitle,
-        albumArtists: track.albumArtists,
-        artists: track.trackArtists,
-        comment: track.trackComment || '',
-        composers: track.trackComposers,
-        discNumber: track.trackDiscNumber,
-        duration: track.trackDuration,
-        fileBitRate: track.trackBitRate,
-        fileChannels: track.trackChannels,
-        fileFrequency: track.trackFrequency,
-        fileId: track.fileId,
+        albumId: track.albumId,
+        albumTitle: track.album?.title || '',
+        albumArtists:
+          track.album?.albumArtists?.map((linkedArtist) => {
+            return {
+              createdAt: linkedArtist.artist?.createdAt || new Date(0),
+              id: linkedArtist.artist?.id || 0,
+              name: linkedArtist.artist?.name || '',
+            };
+          }) || [],
+        artists:
+          track.linkedArtists?.map((linkedArtist) => {
+            return {
+              createdAt: linkedArtist.artist?.createdAt || new Date(0),
+              id: linkedArtist.artist?.id || 0,
+              name: linkedArtist.artist?.name || '',
+            };
+          }) || [],
+        comment: track.comment || '',
+        composers:
+          track.linkedComposers?.map((linkedComposer) => {
+            return {
+              createdAt: linkedComposer.composer?.createdAt || new Date(0),
+              id: linkedComposer.composer?.id || 0,
+              name: linkedComposer.composer?.name || '',
+            };
+          }) || [],
+        discNumber: track.discNumber,
+        duration: track.duration,
+        fileBitRate: track.bitRate,
+        fileChannels: track.channels,
+        fileFrequency: track.frequency,
+        fileId: track.id,
         filePath: track.filePath,
         fileSize: track.fileSize,
         fileType: track.fileType,
-        genres: track.trackGenres,
+        genres:
+          track.linkedGenres?.map((linkedGenre) => {
+            return {
+              createdAt: linkedGenre.genre?.createdAt || new Date(0),
+              id: linkedGenre.genre?.id || 0,
+              name: linkedGenre.genre?.name || '',
+            };
+          }) || [],
         id: track.id,
         trackNumber: track.trackNumber,
-        rating: track.trackRating,
-        title: track.trackTitle,
-        year: track.albumYear,
+        rating: track.rating,
+        title: track.title,
+        year: track.year,
       })),
     };
   }
@@ -214,10 +275,8 @@ export class LibraryService {
     sortDirection?: SortDirectionEnum,
   ): Promise<ListResult<LibraryAlbumWithTracksDto>> {
     const albums = await this.listAlbums(accountId, filters, offset, limit, sortField, sortDirection);
-    const allTracks = await this.collatedTrackEntity.findAll({
-      where: {
-        albumId: albums.items.map((album) => album.id),
-      },
+    const allTracks = await this.listAllTrackData({
+      albumId: albums.items.map((album) => album.id),
     });
     const tracksByAlbumId = allTracks.reduce(
       (acc, track) => {
@@ -232,17 +291,17 @@ export class LibraryService {
         const album = partialAlbum as LibraryAlbumWithTracksDto;
         const tracks = tracksByAlbumId[album.id] || [];
         album.tracks = tracks.map((track) => ({
-          artists: track.trackArtists.map(replaceDoubleQuotes),
-          composers: track.trackComposers.map(replaceDoubleQuotes),
-          discNumber: track.trackDiscNumber,
-          duration: track.trackDuration,
-          fileId: track.fileId,
-          genres: track.trackGenres.map(replaceDoubleQuotes),
-          id: track.fileId,
-          rating: track.trackRating,
-          title: replaceDoubleQuotes(track.trackTitle),
+          artists: track.linkedArtists?.map((item) => replaceDoubleQuotes(item.artist?.name || '')) || [''],
+          composers: track.linkedComposers?.map((item) => replaceDoubleQuotes(item.composer?.name || '')) || [''],
+          discNumber: track.discNumber,
+          duration: track.duration,
+          fileId: track.id,
+          genres: track.linkedGenres?.map((item) => replaceDoubleQuotes(item.genre?.name || '')) || [''],
+          id: track.id,
+          rating: track.rating,
+          title: replaceDoubleQuotes(track.title),
           trackNumber: track.trackNumber,
-          year: track.trackYear,
+          year: track.year,
         }));
         return album;
       }),
@@ -783,10 +842,8 @@ export class LibraryService {
     if (!album) {
       throw new NotFoundException(ErrorCodes.ALBUM_NOT_FOUND_ERROR);
     }
-    const tracks = await this.collatedTrackEntity.findAll({
-      where: {
-        albumId: album.id,
-      },
+    const tracks = await this.listAllTrackData({
+      albumId: album.id,
     });
     return {
       id: album.id,
@@ -806,17 +863,17 @@ export class LibraryService {
       sortName: replaceDoubleQuotes(normalizeString(album.title)),
       year: album.year,
       tracks: tracks.map((track) => ({
-        artists: track.trackArtists.map(replaceDoubleQuotes),
-        composers: track.trackComposers.map(replaceDoubleQuotes),
-        discNumber: track.trackDiscNumber,
-        duration: track.trackDuration,
-        fileId: track.fileId,
-        genres: track.trackGenres.map(replaceDoubleQuotes),
+        artists: track.linkedArtists?.map((item) => replaceDoubleQuotes(item.artist?.name || '')) || [''],
+        composers: track.linkedComposers?.map((item) => replaceDoubleQuotes(item.composer?.name || '')) || [''],
+        discNumber: track.discNumber,
+        duration: track.duration,
+        fileId: track.id,
+        genres: track.linkedGenres?.map((item) => replaceDoubleQuotes(item.genre?.name || '')) || [''],
         id: track.id,
-        rating: track.trackRating,
-        title: replaceDoubleQuotes(track.trackTitle),
+        rating: track.rating,
+        title: replaceDoubleQuotes(track.title),
         trackNumber: track.trackNumber,
-        year: track.trackYear,
+        year: track.year,
       })),
     };
   }

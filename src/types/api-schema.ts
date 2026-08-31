@@ -1910,8 +1910,7 @@ export type components = {
             name: string;
         };
         LibraryGenreWithTracksDto: {
-            /** @description The list of albums including tracks for the genre */
-            albums: components["schemas"]["LibraryAlbumWithTracksDto"][];
+            albums: components["schemas"]["LibraryAlbumWithTracksDto"][][];
             /** @description The internally-generated unique ID of the genre */
             id: number;
             /** @description The name of the genre. */
@@ -1937,8 +1936,6 @@ export type components = {
             discNumber: number;
             /** @description The duration of the track in seconds. */
             duration: number;
-            /** @description The internally-generated unique ID of the file associated with the track */
-            fileId: number;
             /**
              * @description The list of genres for the track, if it is a comma-delimited string then it will be parsed into
              *     an array each containing one name.
@@ -1959,22 +1956,18 @@ export type components = {
             year: number;
         };
         LibraryTrackExtendedDto: {
-            albumArtists: string[];
+            /** @description The list of artists for the album to which the track belongs. */
+            albumArtists: components["schemas"]["LibraryArtistDto"][];
+            /** @description The unique ID of the album to which the track belongs. */
+            albumId: number;
+            /** @description The title of the album to which the track belongs. */
             albumTitle: string;
-            /**
-             * @description The list of artists for the track, if it is a comma-delimited string then it will be parsed into
-             *     an array each containing one name.  This data is very inconsistently-formatted even in official-ish
-             *     sources like MusicBrainz so it may end up with multiple artists in a single string.
-             */
-            artists: string[];
+            /** @description The list of artists for the track. */
+            artists: components["schemas"]["LibraryArtistDto"][];
             /** @description The comment or description associated with the track. */
             comment: string;
-            /**
-             * @description The list of composers for the track, if it is a comma-delimited string then it will be parsed into
-             *     an array each containing one name.  This data is very inconsistently-formatted even in official-ish
-             *     sources like MusicBrainz so it may end up with multiple composers in a single string.
-             */
-            composers: string[];
+            /** @description The list of composers for the track. */
+            composers: components["schemas"]["LibraryComposerDto"][];
             /**
              * @description The disc number of the track on the album or disc if there are multiple discs.  If this field is not
              *     specified it is assumed to be a single-disc album.
@@ -1988,8 +1981,6 @@ export type components = {
             fileChannels: number;
             /** @description The frequency or sample rate of the audio file for the track, in Hz. */
             fileFrequency: number;
-            /** @description The internally-generated unique ID of the file associated with the track */
-            fileId: number;
             /** @description The file path of the file for the track. */
             filePath: string;
             /** @description The size of the file in bytes */
@@ -1999,11 +1990,8 @@ export type components = {
              * @enum {string}
              */
             fileType: LibraryTrackExtendedDtoFileType;
-            /**
-             * @description The list of genres for the track, if it is a comma-delimited string then it will be parsed into
-             *     an array each containing one name.
-             */
-            genres: string[];
+            /** @description The list of genres for the track. */
+            genres: components["schemas"]["LibraryGenreDto"][];
             /** @description The internally-generated unique ID of the track */
             id: number;
             /** @description The rating of the track which is a value between 0 and 5 inclusive applied to the track. */

@@ -5,7 +5,6 @@ import { InjectModel } from '@nestjs/sequelize/dist/common/sequelize.decorators'
 import { Injectable } from '@nestjs/common';
 import { UserTreeItemDto } from './folder-structure.dto';
 import { sep } from 'node:path';
-import { RootPathEntity } from 'src/database/entities/root-path.entity';
 
 const fileTypes = Object.values(FileTypeEnum);
 

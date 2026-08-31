@@ -7,6 +7,10 @@ export class LibraryArtistDto {
   /**
    * The date the artist was added to the library
    */
+  @ApiProperty({
+    type: Date,
+    format: 'date-time',
+  })
   @IsDate()
   declare createdAt: Date;
 

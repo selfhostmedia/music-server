@@ -7,6 +7,10 @@ export class LibraryComposerDto {
   /**
    * The date the composer was added to the library
    */
+  @ApiProperty({
+    type: Date,
+    format: 'date-time',
+  })
   @IsDate()
   declare createdAt: Date;
 

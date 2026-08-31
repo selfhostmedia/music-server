@@ -1,6 +1,9 @@
 /* eslint-disable max-classes-per-file */
+import { ApiProperty, PickType } from '@nestjs/swagger';
 import { FileTypeEnum } from 'src/types/enums';
 import { IsEnum, IsInt, IsNumber, IsString } from 'class-validator';
+import { LibraryArtistDto, LibraryComposerDto } from '.';
+import { LibraryGenreDto } from './library.genre.dto';
 
 export class LibraryTrackDto {
   /**
@@ -38,12 +41,6 @@ export class LibraryTrackDto {
   declare duration: number;
 
   /**
-   * The internally-generated unique ID of the file associated with the track
-   */
-  @IsInt()
-  declare fileId: number;
-
-  /**
    * The list of genres for the track, if it is a comma-delimited string then it will be parsed into
    * an array each containing one name.
    */
@@ -76,18 +73,50 @@ export class LibraryTrackDto {
   declare year: number;
 }
 
-export class LibraryTrackExtendedDto extends LibraryTrackDto {
+export class LibraryTrackExtendedDto extends PickType(LibraryTrackDto, [
+  'id',
+  'discNumber',
+  'duration',
+  'trackNumber',
+  'rating',
+  'title',
+  'year',
+]) {
+  /**
+   * The unique ID of the album to which the track belongs.
+   */
+  @IsInt()
+  declare albumId: number;
+
+  /**
+   * The title of the album to which the track belongs.
+   */
   @IsString()
   declare albumTitle: string;
 
-  @IsString({ each: true })
-  declare albumArtists: string[];
+  /**
+   * The list of artists for the album to which the track belongs.
+   */
+  @ApiProperty() // not sure why but defining type + isArray results in LibraryArtistDto[][]
+  declare albumArtists: LibraryArtistDto[];
+
+  /**
+   * The list of artists for the track.
+   */
+  @ApiProperty() // not sure why but defining type + isArray results in LibraryArtistDto[][]
+  declare artists: LibraryArtistDto[];
 
   /**
    * The comment or description associated with the track.
    */
   @IsString()
   declare comment: string;
+
+  /**
+   * The list of composers for the track.
+   */
+  @ApiProperty() // not sure why but defining type + isArray results in LibraryComposerDto[][]
+  declare composers: LibraryComposerDto[];
 
   /**
    * The bitrate of the audio file for the track, in kbps.
@@ -124,4 +153,13 @@ export class LibraryTrackExtendedDto extends LibraryTrackDto {
    */
   @IsEnum(FileTypeEnum)
   declare fileType: FileTypeEnum;
+
+  /**
+   * The list of genres for the track.
+   */
+  @ApiProperty({
+    type: LibraryGenreDto,
+    isArray: true,
+  })
+  declare genres: LibraryGenreDto[];
 }

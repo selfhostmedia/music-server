@@ -1,6 +1,6 @@
 import { ADMIN_PASSWORD, ADMIN_USERNAME, UserApi, api, createUserApi } from '../../../test-helper';
-import { TrackSortFieldEnum, SortDirectionEnum } from '../../../types/api-schema';
 import { ErrorCodes } from '../../../constants/error-codes';
+import { SortDirectionEnum, TrackSortFieldEnum } from '../../../types/api-schema';
 import { beforeAll, describe, expect, it } from '@jest/globals';
 
 describe('/users/list-tracks', () => {
@@ -129,7 +129,7 @@ describe('/users/list-tracks', () => {
         expect(total).toBe(7);
         expect(tracks.length).toBe(7);
         for (let i = 0; i < tracks.length; i += 1) {
-          expect(tracks[i]?.genres.includes('Rock')).toBe(true);
+          expect(tracks[i]?.genres.find((genre) => genre.name === 'Rock')).toBeDefined();
         }
       });
 
@@ -139,8 +139,8 @@ describe('/users/list-tracks', () => {
         expect(total).toBe(10);
         expect(tracks.length).toBe(10);
         for (let i = 0; i < tracks.length; i += 1) {
-          const pairedMatch = tracks[i]?.artists.some((item) => item.indexOf('Artist 3') > -1);
-          expect(pairedMatch || tracks[i]?.artists.includes('Artist 3')).toBe(true);
+          const pairedMatch = tracks[i]?.artists.some((item) => item.name.indexOf('Artist 3') > -1);
+          expect(pairedMatch || tracks[i]?.artists.find((artist) => artist.name === 'Artist 3')).toBeDefined();
         }
       });
 
@@ -150,7 +150,7 @@ describe('/users/list-tracks', () => {
         expect(total).toBe(7);
         expect(tracks.length).toBe(7);
         for (let i = 0; i < tracks.length; i += 1) {
-          expect(tracks[i]?.composers.includes('Composer 4')).toBe(true);
+          expect(tracks[i]?.composers.find((composer) => composer.name === 'Composer 4')).toBeDefined();
         }
       });
 
@@ -250,9 +250,14 @@ describe('/users/list-tracks', () => {
         const { tracks, total } = data || { tracks: [], total: 0 };
         expect(total).toBe(27);
         expect(tracks.length).toBe(27);
-        const sorted = [...tracks].sort((a, b) => a.albumArtists.join(',').localeCompare(b.albumArtists.join(',')));
+        const sorted = [...tracks].sort((a, b) =>
+          a.albumArtists
+            .map((artist) => artist.name)
+            .join(',')
+            .localeCompare(b.albumArtists.map((artist) => artist.name).join(',')),
+        );
         for (let i = 0; i < tracks.length; i += 1) {
-          expect(tracks[i]?.albumArtists[0]).toBe(sorted[i]?.albumArtists[0]);
+          expect(tracks[i]?.albumArtists[0]?.name).toBe(sorted[i]?.albumArtists[0]?.name);
         }
       });
 
@@ -264,9 +269,14 @@ describe('/users/list-tracks', () => {
         const { tracks, total } = data || { tracks: [], total: 0 };
         expect(total).toBe(27);
         expect(tracks.length).toBe(27);
-        const sorted = [...tracks].sort((a, b) => b.albumArtists.join(',').localeCompare(a.albumArtists.join(',')));
+        const sorted = [...tracks].sort((a, b) =>
+          b.albumArtists
+            .map((artist) => artist.name)
+            .join(',')
+            .localeCompare(a.albumArtists.map((artist) => artist.name).join(',')),
+        );
         for (let i = 0; i < tracks.length; i += 1) {
-          expect(tracks[i]?.albumArtists[0]).toBe(sorted[i]?.albumArtists[0]);
+          expect(tracks[i]?.albumArtists[0]?.name).toBe(sorted[i]?.albumArtists[0]?.name);
         }
       });
 
@@ -278,9 +288,14 @@ describe('/users/list-tracks', () => {
         const { tracks, total } = data || { tracks: [], total: 0 };
         expect(total).toBe(27);
         expect(tracks.length).toBe(27);
-        const sorted = [...tracks].sort((a, b) => a.genres.join(',').localeCompare(b.genres.join(',')));
+        const sorted = [...tracks].sort((a, b) =>
+          a.genres
+            .map((genre) => genre.name)
+            .join(',')
+            .localeCompare(b.genres.map((genre) => genre.name).join(',')),
+        );
         for (let i = 0; i < tracks.length; i += 1) {
-          expect(tracks[i]?.genres[0]).toBe(sorted[i]?.genres[0]);
+          expect(tracks[i]?.genres[0]?.name).toBe(sorted[i]?.genres[0]?.name);
         }
       });
 
@@ -292,9 +307,14 @@ describe('/users/list-tracks', () => {
         const { tracks, total } = data || { tracks: [], total: 0 };
         expect(total).toBe(27);
         expect(tracks.length).toBe(27);
-        const sorted = [...tracks].sort((a, b) => b.genres.join(',').localeCompare(a.genres.join(',')));
+        const sorted = [...tracks].sort((a, b) =>
+          b.genres
+            .map((genre) => genre.name)
+            .join(',')
+            .localeCompare(a.genres.map((genre) => genre.name).join(',')),
+        );
         for (let i = 0; i < tracks.length; i += 1) {
-          expect(tracks[i]?.genres[0]).toBe(sorted[i]?.genres[0]);
+          expect(tracks[i]?.genres[0]?.name).toBe(sorted[i]?.genres[0]?.name);
         }
       });
 

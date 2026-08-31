@@ -2,7 +2,6 @@ import {
   AlbumArtistEntity,
   AlbumEntity,
   ArtistEntity,
-  CollatedTrackEntity,
   ComposerEntity,
   FileEntity,
   GenreEntity,
@@ -12,11 +11,11 @@ import {
 } from 'src/database/entities';
 import { InjectModel } from '@nestjs/sequelize';
 import { Injectable } from '@nestjs/common';
-import { Op } from 'sequelize';
+import { Op, Sequelize, literal } from 'sequelize';
+import { SortDirectionEnum, TrackSortFieldEnum } from 'src/types/enums';
 import { TrackFilters } from './types/track-filter';
-import { TrackSortFieldEnum } from 'src/types/enums';
 import { normalizeString } from 'src/utils/strings';
-import type { FindOptions, Includeable } from 'sequelize';
+import type { FindAttributeOptions, FindOptions, Includeable, OrderItem } from 'sequelize';
 
 @Injectable()
 export class LibraryTrackService {
@@ -27,6 +26,8 @@ export class LibraryTrackService {
     private readonly composerEntity: typeof ComposerEntity,
     @InjectModel(GenreEntity)
     private readonly genreEntity: typeof GenreEntity,
+    @InjectModel(FileEntity)
+    private readonly fileEntity: typeof FileEntity,
   ) {}
 
   /**
@@ -247,25 +248,195 @@ export class LibraryTrackService {
     return queryFilter;
   }
 
+  async listTracks(
+    fileIds: number[],
+    offset: number,
+    limit: number,
+    sortField?: TrackSortFieldEnum,
+    sortDirection?: SortDirectionEnum,
+  ) {
+    const sortFieldColumn = this.sortFieldToColumn(sortField);
+    const order: OrderItem[] = [];
+    if (sortFieldColumn) {
+      order.push([Sequelize.fn('lower', Sequelize.col(sortFieldColumn as string)), sortDirection || 'ASC']);
+    } else {
+      order.push(
+        [Sequelize.fn('lower', Sequelize.col('album.title')), 'ASC'],
+        [Sequelize.fn('lower', Sequelize.col('discNumber')), 'ASC'],
+        [Sequelize.fn('lower', Sequelize.col('trackNumber')), 'ASC'],
+      );
+    }
+    const additionalSortFields: FindAttributeOptions = [];
+    if (sortField === TrackSortFieldEnum.ARTIST) {
+      additionalSortFields.push([
+        literal(` (
+    SELECT group_concat(artist_name, ', ')
+    FROM (
+      SELECT artists.name AS artist_name
+      FROM artists
+      INNER JOIN linked_artists
+        ON linked_artists.artist_id = artists.id
+      WHERE linked_artists.file_id = "FileEntity"."id"
+      ORDER BY artists.name COLLATE NOCASE
+    )
+  )`),
+        'artistSort',
+      ]);
+    }
+    if (sortField === TrackSortFieldEnum.ALBUM_ARTIST) {
+      additionalSortFields.push([
+        literal(` (
+    SELECT group_concat(artist_name, ', ')
+    FROM (
+      SELECT artists.name AS artist_name
+      FROM artists
+      INNER JOIN album_artists
+        ON album_artists.artist_id = artists.id
+      WHERE album_artists.album_id = "FileEntity"."album_id"
+      ORDER BY artists.name COLLATE NOCASE
+    )
+  )`),
+        'albumArtistSort',
+      ]);
+    } else if (sortField === TrackSortFieldEnum.COMPOSER) {
+      additionalSortFields.push([
+        literal(`
+        SELECT group_concat(composer_name, ', ')
+        FROM (
+          SELECT composers.name AS composer_name
+          FROM composers
+          INNER JOIN linked_composers
+            ON linked_composers.composer_id = composers.id
+          WHERE linked_composers.file_id = "FileEntity"."id"
+          ORDER BY composers.name COLLATE NOCASE
+        )
+        `),
+        'composerSort',
+      ]);
+    } else if (sortField === TrackSortFieldEnum.GENRE) {
+      additionalSortFields.push([
+        literal(`
+        (
+          SELECT group_concat(genre_name, ', ')
+          FROM (
+            SELECT genres.name AS genre_name
+            FROM genres
+            INNER JOIN linked_genres
+              ON linked_genres.genre_id = genres.id
+            WHERE linked_genres.file_id = "FileEntity"."id"
+            ORDER BY genres.name COLLATE NOCASE
+          )
+        )
+      `),
+        'genresSort',
+      ]);
+    }
+    return this.fileEntity.findAndCountAll({
+      attributes: [
+        'albumId',
+        'bitRate',
+        'channels',
+        'createdAt',
+        'discNumber',
+        'duration',
+        'frequency',
+        'id',
+        'rating',
+        'title',
+        'trackNumber',
+        'year',
+        ...additionalSortFields,
+      ],
+      where: {
+        id: fileIds,
+      },
+      order,
+      offset: offset || 0,
+      limit: limit || 100_000,
+      include: [
+        {
+          attributes: ['title'],
+          model: AlbumEntity,
+          required: true,
+          include: [
+            {
+              model: AlbumArtistEntity,
+              required: true,
+              separate: true,
+              include: [
+                {
+                  attributes: ['createdAt', 'id', 'name'],
+                  model: ArtistEntity,
+                  required: true,
+                },
+              ],
+            },
+          ],
+        },
+        {
+          attributes: ['artistId'],
+          model: LinkedArtistEntity,
+          include: [
+            {
+              attributes: ['createdAt', 'id', 'name'],
+              model: ArtistEntity,
+              required: true,
+            },
+          ],
+          separate: true,
+          required: true,
+        },
+        {
+          attributes: ['composerId'],
+          model: LinkedComposerEntity,
+          include: [
+            {
+              attributes: ['createdAt', 'id', 'name'],
+              model: ComposerEntity,
+              required: true,
+            },
+          ],
+          separate: true,
+          required: true,
+        },
+        {
+          attributes: ['genreId'],
+          model: LinkedGenreEntity,
+          include: [
+            {
+              attributes: ['createdAt', 'id', 'name'],
+              model: GenreEntity,
+              required: true,
+            },
+          ],
+          separate: true,
+          required: true,
+        },
+      ],
+      subQuery: false,
+      distinct: true,
+    });
+  }
+
   // eslint-disable-next-line class-methods-use-this
   sortFieldToColumn(sortField?: TrackSortFieldEnum): string | undefined {
     switch (sortField) {
       case TrackSortFieldEnum.DATE_ADDED:
         return 'createdAt';
       case TrackSortFieldEnum.ARTIST:
-        return 'trackArtists';
+        return 'artistSort';
       case TrackSortFieldEnum.ALBUM:
-        return 'albumTitle';
+        return 'album.title';
       case TrackSortFieldEnum.ALBUM_ARTIST:
-        return 'albumArtists';
+        return 'albumArtistSort';
       case TrackSortFieldEnum.COMPOSER:
-        return 'trackComposers';
+        return 'composerSort';
       case TrackSortFieldEnum.GENRE:
-        return 'trackGenres';
+        return 'genresSort';
       case TrackSortFieldEnum.YEAR:
-        return 'trackYear';
+        return 'FileEntity.year';
       case TrackSortFieldEnum.TITLE:
-        return 'trackTitle';
+        return 'FileEntity.title';
       default:
         return undefined;
     }

@@ -50,7 +50,6 @@ describe('/users/folder-structure', () => {
       const { data } = await userApi.folderStructure();
       const root1 = data?.items?.[0];
       const root2 = data?.items?.[1];
-      console.log(JSON.stringify(root1, null, 2));
       expect(data?.items.length).toBe(2);
       expect(root1?.children?.length).toBe(2); // root 1
       expect(root1?.children?.[0]?.folder).toBe('Artist 1');
