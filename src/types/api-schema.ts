@@ -709,6 +709,26 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/api/user/list-tracks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List tracks
+         * @description Retrieves a list of tracks for the user based on the provided query parameters.
+         */
+        get: operations["UserListTracksController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/user/regenerate-session-key": {
         parameters: {
             query?: never;
@@ -1919,6 +1939,66 @@ export type components = {
             duration: number;
             /** @description The internally-generated unique ID of the file associated with the track */
             fileId: number;
+            /**
+             * @description The list of genres for the track, if it is a comma-delimited string then it will be parsed into
+             *     an array each containing one name.
+             */
+            genres: string[];
+            /** @description The internally-generated unique ID of the track */
+            id: number;
+            /** @description The rating of the track which is a value between 0 and 5 inclusive applied to the track. */
+            rating: number;
+            /** @description The title of the track, which is usually the name of the song or piece of music. */
+            title: string;
+            /** @description The track number of the track on the album or disc if there are multiple discs. */
+            trackNumber: number;
+            /**
+             * @description The year of release of the track, often the same as the album except in "greatest hits"
+             *     and compilations.
+             */
+            year: number;
+        };
+        LibraryTrackExtendedDto: {
+            albumArtists: string[];
+            albumTitle: string;
+            /**
+             * @description The list of artists for the track, if it is a comma-delimited string then it will be parsed into
+             *     an array each containing one name.  This data is very inconsistently-formatted even in official-ish
+             *     sources like MusicBrainz so it may end up with multiple artists in a single string.
+             */
+            artists: string[];
+            /** @description The comment or description associated with the track. */
+            comment: string;
+            /**
+             * @description The list of composers for the track, if it is a comma-delimited string then it will be parsed into
+             *     an array each containing one name.  This data is very inconsistently-formatted even in official-ish
+             *     sources like MusicBrainz so it may end up with multiple composers in a single string.
+             */
+            composers: string[];
+            /**
+             * @description The disc number of the track on the album or disc if there are multiple discs.  If this field is not
+             *     specified it is assumed to be a single-disc album.
+             */
+            discNumber: number;
+            /** @description The duration of the track in seconds. */
+            duration: number;
+            /** @description The bitrate of the audio file for the track, in kbps. */
+            fileBitRate: number;
+            /** @description The number of audio channels in the file for the track, such as 2 for stereo or 1 for mono. */
+            fileChannels: number;
+            /** @description The frequency or sample rate of the audio file for the track, in Hz. */
+            fileFrequency: number;
+            /** @description The internally-generated unique ID of the file associated with the track */
+            fileId: number;
+            /** @description The file path of the file for the track. */
+            filePath: string;
+            /** @description The size of the file in bytes */
+            fileSize: number;
+            /**
+             * @description The type of the file for the track, such as MP3, FLAC, etc.
+             * @enum {string}
+             */
+            fileType: LibraryTrackExtendedDtoFileType;
             /**
              * @description The list of genres for the track, if it is a comma-delimited string then it will be parsed into
              *     an array each containing one name.
@@ -4934,6 +5014,8 @@ export type components = {
              */
             success: boolean;
         };
+        /** @enum {string} */
+        TrackSortFieldEnum: TrackSortFieldEnum;
         /**
          * @description The error message(s) that occurred during the validation of the request data or additional requirements
          *     applied during the execution of the request
@@ -5451,6 +5533,47 @@ export type components = {
              *     than the number of genres returned in the genres array if pagination is applied.
              */
             total: number;
+        };
+        /**
+         * @description The error message(s) that occurred during the validation of the request data or additional requirements
+         *     applied during the execution of the request
+         * @enum {string}
+         */
+        UserListTracksBadRequestErrorMessages: UserListTracksBadRequestErrorMessages;
+        UserListTracksBadRequestResponseDto: {
+            /** @description General description of the error class */
+            error: string;
+            /**
+             * @description The error message(s) that occurred during the validation of the request data or additional requirements
+             *     applied during the execution of the request
+             * @default invalid-added-after-error
+             */
+            message: components["schemas"]["UserListTracksBadRequestErrorMessages"][];
+            /**
+             * @description The success being "false" indicates that the request failed to complete.
+             * @default false
+             */
+            success: boolean;
+        };
+        UserListTracksResponseDto: {
+            /**
+             * @description The offset of the first track in the tracks array, which may be greater than 0 if
+             *     pagination is applied.
+             */
+            offset: number;
+            /**
+             * Format: constant
+             * @description The success being "true" indicates that the request completed.
+             * @default true
+             */
+            success: boolean;
+            /**
+             * @description The total number of tracks that match the query parameters, which may be greater
+             *     than the number of tracks returned in the tracks array if pagination is applied.
+             */
+            total: number;
+            /** @description The list of tracks that match the query parameters, which may be limited by pagination. */
+            tracks: components["schemas"]["LibraryTrackExtendedDto"][];
         };
         UserLogEntryDto: {
             /** Format: date-time */
@@ -7076,6 +7199,100 @@ export interface operations {
             };
         };
     };
+    UserListTracksController_get: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Optional filter for the date the album was added to the library, which will do an exact match against
+                 *     the date the album was added to the library.  The date must be in ISO 8601 format (YYYY-MM-DD).
+                 */
+                addedAfter?: string;
+                /**
+                 * @description Optional filter for the date the album was added to the library, which will do an exact match against
+                 *     the date the album was added to the library.  The date must be in ISO 8601 format (YYYY-MM-DD).
+                 */
+                addedBefore?: string;
+                /**
+                 * @description Optional filter for the album name, which will do a case-insensitive partial-match against the
+                 *     name of the album.
+                 */
+                album?: string;
+                /**
+                 * @description Optional filter for the album artist name, which will do a case-insensitive partial-match against the
+                 *     artists associated with an album.
+                 */
+                albumArtists?: string[];
+                /**
+                 * @description Optional filter for the artist name, which will do a case-insensitive partial-match against the
+                 *     artists associated with tracks.
+                 */
+                artist?: string[];
+                /**
+                 * @description Optional filter for the composer name, which will do a case-insensitive partial-match against the
+                 *     composers associated with an album.
+                 */
+                composer?: string[];
+                /**
+                 * @description Optional search filter that will do a case-insensitive partial-match against the album
+                 *     name, artist name, composer name, or genre.
+                 */
+                filter?: string;
+                /**
+                 * @description Optional filter for the genre name, which will do a case-insensitive partial-match against the
+                 *     genres associated with an album.
+                 */
+                genre?: string[];
+                limit?: number;
+                /**
+                 * @description Maximum rating value, which will do an exact match against the rating associated with an album.  The
+                 *     rating is a value between 0 and 5, inclusive.
+                 */
+                maxRating?: number;
+                /**
+                 * @description Minimum rating value, which will do an exact match against the rating associated with an album.  The
+                 *     rating is a value between 0 and 5, inclusive.
+                 */
+                minRating?: number;
+                offset?: number;
+                /** @description Optional filter for the direction to sort the results by. */
+                sortDirection?: components["schemas"]["SortDirectionEnum"];
+                /** @description Optional filter for the field to sort results by. */
+                sortField?: components["schemas"]["TrackSortFieldEnum"];
+                /**
+                 * @description Optional filter for the year of the album, which will do an exact match against the year associated
+                 *     with an album's release date.
+                 */
+                year?: number;
+            };
+            header: {
+                /** @description Bearer token for authentication */
+                Authorization: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successfully retrieved the list of tracks for the user. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserListTracksResponseDto"];
+                };
+            };
+            /** @description The request was invalid or missing required parameters. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserListTracksBadRequestResponseDto"];
+                };
+            };
+        };
+    };
     UserRegenerateSessionKeyController_post: {
         parameters: {
             query?: never;
@@ -7750,6 +7967,12 @@ export enum GuestCreateSessionBadRequestErrorMessageEnum {
 export enum InternalServerErrorEnum {
     internal_server_error = "internal-server-error"
 }
+export enum LibraryTrackExtendedDtoFileType {
+    flac = "flac",
+    m4a = "m4a",
+    mp3 = "mp3",
+    ogg = "ogg"
+}
 export enum PlaylistTypeEnum {
     normal = "normal",
     smart = "smart"
@@ -7834,6 +8057,16 @@ export enum SynologyPinTypeEnum {
 export enum SynologyPlaylistDeleteBodyDtoType {
     normal = "normal",
     smart = "smart"
+}
+export enum TrackSortFieldEnum {
+    date_added = "date_added",
+    artist = "artist",
+    album = "album",
+    album_artist = "album_artist",
+    composer = "composer",
+    genre = "genre",
+    title = "title",
+    year = "year"
 }
 export enum UserCreateRootPathBadRequestErrorMessageEnum {
     root_path_does_not_exist_error = "root-path-does-not-exist-error",
@@ -7940,6 +8173,29 @@ export enum UserListTrackGenresWithTracksBadRequestErrorMessages {
     invalid_offset_range_error = "invalid-offset-range-error",
     invalid_sort_field_error = "invalid-sort-field-error",
     invalid_sort_order_error = "invalid-sort-order-error"
+}
+export enum UserListTracksBadRequestErrorMessages {
+    invalid_added_after_error = "invalid-added-after-error",
+    invalid_added_before_error = "invalid-added-before-error",
+    invalid_album_error = "invalid-album-error",
+    invalid_album_length_error = "invalid-album-length-error",
+    invalid_artist_error = "invalid-artist-error",
+    invalid_artist_length_error = "invalid-artist-length-error",
+    invalid_composer_error = "invalid-composer-error",
+    invalid_composer_length_error = "invalid-composer-length-error",
+    invalid_filter_error = "invalid-filter-error",
+    invalid_filter_length_error = "invalid-filter-length-error",
+    invalid_genre_error = "invalid-genre-error",
+    invalid_genre_length_error = "invalid-genre-length-error",
+    invalid_limit_error = "invalid-limit-error",
+    invalid_limit_range_error = "invalid-limit-range-error",
+    invalid_max_rating_error = "invalid-max-rating-error",
+    invalid_min_rating_error = "invalid-min-rating-error",
+    invalid_offset_error = "invalid-offset-error",
+    invalid_offset_range_error = "invalid-offset-range-error",
+    invalid_sort_field_error = "invalid-sort-field-error",
+    invalid_sort_order_error = "invalid-sort-order-error",
+    invalid_year_error = "invalid-year-error"
 }
 export enum UserRetrieveAlbumNotFoundErrorMessage {
     album_not_found_error = "album-not-found-error"

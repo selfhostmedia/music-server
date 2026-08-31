@@ -137,3 +137,14 @@ export enum ComposerSortFieldEnum {
 export enum GenreSortFieldEnum {
   GENRE = 'genre',
 }
+
+export enum TrackSortFieldEnum {
+  DATE_ADDED = 'date_added',
+  ARTIST = 'artist',
+  ALBUM = 'album',
+  ALBUM_ARTIST = 'album_artist',
+  COMPOSER = 'composer',
+  GENRE = 'genre',
+  TITLE = 'title',
+  YEAR = 'year',
+}

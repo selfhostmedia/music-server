@@ -4,6 +4,7 @@ import {
   CollatedAlbumEntity,
   CollatedTrackEntity,
   ComposerEntity,
+  FileEntity,
   GenreEntity,
 } from 'src/database/entities';
 import {
@@ -12,19 +13,22 @@ import {
   ComposerSortFieldEnum,
   GenreSortFieldEnum,
   SortDirectionEnum,
+  TrackSortFieldEnum,
 } from 'src/types/enums';
 import { ComposerFilters } from './types/composer-filter';
 import { ErrorCodes } from 'src/constants/error-codes';
 import { InjectModel } from '@nestjs/sequelize';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { LibraryAlbumDto, LibraryAlbumWithTracksDto } from './dtos/library.album.dto';
-import { LibraryAlbumService } from './album.service.ts';
+import { LibraryAlbumService } from './album.service';
 import { LibraryArtistDto, LibraryArtistWithTracksDto } from './dtos/library.artist.dto';
 import { LibraryArtistService } from './artist.service';
-import { LibraryComposerDto, LibraryComposerWithTracksDto } from './dtos';
+import { LibraryComposerDto, LibraryComposerWithTracksDto, LibraryTrackExtendedDto } from './dtos';
 import { LibraryComposerService } from './composer.service';
 import { LibraryGenreDto, LibraryGenreWithTracksDto } from './dtos/library.genre.dto';
-import { Op, Sequelize } from 'sequelize';
+import { LibraryTrackService } from './track.service';
+import { Includeable, Op, OrderItem, Sequelize } from 'sequelize';
+import { TrackFilters } from './types/track-filter';
 import { normalizeString, replaceDoubleQuotes } from 'src/utils/strings';
 import type { AlbumFilters } from './types/album-filter';
 import type { ArtistFilters } from './types/artist-filter';
@@ -49,7 +53,70 @@ export class LibraryService {
     private readonly composerService: LibraryComposerService,
     @InjectModel(GenreEntity)
     private readonly genreEntity: typeof GenreEntity,
+    @InjectModel(FileEntity)
+    private readonly fileEntity: typeof FileEntity,
+    private readonly trackService: LibraryTrackService,
   ) {}
+
+  async listTracks(
+    accountId: number,
+    filters: TrackFilters,
+    offset: number,
+    limit: number,
+    sortField?: TrackSortFieldEnum,
+    sortDirection?: SortDirectionEnum,
+  ): Promise<ListResult<LibraryTrackExtendedDto>> {
+    const queryFilter = await this.trackService.createTrackQueryFilter(accountId, filters);
+    const fileIds = await this.fileEntity.findAll({
+      attributes: ['id'],
+      ...queryFilter,
+    });
+    const sortFieldColumn = this.trackService.sortFieldToColumn(sortField);
+    const order: OrderItem[] = [];
+    if (sortFieldColumn) {
+      order.push([Sequelize.fn('lower', Sequelize.col(sortFieldColumn)), sortDirection || 'ASC']);
+    } else {
+      order.push(
+        [Sequelize.fn('lower', Sequelize.col('albumTitle')), 'ASC'],
+        [Sequelize.fn('lower', Sequelize.col('trackDiscNumber')), 'ASC'],
+        [Sequelize.fn('lower', Sequelize.col('trackNumber')), 'ASC'],
+      );
+    }
+    const tracks = await this.collatedTrackEntity.findAndCountAll({
+      where: {
+        fileId: { [Op.in]: fileIds.map((file) => file.id) },
+      },
+      order,
+      offset,
+      limit,
+      subQuery: false,
+    });
+    return {
+      total: tracks.count,
+      items: tracks.rows.map((track) => ({
+        albumTitle: track.albumTitle,
+        albumArtists: track.albumArtists,
+        artists: track.trackArtists,
+        comment: track.trackComment || '',
+        composers: track.trackComposers,
+        discNumber: track.trackDiscNumber,
+        duration: track.trackDuration,
+        fileBitRate: track.trackBitRate,
+        fileChannels: track.trackChannels,
+        fileFrequency: track.trackFrequency,
+        fileId: track.fileId,
+        filePath: track.filePath,
+        fileSize: track.fileSize,
+        fileType: track.fileType,
+        genres: track.trackGenres,
+        id: track.id,
+        trackNumber: track.trackNumber,
+        rating: track.trackRating,
+        title: track.trackTitle,
+        year: track.albumYear,
+      })),
+    };
+  }
 
   /**
    * Returns a list of albums belonging to an account, optionally paginated, filtered and sorted by the
@@ -64,14 +131,14 @@ export class LibraryService {
    */
   async listAlbums(
     accountId: number,
-    filter: AlbumFilters,
+    filters: AlbumFilters,
     offset: number,
     limit: number,
     sortField?: AlbumSortFieldEnum,
     sortDirection?: SortDirectionEnum,
   ): Promise<ListResult<LibraryAlbumDto>> {
     const sortFieldColumn = this.albumService.sortFieldToColumn(sortField);
-    const queryFilter = await this.albumService.createAlbumQueryFilter(accountId, filter);
+    const queryFilter = await this.albumService.createAlbumQueryFilter(accountId, filters);
     const matchingAlbums = await this.albumService.findMatchingAlbumIds(queryFilter);
     const albums = await this.collatedAlbumEntity.findAndCountAll({
       attributes: [

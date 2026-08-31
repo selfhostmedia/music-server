@@ -1,4 +1,6 @@
-import { IsInt, IsString } from 'class-validator';
+/* eslint-disable max-classes-per-file */
+import { FileTypeEnum } from 'src/types/enums';
+import { IsEnum, IsInt, IsNumber, IsString } from 'class-validator';
 
 export class LibraryTrackDto {
   /**
@@ -32,7 +34,7 @@ export class LibraryTrackDto {
   /**
    * The duration of the track in seconds.
    */
-  @IsInt()
+  @IsNumber()
   declare duration: number;
 
   /**
@@ -72,4 +74,54 @@ export class LibraryTrackDto {
    */
   @IsInt()
   declare year: number;
+}
+
+export class LibraryTrackExtendedDto extends LibraryTrackDto {
+  @IsString()
+  declare albumTitle: string;
+
+  @IsString({ each: true })
+  declare albumArtists: string[];
+
+  /**
+   * The comment or description associated with the track.
+   */
+  @IsString()
+  declare comment: string;
+
+  /**
+   * The bitrate of the audio file for the track, in kbps.
+   */
+  @IsInt()
+  declare fileBitRate: number;
+
+  /**
+   * The number of audio channels in the file for the track, such as 2 for stereo or 1 for mono.
+   */
+  @IsInt()
+  declare fileChannels: number;
+
+  /**
+   * The frequency or sample rate of the audio file for the track, in Hz.
+   */
+  @IsInt()
+  declare fileFrequency: number;
+
+  /**
+   * The file path of the file for the track.
+   */
+  @IsString()
+  declare filePath: string;
+
+  /**
+   * The size of the file in bytes
+   */
+  @IsInt()
+  declare fileSize: number;
+
+  /**
+   * The type of the file for the track, such as MP3, FLAC, etc.
+   */
+  @IsEnum(FileTypeEnum)
+  declare fileType: FileTypeEnum;
 }

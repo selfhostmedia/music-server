@@ -3,6 +3,8 @@ export enum ErrorCodes {
   INVALID_ADDED_AFTER_ERROR = 'invalid-added-after-error',
   INVALID_ADDED_BEFORE_ERROR = 'invalid-added-before-error',
   INVALID_ALBUM_ID_ERROR = 'invalid-album-id-error',
+  INVALID_ALBUM_ERROR = 'invalid-album-error',
+  INVALID_ALBUM_LENGTH_ERROR = 'invalid-album-length-error',
   INVALID_COVER_SIZE_ERROR = 'invalid-album-cover-size-error',
   INVALID_ARTIST_ERROR = 'invalid-artist-error',
   INVALID_ARTIST_LENGTH_ERROR = 'invalid-artist-length-error',

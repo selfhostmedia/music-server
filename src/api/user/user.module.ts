@@ -22,6 +22,7 @@ import { UserListTrackComposersModule } from './list-track-composers/list-track-
 import { UserListTrackComposersWithTracksModule } from './list-track-composers-with-tracks/list-track-composers-with-tracks.module';
 import { UserListTrackGenresModule } from './list-track-genres/list-track-genres.module';
 import { UserListTrackGenresWithTracksModule } from './list-track-genres-with-tracks/list-track-genres-with-tracks.module';
+import { UserListTracksModule } from './list-tracks/list-tracks.module';
 import { UserRegenerateSessionKeyModule } from './regenerate-session-key/regenerate-session-key.module';
 import { UserRetrieveAlbumModule } from './retrieve-album/retrieve-album.module';
 import { UserUpdatePasswordModule } from './update-password/update-password.module';
@@ -30,27 +31,28 @@ import { UserUpdatePasswordModule } from './update-password/update-password.modu
   imports: [
     UserAlbumCoverModule,
     UserArtistCoverModule,
-    UserCreateRootPathModule,
     UserComposerCoverModule,
+    UserCreateRootPathModule,
     UserDeleteRootPathModule,
     UserEndSessionModule,
+    UserFolderStructureModule,
     UserGenreCoverModule,
-    UserListAlbumsModule,
-    UserListAlbumsWithTracksModule,
     UserListAlbumArtistsModule,
     UserListAlbumArtistsWithTracksModule,
-    UserFolderStructureModule,
-    UserListTrackGenresModule,
-    UserListTrackGenresWithTracksModule,
+    UserListAlbumsModule,
+    UserListAlbumsWithTracksModule,
+    UserListIndexerLogsModule,
+    UserListRootPathsModule,
     UserListTrackArtistsModule,
     UserListTrackArtistsWithTracksModule,
     UserListTrackComposersModule,
     UserListTrackComposersWithTracksModule,
-    UserListIndexerLogsModule,
-    UserListRootPathsModule,
+    UserListTrackGenresModule,
+    UserListTrackGenresWithTracksModule,
+    UserListTracksModule,
+    UserRegenerateSessionKeyModule,
     UserRetrieveAlbumModule,
     UserUpdatePasswordModule,
-    UserRegenerateSessionKeyModule,
   ],
   providers: [
     {
