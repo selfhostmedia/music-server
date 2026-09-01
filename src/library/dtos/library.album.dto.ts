@@ -1,4 +1,7 @@
+/* eslint-disable max-classes-per-file */
+import { ApiProperty } from '@nestjs/swagger';
 import { IsDate, IsInt, IsString } from 'class-validator';
+import { LibraryTrackDto } from './library.track.dto';
 
 export class LibraryAlbumDto {
   /**
@@ -9,6 +12,45 @@ export class LibraryAlbumDto {
 
   @IsString({ each: true })
   declare albumComposers: string[];
+
+  @IsString({ each: true })
+  declare albumGenres: string[];
+
+  /**
+   * A color detected in the cover art image
+   */
+  @IsString()
+  declare coverImageLightVibrant?: string;
+
+  /**
+   * A color detected in the cover art image
+   */
+  @IsString()
+  declare coverImageDarkVibrant?: string;
+
+  /**
+   * A color detected in the cover art image
+   */
+  @IsString()
+  declare coverImageMuted?: string;
+
+  /**
+   * A color detected in the cover art image
+   */
+  @IsString()
+  declare coverImageVibrant?: string;
+
+  /**
+   * A color detected in the cover art image
+   */
+  @IsString()
+  declare coverImageDarkMuted?: string;
+
+  /**
+   * A color detected in the cover art image
+   */
+  @IsString()
+  declare coverImageLightMuted?: string;
 
   /**
    * The date the album was added to the library
@@ -40,7 +82,7 @@ export class LibraryAlbumDto {
   /**
    * The aggregate rating for the album, which is a value between 0 and 5 inclusive applied to tracks.
    */
-  @IsString({ each: true })
+  @IsInt({ each: true })
   declare rating: number;
 
   /**
@@ -55,4 +97,15 @@ export class LibraryAlbumDto {
    */
   @IsInt()
   declare year: number;
+}
+
+export class LibraryAlbumWithTracksDto extends LibraryAlbumDto {
+  /**
+   * The list of tracks for the album
+   */
+  @ApiProperty({
+    type: LibraryTrackDto,
+    isArray: true,
+  })
+  declare tracks: LibraryTrackDto[];
 }

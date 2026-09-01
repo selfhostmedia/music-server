@@ -4,8 +4,10 @@ import { ClassSerializerInterceptor, Logger, ValidationPipe } from '@nestjs/comm
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { GlobalExceptionFilter } from './api/exception-filter';
 import { NestFactory, Reflector } from '@nestjs/core';
+import compression from 'compression';
 import helmet from 'helmet';
 import helmetConfig from './helmet.config';
+import type { Request } from 'express';
 
 async function bootstrap() {
   // CORS headers
@@ -26,6 +28,12 @@ async function bootstrap() {
   const logger = new Logger('NestApplication');
   app.useLogger(logger);
   app.use(helmet(helmetConfig));
+  app.use(
+    compression({
+      filter: (req: Request) => req.url.indexOf('stream.cgi') === -1,
+      threshold: 0,
+    }),
+  );
   app.useGlobalFilters(new GlobalExceptionFilter());
   app.useGlobalPipes(
     new ValidationPipe({

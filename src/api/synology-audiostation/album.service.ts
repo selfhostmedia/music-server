@@ -1,6 +1,6 @@
 import { AlbumSortFieldEnum, SortDirectionEnum } from 'src/types/enums';
 import { Injectable } from '@nestjs/common';
-import { LibraryAlbumDto } from 'src/library/library.album.dto';
+import { LibraryAlbumDto } from 'src/library/dtos/library.album.dto';
 import { LibraryService } from 'src/library/library.service';
 import { SynologyAlbumDataDto, SynologyAlbumDto } from './dtos';
 import { replaceDoubleQuotes } from 'src/utils/strings';
